@@ -30,3 +30,51 @@
 *.exe
 *.out
 *.app
+
+# 忽略所有包含 "build" 的文件夹
+*build*/
+
+# CMake 生成的文件
+CMakeCache.txt
+CMakeFiles/
+cmake_install.cmake
+Makefile
+install_manifest.txt
+
+# Ninja 生成的文件
+build.ninja
+rules.ninja
+
+# 编译器生成的文件
+*.obj
+*.o
+*.lo
+*.a
+*.lib
+*.so
+*.dylib
+*.dll
+*.exe
+*.out
+
+# 中间文件
+*.d
+*.gcno
+*.gcda
+*.gcov
+*.pdb
+
+# 日志文件
+*.log
+
+# 编辑器和 IDE 配置文件
+.vscode/
+.idea/
+*.swp
+*~
+*.user
+*.pro.user
+*.DS_Store
+
+# 生成的编译命令文件
+compile_commands.json
