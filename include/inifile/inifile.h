@@ -5,9 +5,12 @@
  * @license: MIT
  */
 
+#ifndef INI_FILE_H_
+#define INI_FILE_H_
+
  namespace ini
  {
   
  } // namespace ini
 
- 
+ #endif //INI_FILE_H_
