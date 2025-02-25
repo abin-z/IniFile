@@ -34,8 +34,20 @@ namespace ini
     // 除去str两端空白字符
     inline void trim(std::string &str)
     {
-      str.erase(str.find_last_not_of(whitespaces));
-      str.erase(0, str.find_first_not_of(whitespaces));
+      if (str.empty())
+      {
+        return;
+      }
+      auto start = str.find_first_not_of(whitespaces);
+      auto end = str.find_last_not_of(whitespaces);
+      if (start == std::string::npos) // 全是空白
+      {
+        str.clear();
+      }
+      else
+      {
+        str = str.substr(start, end - start + 1);
+      }
     }
 
     template <typename T, typename Enable = void>
