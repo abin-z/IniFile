@@ -19,6 +19,11 @@ set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}/build_output/lib) #
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}/build_output/bin) # 动态库 (.so/.dll)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}/build_output/bin) # 可执行文件
 
-project(IniFile LANGUAGES C CXX VERSION 0.1.1)
+project(IniFile-Cpp LANGUAGES C CXX VERSION 0.1.1)
+
+# inifile.h 头文件库（Header-Only） INTERFACE 类型
+# INTERFACE 目标不会生成 .a 或 .so 文件，但可以被 target_link_libraries 依赖。
+add_library(inifile INTERFACE)
+target_include_directories(inifile INTERFACE ${CMAKE_CURRENT_LIST_DIR}/include)
 
 add_subdirectory(examples)
