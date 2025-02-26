@@ -159,6 +159,26 @@ namespace ini
       }
     };
 
+    // 处理 `char *`
+    template <>
+    struct convert<char *>
+    {
+      void encode(char *value, std::string &result)
+      {
+        result = value;
+      }
+    };
+
+    // 处理 `char[N]` 类型（即固定大小的字符数组）
+    template <std::size_t N>
+    struct convert<char[N]>
+    {
+      void encode(const char (&value)[N], std::string &result)
+      {
+        result = value;
+      }
+    };
+
     /**
      * @brief convert 模板特化：处理所有整数类型（不包括 `char`、`wchar_t`、`char16_t` 等）
      *
@@ -321,7 +341,6 @@ namespace ini
 #endif
   } // namespace detail
 
-
   /// @brief ini文件的字段值
   class field
   {
@@ -385,6 +404,20 @@ namespace ini
     operator T() const
     {
       return this->as<T>(); // 使用 as<T> 方法将值转换为目标类型 T
+    }
+
+    /**
+     * 设置字段值：将传入的值编码并存储到 value_ 中。
+     * 使用一个转换器（假设为 detail::convert<T>）将给定的值编码为字符串。
+     *
+     * @tparam T 设置的值的类型
+     * @param value 需要设置的值
+     */
+    template <typename T>
+    void set(const T &value)
+    {
+      detail::convert<T> conv;
+      conv.encode(value, value_);
     }
   };
 

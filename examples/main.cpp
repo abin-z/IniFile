@@ -12,6 +12,7 @@ int main()
   std::string s = "你好";
   bool b = true;
   char c = 'm';
+  const char arr[5] = {'g', 'o', 'o', 'd', '\0'};
 
   wchar_t wc = 'l';
 
@@ -23,13 +24,17 @@ int main()
   field = c;
   field = i;
   // field = wc;
+  field.set(123);
+  field = arr;
 
   std::string ss = field;
   double dd = field;
   int ii = field;
+  const char * cpp = field;
   // wchar_t wcc = field;
 
-  std::cout << "ss = " << ss << ", dd = " << dd << ", ii = " << ii << std::endl; 
+  std::cout << "ss = " << ss << ", dd = " << dd << ", ii = " << ii << ", cpp = " << cpp 
+  << ", as<double> = " << field.as<double>() << std::endl; 
 
 
 
