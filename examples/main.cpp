@@ -27,6 +27,8 @@ int main()
   field.set(123);
   field = arr;
 
+  ini::field f2 = 100;
+
   std::string ss = field;
   double dd = field;
   int ii = field;
@@ -36,7 +38,12 @@ int main()
   std::cout << "ss = " << ss << ", dd = " << dd << ", ii = " << ii << ", cpp = " << cpp 
   << ", as<double> = " << field.as<double>() << std::endl; 
 
-
+  ini::inifile file;
+  file["sec"]["strkey"] = 100;
+  int val = file["sec"]["strkey"];
+  // file["sec"].set("strkey", 2000);
+  double ds = file["sec"].get("strkey");
+  std::cout << "value = " <<  file["sec"]["strkey"].as<int>() << ", val = " << ds << std::endl;
 
 
 

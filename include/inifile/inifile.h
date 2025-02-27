@@ -348,17 +348,54 @@ namespace ini
     std::string value_; // 存储字符串值，用于存储读取的 INI 文件字段值
 
   public:
-    // 默认构造函数，初始化 value_ 为默认空字符串
+    /// 默认构造函数，使用编译器生成的默认实现。
     field() = default;
 
-    // 带参构造函数，用给定字符串初始化 value_
+    /// 参数化构造函数，通过给定的字符串初始化 value_。
     field(const std::string &value) : value_(value) {}
 
-    // 默认析构函数，无需额外处理，因为 value_ 是自动管理的
+    /// 默认析构函数，使用编译器生成的默认实现。
     ~field() = default;
 
-    // 默认拷贝赋值运算符，用于复制 field 对象
+    /// 默认拷贝构造函数，按值拷贝另一个 field 对象。
+    field(const field &other) = default;
+
+    /// 默认拷贝赋值运算符，按值拷贝另一个 field 对象。
     field &operator=(const field &rhs) = default;
+
+    /// 默认移动构造函数，按值移动另一个 field 对象。
+    field(field &&other) noexcept = default;
+
+    /// 默认移动赋值运算符，按值移动另一个 field 对象。
+    field &operator=(field &&rhs) noexcept = default;
+
+    /**
+     * @brief 模板构造函数：从其他类型的值构造 `field` 对象。
+     * 
+     * @tparam T 传入的值的类型
+     * @param other 传入的值，类型为 `T`，将被转换并存储到 `value_` 中
+     */
+    template <typename T>
+    field(const T &other)
+    {
+      detail::convert<T> conv;    // 创建一个转换器对象，处理 T 类型到字符串的转换
+      conv.encode(other, value_); // 将传入的值编码成字符串并存储到 value_ 中
+    }
+
+    /**
+     * @brief 类型赋值操作符：允许将其他类型的值赋值给 `field` 对象。
+     *
+     * @tparam T 赋值操作符所接收的值的类型
+     * @param rhs 右侧值，类型为 `T`，会被转换为字符串并赋值给当前对象
+     * @return 当前对象的引用，支持链式赋值
+     */
+    template <typename T>
+    field &operator=(const T &rhs)
+    {
+      detail::convert<T> conv;  // 创建一个转换器对象，处理 T 类型到字符串的转换
+      conv.encode(rhs, value_); // 将右侧值编码成字符串并存储到 value_ 中
+      return *this;             // 返回当前对象的引用，支持链式赋值
+    }
 
     /**
      * 将 INI 字段的值转换为目标类型 T。
@@ -375,22 +412,6 @@ namespace ini
       T result;                    // 用于存储转换后的结果
       conv.decode(value_, result); // 将 value_ 字符串解码为目标类型 T
       return result;               // 返回转换结果
-    }
-
-    /**
-     * 类型赋值操作符：允许将其他类型的值（例如 int, double）赋值给 field 对象。
-     * 使用一个转换器（假设为 detail::convert<T>）将 T 类型的值编码成字符串格式。
-     *
-     * @tparam T 赋值操作符所接收的类型
-     * @param rhs 赋值的右侧值
-     * @return 当前对象的引用
-     */
-    template <typename T>
-    field &operator=(const T &rhs)
-    {
-      detail::convert<T> conv;  // 创建一个转换器对象
-      conv.encode(rhs, value_); // 将 rhs 编码成字符串并存储到 value_ 中
-      return *this;             // 返回当前对象的引用，支持链式赋值
     }
 
     /**
@@ -419,6 +440,120 @@ namespace ini
       detail::convert<T> conv;
       conv.encode(value, value_);
     }
+  };
+
+  /// @brief ini文件的section
+  class section
+  {
+    using DataContainer = std::unordered_map<std::string, field>;
+
+  public:
+    using size_type = DataContainer::size_type;
+    using const_iterator = DataContainer::const_iterator;
+
+    /// @brief 获取或插入一个字段，键是常量引用, 如果key不存在，插入一个默认构造的 field 对象
+    /// @param key 键名称
+    /// @return 返回对应键的 field 引用
+    field &operator[](const std::string &key)
+    {
+      return data_[key];
+    }
+    field &operator[](std::string &&key)
+    {
+      return data_[std::move(key)];
+    }
+    bool has(std::string key) const
+    {
+      detail::trim(key);
+      return data_.find(key) != data_.end();
+    }
+    template <typename T>
+    void set(std::string key, T value)
+    {
+      detail::trim(key);
+      field obj = value;
+      data_[key] = std::move(obj);
+    }
+
+    field get(std::string key) const
+    {
+      if (this->has(key))
+      {
+        return data_.at(key);
+      }
+      return field{};
+    }
+
+    bool remove(std::string key)
+    {
+      detail::trim(key);
+      return data_.erase(key) != 0;
+    }
+
+    void clear()
+    {
+      data_.clear();
+    }
+
+    size_type size() const noexcept
+    {
+      return data_.size();
+    }
+    const_iterator begin() const noexcept
+    {
+      return data_.cbegin();
+    }
+    const_iterator end() const noexcept
+    {
+      return data_.cend();
+    }
+
+  private:
+    DataContainer data_; // key - value
+  };
+
+  /// @brief ini文件类
+  class inifile
+  {
+    using DataContainer = std::unordered_map<std::string, section>;
+
+  public:
+    using size_type = DataContainer::size_type;
+    using const_iterator = DataContainer::const_iterator;
+
+    /// @brief 获取或插入一个字段，键是常量引用, 如果section_name不存在，插入一个默认构造的 section 对象
+    /// @param section_name section名称
+    /// @return 返回对应键的 section 引用
+    section &operator[](const std::string &section_name)
+    {
+      return data_[section_name];
+    }
+    section &operator[](std::string &&section_name)
+    {
+      return data_[std::move(section_name)];
+    }
+
+    bool has(std::string section_name) const
+    {
+      detail::trim(section_name);
+      return data_.find(section_name) != data_.end();
+    }
+
+    size_type size() const noexcept
+    {
+      return data_.size();
+    }
+    const_iterator begin() const noexcept
+    {
+      return data_.cbegin();
+    }
+    const_iterator end() const noexcept
+    {
+      return data_.cend();
+    }
+
+  private:
+    DataContainer data_; // section_name - key_value
   };
 
 } // namespace ini
