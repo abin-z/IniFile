@@ -8,16 +8,12 @@
 #ifndef INI_FILE_H_
 #define INI_FILE_H_
 
-#include <iostream>
 #include <unordered_map>
-#include <vector>
 #include <type_traits>
 #include <algorithm>
 #include <string>
-#include <sstream>
-#include <cctype>
-#include <cstdlib>
 #include <limits>
+#include <vector>
 
 #ifdef __cpp_lib_string_view // If we have std::string_view
 #include <string_view>
