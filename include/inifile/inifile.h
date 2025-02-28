@@ -25,7 +25,7 @@ namespace ini
   namespace detail
   {
     /** whitespace characters. */
-    static constexpr const char whitespaces[] = " \t\n\r\f\v";
+    static constexpr char whitespaces[] = " \t\n\r\f\v";
 
     // 除去str两端空白字符
     inline void trim(std::string &str)
@@ -471,11 +471,11 @@ namespace ini
     {
       return data_[std::move(key)];
     }
-    bool has(std::string key) const
-    {
-      detail::trim(key);
-      return data_.find(key) != data_.end();
-    }
+
+    /// @brief 设置值
+    /// @tparam T
+    /// @param key
+    /// @param value
     template <typename T>
     void set(std::string key, T &&value)
     {
@@ -491,22 +491,54 @@ namespace ini
       }
     }
 
-    // return a copy
-    field get(std::string key) const
+    /// @brief key是否存在
+    /// @param key
+    /// @return
+    bool has(std::string key) const
     {
-      if (this->has(key))
+      detail::trim(key);
+      return data_.find(key) != data_.end();
+    }
+
+    /// @brief 返回指定key键的元素的字段值的引用。如果不存在这样的元素，则会出现 std::out_of_range 类型的异常。
+    /// @param key key键 - key不存在将抛出异常
+    /// @return 字段值引用
+    field &at(std::string key)
+    {
+      detail::trim(key);
+      return data_.at(key);
+    }
+    // const 重载函数
+    const field &at(std::string key) const
+    {
+      detail::trim(key);
+      return data_.at(key);
+    }
+
+    /// @brief 获取key对应的值(副本), 若key不存在则返回default_value默认值
+    /// @param key key键
+    /// @param default_value 默认值 - 当key不存在返回默认值
+    /// @return 字段值
+    field get(std::string key, field default_value = field{}) const
+    {
+      detail::trim(key);
+      if (data_.find(key) != data_.end())
       {
         return data_.at(key);
       }
-      return field{};
+      return default_value;
     }
 
+    /// @brief 删除值
+    /// @param key
+    /// @return 是否删除成功
     bool remove(std::string key)
     {
       detail::trim(key);
       return data_.erase(key) != 0;
     }
 
+    /// @brief 清除所有key - value
     void clear()
     {
       data_.clear();
@@ -538,57 +570,90 @@ namespace ini
     using size_type = DataContainer::size_type;
     using const_iterator = DataContainer::const_iterator;
 
-    inifile() = default;
-    inifile(const std::string &filename) : filename_(filename)
-    {
-      load(filename_);
-    }
-
-    bool load(const std::string &filename)
-    {
-      filename_ = filename;
-
-      return true;
-    }
-
-    bool save()
-    {
-      return true;
-    }
-
     /// @brief 获取或插入一个字段，键是常量引用, 如果section_name不存在，插入一个默认构造的 section 对象
-    /// @param section_name section名称
+    /// @param section section名称
     /// @return 返回对应键的 section 引用
-    section &operator[](const std::string &section_name)
+    section &operator[](const std::string &section)
     {
-      return data_[section_name];
+      return data_[section];
     }
-    section &operator[](std::string &&section_name)
+    section &operator[](std::string &&section)
     {
-      return data_[std::move(section_name)];
-    }
-
-    bool has(std::string section_name) const
-    {
-      detail::trim(section_name);
-      return data_.find(section_name) != data_.end();
+      return data_[std::move(section)];
     }
 
+    /// @brief 设置section key-value
+    /// @tparam T 字段值类型
+    /// @param section section名称
+    /// @param key key键
+    /// @param value 字段值
     template <typename T>
     void set(const std::string &section, const std::string &key, T &&value)
     {
       data_[section][key] = std::forward<T>(value);
     }
 
-    // return a copy
-    section get(std::string key) const
+    /// @brief 判断指定的section是否存在
+    /// @param section section名称
+    /// @return 是否存在
+    bool has(std::string section) const
     {
-      detail::trim(key);
-      if (this->has(key))
+      detail::trim(section);
+      return data_.find(section) != data_.end();
+    }
+
+    /// @brief 判断指定section下指定的key是否存在
+    /// @param section section名称
+    /// @param key key键
+    /// @return 是否存在
+    bool has(std::string section, std::string key) const
+    {
+      detail::trim(section);
+      auto sec_it = data_.find(section);
+      if (sec_it != data_.end())
       {
-        return data_.at(key);
+        return sec_it->second.has(std::move(key));
       }
-      return section{};
+      return false;
+    }
+
+    /// @brief 返回指定section的引用。如果不存在这样的元素，则会出现 std::out_of_range 类型的异常。
+    /// @param section section名称 - section不存在将抛出异常
+    /// @return section引用
+    section &at(std::string section)
+    {
+      detail::trim(section);
+      return data_.at(section);
+    }
+    const section &at(std::string section) const
+    {
+      detail::trim(section);
+      return data_.at(section);
+    }
+
+    /// @brief 返回指定section的指定key键的字段值
+    /// @param sec section名称
+    /// @param key key键
+    /// @param default_value 默认值 - key不存在时将返回该默认值
+    /// @return 字段值
+    field get(std::string sec, std::string key, field default_value = field{}) const
+    {
+      detail::trim(sec);
+      auto sec_it = data_.find(sec);
+      if (sec_it != data_.end())
+      {
+        if (sec_it->second.has(key))
+        {
+          return sec_it->second.at(std::move(key));
+        }
+      }
+      return default_value;
+    }
+
+    bool remove(std::string sec)
+    {
+      detail::trim(sec);
+      return data_.erase(sec) != 0;
     }
 
     size_type size() const noexcept
@@ -604,9 +669,19 @@ namespace ini
       return data_.cend();
     }
 
+    bool load(const std::string &filename)
+    {
+
+      return true;
+    }
+
+    bool save(const std::string &filename)
+    {
+      return true;
+    }
+
   private:
-    DataContainer data_;   // section_name - key_value
-    std::string filename_; // ini文件名
+    DataContainer data_; // section_name - key_value
   };
 
 } // namespace ini
