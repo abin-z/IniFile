@@ -477,11 +477,18 @@ namespace ini
       return data_.find(key) != data_.end();
     }
     template <typename T>
-    void set(std::string key, T value)
+    void set(std::string key, T &&value)
     {
       detail::trim(key);
-      field obj = value;
-      data_[key] = std::move(obj);
+      data_[std::move(key)] = std::forward<T>(value);
+    }
+
+    void set(std::initializer_list<std::pair<std::string, field>> args)
+    {
+      for (auto &&pair : args)
+      {
+        data_[std::move(pair.first)] = std::move(pair.second);
+      }
     }
 
     // return a copy
@@ -522,12 +529,6 @@ namespace ini
     DataContainer data_; // key - value
   };
 
-
-
-
-
-
-
   /// @brief ini文件类
   class inifile
   {
@@ -538,7 +539,7 @@ namespace ini
     using const_iterator = DataContainer::const_iterator;
 
     inifile() = default;
-    inifile(const std::string &filename) : filename_(filename) 
+    inifile(const std::string &filename) : filename_(filename)
     {
       load(filename_);
     }
@@ -573,38 +574,22 @@ namespace ini
       return data_.find(section_name) != data_.end();
     }
 
-
-    template<typename T>
-    void set(const std::string &section, const std::string &key, T&& value)
+    template <typename T>
+    void set(const std::string &section, const std::string &key, T &&value)
     {
       data_[section][key] = std::forward<T>(value);
     }
-
 
     // return a copy
     section get(std::string key) const
     {
       detail::trim(key);
-      if(this->has(key))
+      if (this->has(key))
       {
         return data_.at(key);
       }
       return section{};
     }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
     size_type size() const noexcept
     {
@@ -620,8 +605,8 @@ namespace ini
     }
 
   private:
-    DataContainer data_;    // section_name - key_value
-    std::string filename_;  // ini文件名
+    DataContainer data_;   // section_name - key_value
+    std::string filename_; // ini文件名
   };
 
 } // namespace ini

@@ -43,9 +43,14 @@ int main()
   int val = file["sec"]["strkey"];
   // file["sec"].set("strkey", 2000);
   double ds = file["sec"].get("strkey");
-  std::cout << "value = " <<  file["sec"]["strkey"].as<int>() << ", val = " << ds << std::endl;
-
-
-
-
+  file["sec"].set("price", 99.9);
+  file["sec"].set({{"hello", 0}, {"ggg", 20}, {"mmm", 999}});
+  file["section"].set({
+    {"key1", "value1"},
+    {"key2", "value2"},
+    {"key3", 999},
+    {"key4", 3.14159},
+    {"key5", true}
+  });
+  std::cout << "value = " << file["sec"]["strkey"].as<int>() << ", val = " << ds << std::endl;
 }
