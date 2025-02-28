@@ -175,7 +175,8 @@ namespace ini
       }
     };
 
-    /* 类型特征：所有字符类型（包括 const 和引用的 char 类型）
+    /** 
+     * @brief char系列类型特征：所有字符类型（包括 const 和引用的 char 类型）
      * 该特征判断类型是否为 char 系列类型（包括 `char`、`signed char`、`unsigned char`、`wchar_t`、`char8_t`、`char16_t` 和 `char32_t`）。
      * 它会移除 `const` 和 `reference` 修饰符，以确保正确判断字符类型。
      */
