@@ -175,23 +175,24 @@ namespace ini
       }
     };
 
-    /** 
+    /**
      * @brief char系列类型特征：所有字符类型（包括 const 和引用的 char 类型）
      * 该特征判断类型是否为 char 系列类型（包括 `char`、`signed char`、`unsigned char`、`wchar_t`、`char8_t`、`char16_t` 和 `char32_t`）。
      * 它会移除 `const` 和 `reference` 修饰符，以确保正确判断字符类型。
      */
     template <typename T>
     struct is_char_type
-        : std::integral_constant<bool,
-                                 std::is_same<std::remove_const_t<std::remove_reference_t<T>>, char>::value ||
-                                     std::is_same<std::remove_const_t<std::remove_reference_t<T>>, signed char>::value ||
-                                     std::is_same<std::remove_const_t<std::remove_reference_t<T>>, unsigned char>::value ||
-                                     std::is_same<std::remove_const_t<std::remove_reference_t<T>>, wchar_t>::value ||
-#if __cplusplus >= 202002L
-                                     std::is_same<std::remove_const_t<std::remove_reference_t<T>>, char8_t>::value ||
+        : std::integral_constant<
+              bool,
+              std::is_same<typename std::remove_reference<typename std::remove_const<T>::type>::type, char>::value ||
+                  std::is_same<typename std::remove_reference<typename std::remove_const<T>::type>::type, signed char>::value ||
+                  std::is_same<typename std::remove_reference<typename std::remove_const<T>::type>::type, unsigned char>::value ||
+                  std::is_same<typename std::remove_reference<typename std::remove_const<T>::type>::type, wchar_t>::value ||
+#if defined(__cpp_char8_t) // 仅在 C++20 及更高版本支持 char8_t
+                  std::is_same<typename std::remove_reference<typename std::remove_const<T>::type>::type, char8_t>::value ||
 #endif
-                                     std::is_same<std::remove_const_t<std::remove_reference_t<T>>, char16_t>::value ||
-                                     std::is_same<std::remove_const_t<std::remove_reference_t<T>>, char32_t>::value>
+                  std::is_same<typename std::remove_reference<typename std::remove_const<T>::type>::type, char16_t>::value ||
+                  std::is_same<typename std::remove_reference<typename std::remove_const<T>::type>::type, char32_t>::value>
     {
     };
 
@@ -483,6 +484,7 @@ namespace ini
       data_[key] = std::move(obj);
     }
 
+    // return a copy
     field get(std::string key) const
     {
       if (this->has(key))
@@ -520,6 +522,12 @@ namespace ini
     DataContainer data_; // key - value
   };
 
+
+
+
+
+
+
   /// @brief ini文件类
   class inifile
   {
@@ -528,6 +536,24 @@ namespace ini
   public:
     using size_type = DataContainer::size_type;
     using const_iterator = DataContainer::const_iterator;
+
+    inifile() = default;
+    inifile(const std::string &filename) : filename_(filename) 
+    {
+      load(filename_);
+    }
+
+    bool load(const std::string &filename)
+    {
+      filename_ = filename;
+
+      return true;
+    }
+
+    bool save()
+    {
+      return true;
+    }
 
     /// @brief 获取或插入一个字段，键是常量引用, 如果section_name不存在，插入一个默认构造的 section 对象
     /// @param section_name section名称
@@ -547,6 +573,39 @@ namespace ini
       return data_.find(section_name) != data_.end();
     }
 
+
+    template<typename T>
+    void set(const std::string &section, const std::string &key, T&& value)
+    {
+      data_[section][key] = std::forward<T>(value);
+    }
+
+
+    // return a copy
+    section get(std::string key) const
+    {
+      detail::trim(key);
+      if(this->has(key))
+      {
+        return data_.at(key);
+      }
+      return section{};
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     size_type size() const noexcept
     {
       return data_.size();
@@ -561,7 +620,8 @@ namespace ini
     }
 
   private:
-    DataContainer data_; // section_name - key_value
+    DataContainer data_;    // section_name - key_value
+    std::string filename_;  // ini文件名
   };
 
 } // namespace ini
