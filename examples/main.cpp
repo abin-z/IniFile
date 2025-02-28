@@ -11,7 +11,7 @@ int main()
   long double ld = 999999999.999;
   std::string s = "你好";
   bool b = true;
-  char c = 'm';
+  const char c = 'm';
   const char arr[5] = {'g', 'o', 'o', 'd', '\0'};
 
   wchar_t wc = 'l';

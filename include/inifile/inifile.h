@@ -175,27 +175,38 @@ namespace ini
       }
     };
 
-    /**
-     * @brief convert 模板特化：处理所有整数类型（不包括 `char`、`wchar_t`、`char16_t` 等）
-     *
-     * 该模板特化适用于所有 `std::is_integral<T>::value` 为 `true` 的类型，
-     * 但排除了 `char`、`signed char`、`unsigned char`、`wchar_t` 以及
-     * C++11 及以上版本中的 `char16_t` 和 `char32_t`。
-     *
-     * 在 C++20 及以上版本，还会排除 `char8_t`。
+    /* 类型特征：所有字符类型（包括 const 和引用的 char 类型）
+     * 该特征判断类型是否为 char 系列类型（包括 `char`、`signed char`、`unsigned char`、`wchar_t`、`char8_t`、`char16_t` 和 `char32_t`）。
+     * 它会移除 `const` 和 `reference` 修饰符，以确保正确判断字符类型。
      */
     template <typename T>
-    struct convert<T, typename std::enable_if<
-                          std::is_integral<T>::value &&
-                          !std::is_same<T, char>::value &&
-                          !std::is_same<T, signed char>::value &&
-                          !std::is_same<T, unsigned char>::value &&
-                          !std::is_same<T, wchar_t>::value &&
-#if __cplusplus >= 202002L // 仅在 C++20 及以上排除 char8_t
-                          !std::is_same<T, char8_t>::value &&
+    struct is_char_type
+        : std::integral_constant<bool,
+                                 std::is_same<std::remove_const_t<std::remove_reference_t<T>>, char>::value ||
+                                     std::is_same<std::remove_const_t<std::remove_reference_t<T>>, signed char>::value ||
+                                     std::is_same<std::remove_const_t<std::remove_reference_t<T>>, unsigned char>::value ||
+                                     std::is_same<std::remove_const_t<std::remove_reference_t<T>>, wchar_t>::value ||
+#if __cplusplus >= 202002L
+                                     std::is_same<std::remove_const_t<std::remove_reference_t<T>>, char8_t>::value ||
 #endif
-                          !std::is_same<T, char16_t>::value &&
-                          !std::is_same<T, char32_t>::value>::type>
+                                     std::is_same<std::remove_const_t<std::remove_reference_t<T>>, char16_t>::value ||
+                                     std::is_same<std::remove_const_t<std::remove_reference_t<T>>, char32_t>::value>
+    {
+    };
+
+    /**
+     * @brief convert 模板特化：处理所有整数类型（不包括字符类型 `char`、`signed char`、`unsigned char`、`wchar_t`、`char16_t`、`char32_t` 等）
+     *
+     * 该模板特化适用于所有 `std::is_integral<T>::value` 为 `true` 的类型，但排除了以下字符类型：
+     * - `char`、`signed char`、`unsigned char`
+     * - `wchar_t`（宽字符类型）
+     * - `char16_t`、`char32_t`（UTF-16 和 UTF-32 编码字符类型）
+     * - 在 C++20 及以上版本中，排除 `char8_t`（用于 UTF-8 编码的字符类型）。
+     *
+     * 该特化确保只有整型类型（例如 `int`、`long` 等）能够匹配，而字符类型将被排除。
+     */
+    template <typename T>
+    struct convert<T, typename std::enable_if<std::is_integral<T>::value && !is_char_type<T>::value>::type>
     {
 
       /**
@@ -367,7 +378,7 @@ namespace ini
 
     /**
      * @brief 模板构造函数：从其他类型的值构造 `field` 对象。
-     * 
+     *
      * @tparam T 传入的值的类型
      * @param other 传入的值，类型为 `T`，将被转换并存储到 `value_` 中
      */
