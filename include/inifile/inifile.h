@@ -15,6 +15,9 @@
 #include <algorithm>
 #include <type_traits>
 #include <unordered_map>
+#include <stdexcept>
+#include <cstdlib>
+#include <cerrno>
 
 #ifdef __cpp_lib_string_view // If we have std::string_view
 #include <string_view>
@@ -227,8 +230,7 @@ namespace ini
       {
         if (value.empty())
         {
-          result = 0;
-          return;
+          throw std::invalid_argument("<inifile> Cannot convert empty string to integer.");
         }
 
         char *endPtr = nullptr;
@@ -239,8 +241,7 @@ namespace ini
           long long temp = std::strtoll(value.c_str(), &endPtr, 10);
           if (errno == ERANGE || temp < std::numeric_limits<T>::min() || temp > std::numeric_limits<T>::max())
           {
-            result = 0;
-            return;
+            throw std::out_of_range("<inifile> Integer conversion out of range.");
           }
           result = static_cast<T>(temp);
         }
@@ -249,15 +250,14 @@ namespace ini
           unsigned long long temp = std::strtoull(value.c_str(), &endPtr, 10);
           if (errno == ERANGE || temp > std::numeric_limits<T>::max())
           {
-            result = 0;
-            return;
+            throw std::out_of_range("<inifile> Unsigned integer conversion out of range.");
           }
           result = static_cast<T>(temp);
         }
 
         if (endPtr == value.c_str() || *endPtr != '\0') // 检查是否转换完整
         {
-          result = 0;
+          throw std::invalid_argument("<inifile> Invalid integer format: " + value);
         }
       }
 
@@ -298,8 +298,7 @@ namespace ini
       {
         if (value.empty())
         {
-          result = 0.0;
-          return;
+          throw std::invalid_argument("<inifile> Cannot convert empty string to floating point.");
         }
 
         char *endPtr = nullptr;
@@ -308,15 +307,14 @@ namespace ini
 
         if (errno == ERANGE || temp < std::numeric_limits<T>::lowest() || temp > std::numeric_limits<T>::max())
         {
-          result = 0.0;
-          return;
+          throw std::out_of_range("<inifile> Floating point conversion out of range.");
         }
 
         result = static_cast<T>(temp);
 
         if (endPtr == value.c_str() || *endPtr != '\0') // 检查是否转换完整
         {
-          result = 0.0;
+          throw std::invalid_argument("<inifile> Invalid floating point format: " + value);
         }
       }
 
