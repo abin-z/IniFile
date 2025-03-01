@@ -8,13 +8,13 @@
 #ifndef INI_FILE_H_
 #define INI_FILE_H_
 
-#include <unordered_map>
-#include <type_traits>
-#include <algorithm>
 #include <string>
 #include <limits>
-#include <iostream>
 #include <fstream>
+#include <iostream>
+#include <algorithm>
+#include <type_traits>
+#include <unordered_map>
 
 #ifdef __cpp_lib_string_view // If we have std::string_view
 #include <string_view>

@@ -68,4 +68,5 @@ int main()
 
 
   std::cout << "value = " << file["sec"]["strkey"].as<int>() << ", val = " << ds << std::endl;
+  std::cout << "write inifile = " << file.save("config.ini") << std::endl;
 }
