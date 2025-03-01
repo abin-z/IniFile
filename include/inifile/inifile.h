@@ -93,11 +93,15 @@ namespace ini
     {
       void decode(const std::string &value, char &result)
       {
-        result = value.empty() ? '\0' : value[0];
+        if (value.empty())
+        {
+            throw std::invalid_argument("<inifile> Cannot convert empty string to char.");
+        }
+        result = value[0];
       }
       void encode(const char value, std::string &result)
       {
-        result = value;
+        result = std::string(1, value);
       }
     };
 
@@ -106,7 +110,11 @@ namespace ini
     {
       void decode(const std::string &value, unsigned char &result)
       {
-        result = value.empty() ? '\0' : static_cast<unsigned char>(value[0]);
+        if (value.empty())
+        {
+          throw std::invalid_argument("<inifile> Cannot convert empty string to unsigned char.");
+        }
+        result = static_cast<unsigned char>(value[0]);
       }
 
       void encode(const unsigned char value, std::string &result)
@@ -120,7 +128,11 @@ namespace ini
     {
       void decode(const std::string &value, signed char &result)
       {
-        result = value.empty() ? '\0' : static_cast<signed char>(value[0]);
+        if (value.empty())
+        {
+          throw std::invalid_argument("<inifile> Cannot convert empty string to signed char.");
+        }
+        result = static_cast<signed char>(value[0]);
       }
 
       void encode(const signed char value, std::string &result)
