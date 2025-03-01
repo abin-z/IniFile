@@ -52,5 +52,20 @@ int main()
     {"key4", 3.14159},
     {"key5", true}
   });
+
+
+  auto &section01 = file["section"];
+  section01.remove("");
+  for(const auto &pair : section01)
+  {
+    std::cout << pair.first << "=" << pair.second << std::endl;
+  }
+
+  float nom = section01.get("no", 98.9);
+  std::cout << "nom = " << nom << std::endl;
+
+
+
+
   std::cout << "value = " << file["sec"]["strkey"].as<int>() << ", val = " << ds << std::endl;
 }

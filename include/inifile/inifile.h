@@ -13,7 +13,8 @@
 #include <algorithm>
 #include <string>
 #include <limits>
-#include <vector>
+#include <iostream>
+#include <fstream>
 
 #ifdef __cpp_lib_string_view // If we have std::string_view
 #include <string_view>
@@ -353,6 +354,8 @@ namespace ini
   /// @brief ini文件的字段值
   class field
   {
+    friend std::ostream &operator<<(std::ostream &os, const field &data);
+
   private:
     std::string value_; // 存储字符串值，用于存储读取的 INI 文件字段值
 
@@ -451,6 +454,11 @@ namespace ini
     }
   };
 
+  inline std::ostream &operator<<(std::ostream &os, const field &data)
+  {
+    return os << data.value_;
+  }
+
   /// @brief ini文件的section
   class section
   {
@@ -539,7 +547,7 @@ namespace ini
     }
 
     /// @brief 清除所有key - value
-    void clear()
+    void clear() noexcept
     {
       data_.clear();
     }
@@ -656,6 +664,10 @@ namespace ini
       return data_.erase(sec) != 0;
     }
 
+    void clear() noexcept
+    {
+      data_.clear();
+    }
     size_type size() const noexcept
     {
       return data_.size();
@@ -669,15 +681,97 @@ namespace ini
       return data_.cend();
     }
 
-    bool load(const std::string &filename)
+    /// @brief 从istream中读取ini信息
+    /// @param is istream
+    void read(std::istream &is)
     {
-
-      return true;
+      data_.clear();
+      std::string line, current_section;
+      while (std::getline(is, line))
+      {
+        detail::trim(line);
+        if (line.empty() || line[0] == '#' || line[0] == ';') // 跳过注释
+        {
+          continue;
+        }
+        if (line.front() == '[' && line.back() == ']') // 处理section
+        {
+          current_section = line.substr(1, line.size() - 2);
+          detail::trim(current_section);
+        }
+        else // 处理key=value
+        {
+          auto pos = line.find('=');
+          if (pos != std::string::npos)
+          {
+            std::string key = line.substr(0, pos);
+            std::string value = line.substr(pos + 1);
+            detail::trim(key);
+            detail::trim(value);
+            data_[current_section][key] = value; // 允许section为空字符串
+          }
+        }
+      }
     }
 
+    /// @brief 向ostream中写入ini信息
+    /// @param os ostream
+    void write(std::ostream &os)
+    {
+      bool first_section = true;
+
+      // 先处理空 section（无 section 的键值对）
+      auto it = data_.find("");
+      if (it != data_.end())
+      {
+        for (const auto &kv : it->second)
+        {
+          os << kv.first << "=" << kv.second << "\n";
+        }
+        first_section = false;
+      }
+
+      // 处理非空 section
+      for (const auto &sec : data_)
+      {
+        if (sec.first.empty()) // 空 section 已经写过了
+          continue;
+
+        if (!first_section)
+          os << "\n"; // Section 之间插入空行
+        first_section = false;
+        os << "[" << sec.first << "]\n";
+        for (const auto &kv : sec.second)
+        {
+          os << kv.first << "=" << kv.second << "\n";
+        }
+      }
+    }
+
+    /// @brief 从ini文件中加载ini信息
+    /// @param filename 读取文件路径
+    /// @return 是否读取成功
+    bool load(const std::string &filename)
+    {
+      std::ifstream is(filename);
+      if (!is)
+        return false;
+
+      read(is);
+      return !is.fail();
+    }
+
+    /// @brief 将ini信息保存到ini文件
+    /// @param filename 保存文件路径
+    /// @return 保存是否成功
     bool save(const std::string &filename)
     {
-      return true;
+      std::ofstream os(filename);
+      if (!os)
+        return false;
+
+      write(os);
+      return !os.fail();
     }
 
   private:
