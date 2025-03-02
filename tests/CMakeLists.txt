@@ -1,8 +1,8 @@
-# 添加测试可执行文件，将 test01.cpp 作为源文件
-add_executable(initest test01.cpp)
+# 添加测试可执行文件，将 test_inifile.cpp 作为源文件
+add_executable(initest test_inifile.cpp)
 
-# 设置 test01 目标的头文件搜索路径
-# 这里包含 Catch2 头文件，以便 test01.cpp 能够使用 Catch2 进行单元测试
+# 设置 initest 目标的头文件搜索路径
+# 这里包含 Catch2 头文件，以便 test_inifile.cpp 能够使用 Catch2 进行单元测试
 target_include_directories(initest PRIVATE ${CATCH2_INCLUDE_DIR})
 
 # 链接被测库 inifile
