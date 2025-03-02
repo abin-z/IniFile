@@ -1,4 +1,5 @@
 /**************************************************************************************************************
+ *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  * @description: Easy-to-use ini file parsing library that supports parsing, modifying and saving ini files.
  * - Easy-to-use INI file parsing library that supports:
  *   - Reading and writing INI configuration files
@@ -11,6 +12,7 @@
  * @date: 2025-02-23
  * @license: MIT
  * @repository: https://github.com/abin-z/IniFile
+ *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  **************************************************************************************************************/
 
 #ifndef INI_FILE_H_
