@@ -773,6 +773,14 @@ namespace ini
       }
     }
 
+    /// @brief 从str中读取ini信息
+    /// @param str ini字符串
+    void from_string(const std::string &str)
+    {
+      std::istringstream is(str);
+      read(is);
+    }
+
     /// @brief 将inifile对象转为对应字符串
     /// @return ini字符串
     std::string to_string() const
