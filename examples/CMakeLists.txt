@@ -1,12 +1,11 @@
-set(tgt_name main)
+add_executable(inifile_read inifile_read.cpp)
+target_link_libraries(inifile_read PRIVATE inifile)
 
-file(GLOB_RECURSE headers CONFIGURE_DEPENDS *.h *.hpp)
-file(GLOB_RECURSE sources CONFIGURE_DEPENDS *.c *.cpp *.cc *.cxx)
+add_executable(inifile_write inifile_write.cpp)
+target_link_libraries(inifile_write PRIVATE inifile)
 
-add_executable(${tgt_name})
-target_sources(${tgt_name} PUBLIC ${headers})
-target_sources(${tgt_name} PRIVATE ${sources})
+add_executable(inifile_load inifile_load.cpp)
+target_link_libraries(inifile_load PRIVATE inifile)
 
-target_include_directories(${tgt_name} PUBLIC .)
-
-target_link_libraries(${tgt_name} PRIVATE inifile)
+add_executable(inifile_save inifile_save.cpp)
+target_link_libraries(inifile_save PRIVATE inifile)
