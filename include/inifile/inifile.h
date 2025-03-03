@@ -522,7 +522,7 @@ namespace ini
     /// @brief key是否存在
     /// @param key
     /// @return
-    bool has(std::string key) const
+    bool contains(std::string key) const
     {
       detail::trim(key);
       return data_.find(key) != data_.end();
@@ -624,7 +624,7 @@ namespace ini
     /// @brief 判断指定的section是否存在
     /// @param section section名称
     /// @return 是否存在
-    bool has(std::string section) const
+    bool contains(std::string section) const
     {
       detail::trim(section);
       return data_.find(section) != data_.end();
@@ -634,13 +634,13 @@ namespace ini
     /// @param section section名称
     /// @param key key键
     /// @return 是否存在
-    bool has(std::string section, std::string key) const
+    bool contains(std::string section, std::string key) const
     {
       detail::trim(section);
       auto sec_it = data_.find(section);
       if (sec_it != data_.end())
       {
-        return sec_it->second.has(std::move(key));
+        return sec_it->second.contains(std::move(key));
       }
       return false;
     }
@@ -670,7 +670,7 @@ namespace ini
       auto sec_it = data_.find(sec);
       if (sec_it != data_.end())
       {
-        if (sec_it->second.has(key))
+        if (sec_it->second.contains(key))
         {
           return sec_it->second.at(std::move(key));
         }

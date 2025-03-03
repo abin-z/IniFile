@@ -5,6 +5,11 @@
 TEST_CASE("basic test")
 {
   REQUIRE(1 + 1 == 2);
+#ifdef _WIN32
+  // msvc下能通过: msvc下double和long double一样, 都是 (64-bit IEEE 754), 但是gcc和clang不一样
+  REQUIRE(sizeof(double) == sizeof(long double));
+  REQUIRE(std::numeric_limits<long double>::max() == std::numeric_limits<double>::max());
+#endif
 }
 
 TEST_CASE("type convert test01", "[inifile]")
@@ -117,7 +122,7 @@ TEST_CASE("test out of range", "[inifile]")
                       ini::inifile file;
                       file["section"]["key"] = std::numeric_limits<long double>::max();
                       long double v1 = file["section"]["key"];
-                      double v2 = file["section"]["key"]; // out_of_range
+                      float v2 = file["section"]["key"]; // out_of_range
                     }(),
                     std::out_of_range);
 
@@ -136,12 +141,26 @@ TEST_CASE("member func test01", "[inifile]")
 {
   ini::inifile file;
   file["section"]["key"] = "hello world";
-  REQUIRE(file.has("section") == true);
-  REQUIRE(file.has("section", "key") == true);
-  REQUIRE(file.has("section_no") == false);
-  REQUIRE(file.has("section_no", "key") == false);
-  REQUIRE(file.has("section", "key_no") == false);
+  REQUIRE(file.contains("section") == true);
+  REQUIRE(file.contains("section", "key") == true);
+  REQUIRE(file.contains("section_no") == false);
+  REQUIRE(file.contains("section_no", "key") == false);
+  REQUIRE(file.contains("section", "key_no") == false);
   REQUIRE(file["section"].size() == 1);
   REQUIRE(file["section"]["key"].as<std::string>() == std::string("hello world"));
-  REQUIRE_FALSE(file.has("section") != true);
+  REQUIRE_FALSE(file.contains("section") != true);
+}
+
+TEST_CASE("member func test02", "[inifile]")
+{
+  ini::inifile file;
+  file["section"]["key"] = "hello world";
+  REQUIRE(file.contains("section") == true);
+  REQUIRE(file.contains("section", "key") == true);
+  REQUIRE(file.contains("section_no") == false);
+  REQUIRE(file.contains("section_no", "key") == false);
+  REQUIRE(file.contains("section", "key_no") == false);
+  REQUIRE(file["section"].size() == 1);
+  REQUIRE(file["section"]["key"].as<std::string>() == std::string("hello world"));
+  REQUIRE_FALSE(file.contains("section") != true);
 }
