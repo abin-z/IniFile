@@ -7,8 +7,8 @@ TEST_CASE("basic test")
   REQUIRE(1 + 1 == 2);
 #ifdef _WIN32
   // msvc下能通过: msvc下double和long double一样, 都是 (64-bit IEEE 754), 但是gcc和clang不一样
-  REQUIRE(sizeof(double) == sizeof(long double));
-  REQUIRE(std::numeric_limits<long double>::max() == std::numeric_limits<double>::max());
+  CHECK(sizeof(double) == sizeof(long double));
+  CHECK(std::numeric_limits<long double>::max() == std::numeric_limits<double>::max());
 #endif
 }
 

@@ -7,7 +7,7 @@
  *   - Automatic type conversion for numeric and boolean values
  *   - Error handling for malformed INI files
  *   - Minimal dependencies (only requires C++11 standard library)
- * 
+ *
  * @author: abin
  * @date: 2025-02-23
  * @license: MIT
@@ -20,6 +20,7 @@
 
 #include <string>
 #include <limits>
+#include <sstream>
 #include <fstream>
 #include <iostream>
 #include <algorithm>
@@ -105,7 +106,7 @@ namespace ini
       {
         if (value.empty())
         {
-            throw std::invalid_argument("<inifile> Cannot convert empty string to char.");
+          throw std::invalid_argument("<inifile> Cannot convert empty string to char.");
         }
         result = value[0];
       }
@@ -736,7 +737,7 @@ namespace ini
 
     /// @brief 向ostream中写入ini信息
     /// @param os ostream
-    void write(std::ostream &os)
+    void write(std::ostream &os) const
     {
       bool first_section = true;
 
@@ -768,6 +769,15 @@ namespace ini
       }
     }
 
+    /// @brief 将inifile对象转为对应字符串
+    /// @return ini字符串
+    std::string to_string() const
+    {
+      std::ostringstream ss;
+      write(ss);
+      return ss.str();
+    }
+
     /// @brief 从ini文件中加载ini信息
     /// @param filename 读取文件路径
     /// @return 是否读取成功
@@ -783,7 +793,7 @@ namespace ini
 
     /// @brief 将ini信息保存到ini文件
     /// @param filename 保存文件路径
-    /// @return 保存是否成功
+    /// @return 是否保存成功
     bool save(const std::string &filename)
     {
       std::ofstream os(filename);
