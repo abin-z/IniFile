@@ -719,6 +719,10 @@ namespace ini
         {
           current_section = line.substr(1, line.size() - 2);
           detail::trim(current_section);
+          if(!current_section.empty())
+          {
+            data_[current_section]; // 添加没有key=value的section
+          }
         }
         else // 处理key=value
         {
