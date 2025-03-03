@@ -99,7 +99,7 @@ TEMPLATE_TEST_CASE("Different types float", "[template]",
                    double,
                    long double)
 {
-  TestType x = 3.14159;
+  TestType x = 3.141592;
   ini::inifile file;
   file["section"]["key"] = x;
   TestType result = file["section"]["key"];
@@ -154,13 +154,17 @@ TEST_CASE("member func test01", "[inifile]")
 TEST_CASE("member func test02", "[inifile]")
 {
   ini::inifile file;
-  file["section"]["key"] = "hello world";
-  REQUIRE(file.contains("section") == true);
-  REQUIRE(file.contains("section", "key") == true);
-  REQUIRE(file.contains("section_no") == false);
-  REQUIRE(file.contains("section_no", "key") == false);
-  REQUIRE(file.contains("section", "key_no") == false);
+  file["section"]["key"] = 3.14;
+  REQUIRE(file.size() == 1);
   REQUIRE(file["section"].size() == 1);
-  REQUIRE(file["section"]["key"].as<std::string>() == std::string("hello world"));
-  REQUIRE_FALSE(file.contains("section") != true);
+  REQUIRE(file["section01"].size() == 0);
+  REQUIRE(file.size() == 2);
+  REQUIRE_THROWS_AS([&file]{file.at("section_no");}(), std::out_of_range);
+  REQUIRE_THROWS_AS([&file]{file.at("section").at("key_no");}(), std::out_of_range);
+  REQUIRE_NOTHROW([&file]{auto ret = file.at("section").at("key");}());
+  REQUIRE_NOTHROW([&file]{auto ret = file.at("section01");}());
+  REQUIRE_FALSE(file.contains("section01") != true);
+  REQUIRE(file.contains("section_no") == false);
+  REQUIRE(file.contains("section_no") == false);
+  REQUIRE(file.at("section").at("key").as<std::string>() != "3.14");
 }
