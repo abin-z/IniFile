@@ -719,7 +719,7 @@ namespace ini
         {
           current_section = line.substr(1, line.size() - 2);
           detail::trim(current_section);
-          if(!current_section.empty())
+          if (!current_section.empty())
           {
             data_[current_section]; // 添加没有key=value的section
           }
@@ -800,7 +800,8 @@ namespace ini
         return false;
 
       read(is);
-      return !is.fail();
+      // 仅当 fail() 不是由于 EOF 造成的，并且没有发生 bad()，才认为读取成功
+      return !(is.fail() && !is.eof()) && !is.bad();
     }
 
     /// @brief 将ini信息保存到ini文件
@@ -813,7 +814,8 @@ namespace ini
         return false;
 
       write(os);
-      return !os.fail();
+      os.flush();
+      return !os.fail() && !os.bad();
     }
 
   private:
