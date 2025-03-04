@@ -377,9 +377,6 @@ namespace ini
   {
     friend std::ostream &operator<<(std::ostream &os, const field &data);
 
-  private:
-    std::string value_; // 存储字符串值，用于存储读取的 INI 文件字段值
-
   public:
     /// 默认构造函数，使用编译器生成的默认实现。
     field() = default;
@@ -473,6 +470,9 @@ namespace ini
       detail::convert<T> conv;
       conv.encode(value, value_);
     }
+
+  private:
+    std::string value_; // 存储字符串值，用于存储读取的 INI 文件字段值
   };
 
   inline std::ostream &operator<<(std::ostream &os, const field &data)
