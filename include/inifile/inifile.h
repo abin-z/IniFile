@@ -486,7 +486,13 @@ namespace ini
     using DataContainer = std::unordered_map<std::string, field>;
 
   public:
+    using key_type = DataContainer::key_type;
+    using mapped_type = DataContainer::mapped_type;
+    using value_type = DataContainer::value_type;
     using size_type = DataContainer::size_type;
+    using difference_type = DataContainer::difference_type;
+
+    using iterator = DataContainer::iterator;
     using const_iterator = DataContainer::const_iterator;
 
     /// @brief 获取或插入一个字段，键是常量引用, 如果key不存在，插入一个默认构造的 field 对象
@@ -577,11 +583,30 @@ namespace ini
     {
       return data_.size();
     }
+
+    iterator begin() noexcept
+    {
+      return data_.begin();
+    }
     const_iterator begin() const noexcept
+    {
+      return data_.begin();
+    }
+
+    iterator end() noexcept
+    {
+      return data_.end();
+    }
+    const_iterator end() const noexcept
+    {
+      return data_.end();
+    }
+
+    const_iterator cbegin() const noexcept
     {
       return data_.cbegin();
     }
-    const_iterator end() const noexcept
+    const_iterator cend() const noexcept
     {
       return data_.cend();
     }
@@ -596,7 +621,13 @@ namespace ini
     using DataContainer = std::unordered_map<std::string, section>;
 
   public:
+    using key_type = DataContainer::key_type;
+    using mapped_type = DataContainer::mapped_type;
+    using value_type = DataContainer::value_type;
     using size_type = DataContainer::size_type;
+    using difference_type = DataContainer::difference_type;
+
+    using iterator = DataContainer::iterator;
     using const_iterator = DataContainer::const_iterator;
 
     /// @brief 获取或插入一个字段，键是常量引用, 如果section_name不存在，插入一个默认构造的 section 对象
@@ -693,11 +724,30 @@ namespace ini
     {
       return data_.size();
     }
+
+    iterator begin() noexcept
+    {
+      return data_.begin();
+    }
     const_iterator begin() const noexcept
+    {
+      return data_.begin();
+    }
+
+    iterator end() noexcept
+    {
+      return data_.end();
+    }
+    const_iterator end() const noexcept
+    {
+      return data_.end();
+    }
+
+    const_iterator cbegin() const noexcept
     {
       return data_.cbegin();
     }
-    const_iterator end() const noexcept
+    const_iterator cend() const noexcept
     {
       return data_.cend();
     }
