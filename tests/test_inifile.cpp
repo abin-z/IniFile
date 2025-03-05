@@ -159,12 +159,51 @@ TEST_CASE("member func test02", "[inifile]")
   REQUIRE(file["section"].size() == 1);
   REQUIRE(file["section01"].size() == 0);
   REQUIRE(file.size() == 2);
-  REQUIRE_THROWS_AS([&file]{file.at("section_no");}(), std::out_of_range);
-  REQUIRE_THROWS_AS([&file]{file.at("section").at("key_no");}(), std::out_of_range);
-  REQUIRE_NOTHROW([&file]{auto ret = file.at("section").at("key");}());
-  REQUIRE_NOTHROW([&file]{auto ret = file.at("section01");}());
+  REQUIRE_THROWS_AS([&file]
+                    { file.at("section_no"); }(), std::out_of_range);
+  REQUIRE_THROWS_AS([&file]
+                    { file.at("section").at("key_no"); }(), std::out_of_range);
+  REQUIRE_NOTHROW([&file]
+                  { auto ret = file.at("section").at("key"); }());
+  REQUIRE_NOTHROW([&file]
+                  { auto ret = file.at("section01"); }());
   REQUIRE_FALSE(file.contains("section01") != true);
   REQUIRE(file.contains("section_no") == false);
   REQUIRE(file.contains("section_no") == false);
   REQUIRE(file.at("section").at("key").as<std::string>() != "3.14");
+}
+
+TEST_CASE("member func test03", "[inifile]")
+{
+  ini::inifile file;
+  file["section"]["key"] = 3.14;
+  REQUIRE_NOTHROW([&file]
+                  { auto ret = file.get("section", "key_no"); }());
+  REQUIRE_NOTHROW([&file]
+                  { auto ret = file.at("section").get("key_no"); }());
+
+  REQUIRE_NOTHROW([&file]
+                  { auto ret = file.get("section", "key_no", "default"); }());
+  REQUIRE_NOTHROW([&file]
+                  { auto ret = file.at("section").get("key_no", 55); }());
+
+  REQUIRE_THROWS_AS([&file]
+                    { file.at("section_no"); }(), std::out_of_range);
+  REQUIRE_THROWS_AS([&file]
+                    { file.at("section_no").at("key"); }(), std::out_of_range);
+  REQUIRE_THROWS_AS([&file]
+                    { file.at("section").at("key_no"); }(), std::out_of_range);
+}
+
+
+TEST_CASE("member func test04", "[inifile]")
+{
+  ini::inifile file;
+  REQUIRE_NOTHROW([&file]
+                  { auto ret = file.get("section", "key_no", "default"); }());
+  REQUIRE_NOTHROW([&file]
+                  { auto ret = file.get("section", "key_no", 55).as<float>(); }());
+
+  REQUIRE_THROWS_AS([&file]
+                    { auto ret = file.get("section", "key_no", "default").as<int>(); }(), std::invalid_argument);
 }
