@@ -17,7 +17,7 @@
 
 **header-only方式**
 
-1. 直接将`inifile.h`头文件复制到您的项目文件夹中
+1. 直接将[`inifile.h`头文件](./include/inifile/inifile.h)复制到您的项目文件夹中
 
 2. 然后在源代码文件中直接`#include "inifile.h"`即可使用
 
@@ -25,7 +25,7 @@
 
 1. 在项目中创建一个`inifile`文件夹(名称随意)
 
-2. 将本项目的`include`文件夹中的所有内容复制到刚才步骤1创建的`inifile`文件夹内
+2. 将本项目的[`include`文件夹](./include/)中的所有内容复制到刚才步骤1创建的`inifile`文件夹内
 
 3. 然后在您的主`CMakeLists.txt`中添加以下内容
 
