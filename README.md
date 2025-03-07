@@ -37,6 +37,46 @@
 
 ### 🔧 使用示例
 
+下面提供简单的使用案例, 更多详细的案例请查看`./examples/`文件夹下的案例
+
+**创建并保存ini文件**
+
+```cpp
+#include "inifile.h"
+
+int main()
+{
+  constexpr char path[] = "path/to/ini/file";
+  ini::inifile inif;
+  inif["section"]["key0"] = true;
+  inif["section"]["key1"] = 3.14159;
+  inif["section"]["key2"] = "value";
+  // 调用save方法保存ini到文件, 返回是否保存成功
+  bool isok = inif.save(path);
+}
+```
+
+**读取ini文件**
+
+```cpp
+#include "inifile.h"
+
+int main()
+{
+  constexpr char path[] = "path/to/ini/file";
+  ini::inifile inif;
+  // 调用load方法保存ini到文件, 返回是否加载成功
+  bool isok = inif.load(path);
+  bool b = inif["section"]["key0"];
+  double d = inif["section"]["key1"];
+  std::string b = inif["section"]["key2"];
+}
+```
+
+
+
+
+
 
 
 ### 📄 API 说明
