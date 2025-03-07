@@ -51,7 +51,7 @@ int main()
   inif["section"]["key0"] = true;
   inif["section"]["key1"] = 3.14159;
   inif["section"]["key2"] = "value";
-  // 调用save方法保存ini到文件, 返回是否保存成功
+  // 调用save方法保存ini文件, 返回是否保存成功
   bool isok = inif.save(path);
 }
 ```
@@ -65,7 +65,7 @@ int main()
 {
   constexpr char path[] = "path/to/ini/file";
   ini::inifile inif;
-  // 调用load方法保存ini到文件, 返回是否加载成功
+  // 调用load方法加载ini文件, 返回是否加载成功
   bool isok = inif.load(path);
   bool b = inif["section"]["key0"];
   double d = inif["section"]["key1"];
