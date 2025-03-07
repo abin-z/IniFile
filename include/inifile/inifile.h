@@ -1,13 +1,14 @@
 /**************************************************************************************************************
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  * @description: Easy-to-use ini file parsing library that supports parsing, modifying and saving ini files.
- * - Easy-to-use INI file parsing library that supports:
- *   - Reading and writing INI configuration files
- *   - Section-based key-value storage
- *   - Automatic type conversion for numeric and boolean values
- *   - Error handling for malformed INI files
- *   - Minimal dependencies (only requires C++11 standard library)
- *
+ * - Features :
+ *   - Lightweight & Easy-to-Use: A header-only INI parser with no external dependencies (C++11 only).  
+ *   - Read, Modify & Write: Easily handle INI configuration files. 
+ *   - Intuitive API: Simple and clear interface for reading, modifying, and writing INI files.  
+ *   - Versatile Data Handling: Supports `std::string` and `std::istream` for input/output.  
+ *   - Automatic Type Conversion: Seamlessly handles various data types.  
+ * 
+ * 
  * @author: abin
  * @date: 2025-02-23
  * @license: MIT
