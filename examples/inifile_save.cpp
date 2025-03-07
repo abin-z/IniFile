@@ -6,12 +6,17 @@ int main()
 
   ini::inifile inif;
 
-  inif["section1"]["string"] = "value";
-  inif["section1"]["int"] = 123;
-  inif["section1"]["float"] = 3.14f;
-  inif["section1"]["double"] = 3.141592;
-  inif["section1"]["char"] = 'c';
-  inif["section1"]["bool"] = true;
+  inif["section"]["string"] = "value";
+  inif["section"]["int"] = 123;
+  inif["section"]["float"] = 3.14f;
+  inif["section"]["double"] = 3.141592;
+  inif["section"]["char"] = 'c';
+  inif["section"]["bool"] = true;
+
+  inif["section1"]["string"].set("hello");
+  inif["section1"]["int"].set(1);
+  inif["section1"]["double"].set(3.14159);
+  inif["section1"]["bool"].set(false);
 
   inif.set("section2", "int", 99);
   inif.set("section2", "bool", false);
