@@ -37,13 +37,12 @@
 
 ### 🔧 使用示例
 
-下面提供简单的使用案例, 更多详细的案例请查看`./examples/`文件夹下的案例
+下面提供简单的使用案例, 更多详细的案例请查看[`./examples/`](./examples/)文件夹下的案例
 
 **创建并保存ini文件**
 
 ```cpp
 #include "inifile.h"
-
 int main()
 {
   constexpr char path[] = "path/to/ini/file";
@@ -51,7 +50,7 @@ int main()
   inif["section"]["key0"] = true;
   inif["section"]["key1"] = 3.14159;
   inif["section"]["key2"] = "value";
-  // 调用save方法保存ini文件, 返回是否保存成功
+  // Save the ini file, returns whether the save was successful or not.
   bool isok = inif.save(path);
 }
 ```
@@ -60,18 +59,63 @@ int main()
 
 ```cpp
 #include "inifile.h"
-
 int main()
 {
   constexpr char path[] = "path/to/ini/file";
   ini::inifile inif;
-  // 调用load方法加载ini文件, 返回是否加载成功
+  // Load the ini file, return whether the loading was successful or not.
   bool isok = inif.load(path);
   bool b = inif["section"]["key0"];
   double d = inif["section"]["key1"];
-  std::string b = inif["section"]["key2"];
+  std::string s = inif["section"]["key2"];
 }
 ```
+
+**`stream`流中读/写ini信息**
+
+```cpp
+#include "inifile.h"
+int main()
+{
+  // create istream object "is" ...
+  ini::inifile inif;
+  inif.read(is);
+}
+```
+
+```cpp
+#include "inifile.h"
+int main()
+{
+  // create ostream object "os" ...
+  ini::inifile inif;
+  inif.write(os);
+}
+```
+
+**`std::string`中读写ini信息**
+
+```cpp
+#include "inifile.h"
+int main()
+{
+  // create string object "s" ...
+  ini::inifile inif;
+  inif.from_string(s);
+}
+```
+
+```cpp
+#include "inifile.h"
+int main()
+{
+  ini::inifile inif;
+  inif["section"]["key"] = "value";
+  std::string s = inif.to_string();
+}
+```
+
+
 
 
 
