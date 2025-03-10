@@ -243,7 +243,7 @@ int main()
 
 
 
-### 📄 API 说明
+### 📄 常用API 说明
 
 #### class 类型说明
 
@@ -255,19 +255,52 @@ int main()
 
 #### ini::field类API说明
 
+以下函数类型转换失败或者值溢出将抛异常
 
+| 函数名     | 函数签名                       | 功能描述                          |
+| ---------- | ------------------------------ | --------------------------------- |
+| field      | field(const T &other)          | 构造field对象, 将T类型转为field值 |
+| set        | void set(const T &value)       | 设置field值, 将T类型转为field值   |
+| operator=  | field &operator=(const T &rhs) | 设置field值, 将T类型转为field值   |
+| operator T | operator T() const             | 将field类型转为T类型              |
+| as         | T as() const                   | 将field类型转为T类型              |
 
 #### ini::section类API说明
 
-
+| 函数名     | 函数签名                                                     | 功能描述                                                     |
+| ---------- | ------------------------------------------------------------ | ------------------------------------------------------------ |
+| operator[] | field &operator\[\](const std::string &key)                  | 返回ini::field引用, 不存在则插入空ini::field                 |
+| set        | void set(std::string key, T &&value)                         | 插入或更新指定key的field                                     |
+| contains   | bool contains(std::string key) const                         | 判断key是否存在                                              |
+| at         | field &at(std::string key)                                   | 返回指定key键的元素的字段值的引用。如果元素不存则抛 std::out_of_range异常 |
+| get        | field get(std::string key, field default_value = field{}) const | 获取key对应的值(副本), 若key不存在则返回default_value默认值  |
+| remove     | bool remove(std::string key)                                 | 删除指定的key-value键值对, 若不存在则什么都不做              |
+| clear      | void clear() noexcept                                        | 清除所有key - value键值对                                    |
+| size       | size_type size() const noexcept                              | 返回有多少key - value键值对                                  |
+| begin      | iterator begin() noexcept                                    | 返回起始迭代器                                               |
+| end        | iterator end() noexcept                                      | 返回末尾迭代器                                               |
 
 #### ini::inifile类API说明
 
-
-
-
-
-
+| 函数名      | 函数签名                                                     | 功能描述                                                     |
+| ----------- | ------------------------------------------------------------ | ------------------------------------------------------------ |
+| operator[]  | section &operator\[\](const std::string &section)            | 返回ini::section引用, 不存在则插入空ini::section             |
+| set         | void set(const std::string &section, const std::string &key, T &&value) | 设置section key-value                                        |
+| contains    | bool contains(std::string section) const                     | 判断指定的section是否存在                                    |
+| contains    | bool contains(std::string section, std::string key) const    | 判断指定section下指定的key是否存在                           |
+| at          | section &at(std::string section)                             | 返回指定section的引用。如果不存在这样的元素，则会抛出 std::out_of_range 类型的异常 |
+| get         | field get(std::string sec, std::string key, field default_value = field{}) const | 返回指定section的指定key键的字段值, 若section或key不存在则返回默认值default_value |
+| remove      | bool remove(std::string sec)                                 | 删除指定的section(包括其所有元素)                            |
+| clear       | void clear() noexcept                                        | 清空所有的section                                            |
+| size        | size_type size() const noexcept                              | 返回有多少section                                            |
+| begin       | iterator begin() noexcept                                    | 返回起始迭代器                                               |
+| end         | iterator end() noexcept                                      | 返回末尾迭代器                                               |
+| read        | void read(std::istream &is)                                  | 从istream中读取ini信息                                       |
+| write       | void write(std::ostream &os) const                           | 向ostream中写入ini信息                                       |
+| from_string | void from_string(const std::string &str)                     | 从str中读取ini信息                                           |
+| to_strig    | std::string to_string() const                                | 将inifile对象转为对应字符串                                  |
+| load        | bool load(const std::string &filename)                       | 从ini文件中加载ini信息, 返回是否成功                         |
+| save        | bool save(const std::string &filename)                       | 将ini信息保存到ini文件, 返回是否成功                         |
 
 
 
