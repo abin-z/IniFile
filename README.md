@@ -214,6 +214,21 @@ int main()
 }
 ```
 
+支持自动转换的类型包括:
+
+- `bool`
+- `char`, `signed char`, `unsigned char`
+- `short`, `unsigned short`
+- `int`, `unsigned int`
+- `long`, `unsigned long`
+- `long long`, `unsigned long long`
+- `float`
+- `double`
+- `long double`
+- `std::string`
+- `const char *`
+- `std::string_view` (C++17)
+
 #### 其他工具函数
 
 提供多种工具函数, 查询个数`size()`,  是否包含元素`contains()`,  移除元素 `remove()`,  清除所有元素`clear()`,  迭代器访问: `begin()`, `end()`, `cbegin()`, `cend()`, 支持range-base for循环.  具体详情请查看常用 API 说明. 下面提供一个迭代器访问ini信息:
