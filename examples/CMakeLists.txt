@@ -9,3 +9,6 @@ target_link_libraries(inifile_load PRIVATE inifile)
 
 add_executable(inifile_save inifile_save.cpp)
 target_link_libraries(inifile_save PRIVATE inifile)
+
+add_executable(inifile_basic inifile_basic.cpp)
+target_link_libraries(inifile_basic PRIVATE inifile)
