@@ -207,3 +207,64 @@ TEST_CASE("member func test04", "[inifile]")
   REQUIRE_THROWS_AS([&file]
                     { auto ret = file.get("section", "key_no", "default").as<int>(); }(), std::invalid_argument);
 }
+
+TEST_CASE("member func test05", "[inifile]")
+{
+  ini::inifile file;
+  REQUIRE_NOTHROW([&file]
+                  { auto ret0 = file["section"].get("key_no");
+                    auto ret1 = file["section"].get("key_no", "default"); }());
+
+  REQUIRE_THROWS_AS([&file]
+                    { auto ret = file.get("section", "key_no", "default").as<double>(); }(), std::invalid_argument);
+}
+
+TEST_CASE("member func test06", "[inifile]")
+{
+  REQUIRE_NOTHROW([]
+                  { 
+                    ini::field f;
+                    ini::field f1(1);
+                    ini::field f2(true);
+                    ini::field f3(3.14);
+                    ini::field f4('c');
+                    ini::field f5("abc");
+                    ini::field f6(3.14f);
+                    ini::field f7(999999999ll);
+                    ini::field f8 = "hello";
+                    f8 = 3.14;
+                  }());
+}
+
+TEST_CASE("member func test07", "[inifile]")
+{
+  REQUIRE_NOTHROW([]
+                  { 
+                  // 其他类型 -> ini::field
+                  ini::field f(true);
+                  ini::field f1(10);
+                  ini::field f2 = 3.14;
+                  ini::field f3 = 'c';
+                  ini::field f4 = "abc";
+                    
+                  // ini::field -> 其他类型
+                  bool b = f;
+                  int i = f1;
+                  double d = f2;
+                  char c = f3;
+                  std::string s = f4; 
+
+                  ini::inifile inif;
+                  inif["section"]["key"] = true; // bool -> ini::field
+                  
+                  /// Get direct type(ini::field)
+                  auto val = inif["section"]["key"]; // val type is ini::field
+                  ini::field val2 = inif["section"]["key"]; 
+                  
+                  /// explicit type conversion
+                  bool bb = inif["section"]["key"].as<bool>();
+                    
+                  /// automatic type conversion
+                  bool bb2 = inif["section"]["key"];
+                }());
+}
