@@ -678,7 +678,7 @@ namespace ini
       return false;
     }
 
-    /// @brief 返回指定section的引用。如果不存在这样的元素，则会出现 std::out_of_range 类型的异常。
+    /// @brief 返回指定section的引用。如果不存在这样的元素，则会抛出 std::out_of_range 类型的异常。
     /// @param section section名称 - section不存在将抛出异常
     /// @return section引用
     section &at(std::string section)
