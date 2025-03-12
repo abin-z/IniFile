@@ -317,12 +317,10 @@ int main()
 | load        | bool load(const std::string &filename)                       | 从ini文件中加载ini信息, 返回是否成功                         |
 | save        | bool save(const std::string &filename)                       | 将ini信息保存到ini文件, 返回是否成功                         |
 
-
-
 ### 💡 贡献指南
 
 欢迎提交 **Issue** 和 **Pull request** 来改进本项目！
 
 ### 📜 许可证
 
-本项目采用 **MIT** 许可证。
+本项目采用[ **MIT** 许可证](./LICENSE)。
