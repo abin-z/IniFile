@@ -240,31 +240,70 @@ TEST_CASE("member func test07", "[inifile]")
 {
   REQUIRE_NOTHROW([]
                   { 
-                  // 其他类型 -> ini::field
-                  ini::field f(true);
-                  ini::field f1(10);
-                  ini::field f2 = 3.14;
-                  ini::field f3 = 'c';
-                  ini::field f4 = "abc";
-                    
-                  // ini::field -> 其他类型
-                  bool b = f;
-                  int i = f1;
-                  double d = f2;
-                  char c = f3;
-                  std::string s = f4; 
+                    // 其他类型 -> ini::field
+                    ini::field f(true);
+                    ini::field f1(10);
+                    ini::field f2 = 3.14;
+                    ini::field f3 = 'c';
+                    ini::field f4 = "abc";
+                      
+                    // ini::field -> 其他类型
+                    bool b = f;
+                    int i = f1;
+                    double d = f2;
+                    char c = f3;
+                    std::string s = f4; 
 
-                  ini::inifile inif;
-                  inif["section"]["key"] = true; // bool -> ini::field
-                  
-                  /// Get direct type(ini::field)
-                  auto val = inif["section"]["key"]; // val type is ini::field
-                  ini::field val2 = inif["section"]["key"]; 
-                  
-                  /// explicit type conversion
-                  bool bb = inif["section"]["key"].as<bool>();
+                    ini::inifile inif;
+                    inif["section"]["key"] = true; // bool -> ini::field
                     
-                  /// automatic type conversion
-                  bool bb2 = inif["section"]["key"];
-                }());
+                    /// Get direct type(ini::field)
+                    auto val = inif["section"]["key"]; // val type is ini::field
+                    ini::field val2 = inif["section"]["key"]; 
+                    
+                    /// explicit type conversion
+                    bool bb = inif["section"]["key"].as<bool>();
+                      
+                    /// automatic type conversion
+                    bool bb2 = inif["section"]["key"];
+                  }());
+}
+
+TEST_CASE("member func test08", "[inifile]")
+{
+  REQUIRE_NOTHROW([]
+                  { 
+                    ini::inifile inif;
+                    inif["only_section"];
+                    inif["section"]["only_key"];
+                    inif[""][""];
+                    inif[""]["key"];
+                    inif["section0"][""];
+                    inif.save("./test.ini");
+                  }());
+}
+
+
+TEST_CASE("member func test09", "[inifile]")
+{
+  ini::inifile inif;
+  inif["section"]["key"] = true;
+  CHECK(inif.contains("section") == true);
+  CHECK(inif.contains("section_no") == false);
+  CHECK(inif.contains("section", "key") == true);
+  CHECK(inif.contains("section_no", "key") == false);
+  CHECK(inif.contains("section", "key_no") == false);
+  CHECK(inif.contains("section_no", "key_no") == false);
+
+  CHECK(inif.at("section").contains("key") == true);
+  CHECK(inif.at("section").contains("key_no") == false);
+
+  CHECK(inif["section"].contains("key") == true);
+  CHECK(inif["section"].contains("key_no") == false);
+
+  CHECK(inif["section_no"].contains("") == false);
+  CHECK(inif["section_no"].contains("key_no") == false);
+
+  inif[""]["num"] = 12345;
+  CHECK(inif[""].contains("num") == true); // 允许key为空字符串
 }
