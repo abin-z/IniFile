@@ -153,8 +153,8 @@ int main()
   - 使用`get()`函数返回**值**, 若给定的section或key不存在**不会插入**field, 而是返回一个默认的空field值(可以指定默认值).
   - 使用`at()`函数返回**引用**, 若给定的section或key不存在则**抛出异常** :`std::out_of_range`
 - 是否可以执行类型自动转换, 以上三个函数返回的是`ini::field`包装对象, 若将该对象转为其他类型需注意:
-  - 类型转换是否允许, 若类型转换不允许则抛出异常: `std::invalid_argument`, (例如将`"abc"`转为`int`)
-  - 数值类型转换范围是否溢出, 若超出目标类型的范围则抛出异常: `std::out_of_range`, (例如将`INT_MAX`转为`uint8_t`)
+  - 类型转换是否允许, 若类型转换不允许则**抛出异常**: `std::invalid_argument`, (例如将`"abc"`转为`int`)
+  - 数值类型转换范围是否溢出, 若超出目标类型的范围则**抛出异常**: `std::out_of_range`, (例如将`INT_MAX`转为`uint8_t`)
 
 ```cpp
 #include "inifile.h"
@@ -197,7 +197,6 @@ int main()
   double d = f2;
   char c = f3;
   std::string s = f4;
-
   
   ini::inifile inif;
   inif["section"]["key"] = true; // bool -> ini::field
@@ -211,6 +210,9 @@ int main()
     
   /// automatic type conversion
   bool bb2 = inif["section"]["key"];
+  
+  /// Type conversion failure throws an exception
+  double n =  inif["section"]["key"]; // error: Converting true to double is not allowed.
 }
 ```
 
@@ -262,7 +264,7 @@ int main()
 
 #### class 类型说明
 
-| 类型名称     | 描述                                                         |
+| class名称    | 描述                                                         |
 | ------------ | ------------------------------------------------------------ |
 | ini::inifile | 对应整个ini数据, 包含了所有的section                         |
 | ini::section | 对应整个section内容, 里面包含了本section所有的key-value值    |
@@ -312,7 +314,7 @@ int main()
 | end         | iterator end() noexcept                                      | 返回末尾迭代器                                               |
 | read        | void read(std::istream &is)                                  | 从istream中读取ini信息                                       |
 | write       | void write(std::ostream &os) const                           | 向ostream中写入ini信息                                       |
-| from_string | void from_string(const std::string &str)                     | 从str中读取ini信息                                           |
+| from_string | void from_string(const std::string &str)                     | 从string中读取ini信息                                        |
 | to_strig    | std::string to_string() const                                | 将inifile对象转为对应字符串                                  |
 | load        | bool load(const std::string &filename)                       | 从ini文件中加载ini信息, 返回是否成功                         |
 | save        | bool save(const std::string &filename)                       | 将ini信息保存到ini文件, 返回是否成功                         |
