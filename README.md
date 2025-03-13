@@ -1,4 +1,6 @@
-## 🛠️ Lightweight INI File Parsing Library - Supports Parsing, Modifying, and Saving INI Files
+## 🛠️ Lightweight INI File Parsing Library
+
+🌍 Available languages/可用的语言:  [English](README.md)  |  [简体中文](README.zh-CN.md)
 
 ### 📌 Project Overview
 
