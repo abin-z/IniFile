@@ -19,14 +19,14 @@ Ideal for C++ projects that require **parsing, editing, and storing** INI config
 
 **Header-Only Approach**
 
-1. Copy the [`inifile.h`](https://chatgpt.com/c/include/inifile/inifile.h) header file to your project folder.
+1. Copy the [`inifile.h`](./include/inifile/inifile.h) header file to your project folder.
 2. Include it in your source code using `#include "inifile.h"`.
 
 **CMake Approach**
 
 1. Create an `inifile` folder in your project (name can be customized).
 
-2. Copy all contents from the [`include`](https://chatgpt.com/c/include/) folder of this project into the `inifile` folder.
+2. Copy all contents from the [`include`](./include/) folder of this project into the `inifile` folder.
 
 3. Add the following line to your main `CMakeLists.txt` file:
 
@@ -38,7 +38,7 @@ Ideal for C++ projects that require **parsing, editing, and storing** INI config
 
 ### 🔧 Usage Examples
 
-Below are some simple usage examples. For more details, refer to the [`./examples/`](https://chatgpt.com/c/examples/) folder.
+Below are some simple usage examples. For more details, refer to the[`./examples/`](./examples/) folder.
 
 #### Creating and Saving an INI File
 
@@ -116,4 +116,5 @@ We welcome contributions! Feel free to submit **Issues** and **Pull Requests** t
 
 ### 📜 License
 
-This project is licensed under the [**MIT** License](https://chatgpt.com/c/LICENSE).
+This project is licensed under the [**MIT** License](./LICENSE).
+
