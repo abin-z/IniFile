@@ -1,45 +1,46 @@
-##  🛠️ 轻量级ini文件解析库，支持解析、修改、保存ini文件
+## 🛠️ Lightweight INI File Parsing Library - Supports Parsing, Modifying, and Saving INI Files
 
-### 📌 项目简介
-这是一个轻量级、高效且 header-only 的 INI 配置文件解析库，专为 C++ 项目设计。它提供简洁直观的 API，支持快速解析、修改和写入 INI 文件，让配置管理变得更简单。
+### 📌 Project Overview
 
-### 🚀 特性
-- **轻量级 & 无依赖**：仅依赖 C++11 标准库，无需额外依赖项
-- **易于集成**：Header-only 设计，开箱即用
-- **直观 API**：提供清晰友好的接口，简化 INI 文件操作
-- **全面支持**：可读取、修改、写入 INI 数据至文件
-- **多种数据源**：支持从 `std::string` 或 `std::istream` 解析 INI 数据，并写入其中
-- **自动类型转换**：支持多种数据类型，自动处理类型转换
+This is a lightweight, efficient, and header-only INI configuration file parsing library designed for C++ projects. It provides a simple and intuitive API that supports fast parsing, modification, and writing of INI files, making configuration management easier.
 
-适用于对 INI 配置文件有 **解析、编辑、存储** 需求的 C++ 项目。
+### 🚀 Features
 
-### 📦 使用方式
+- **Lightweight & Dependency-Free**: Only relies on the C++11 standard library, no additional dependencies required.
+- **Easy Integration**: Header-only design, ready to use out of the box.
+- **Intuitive API**: Provides a clear and user-friendly interface to simplify INI file operations.
+- **Comprehensive Support**: Allows reading, modifying, and writing INI data to files.
+- **Multiple Data Sources**: Supports parsing INI data from `std::string` or `std::istream` and writing back to them.
+- **Automatic Type Conversion**: Supports multiple data types with seamless type conversion.
 
-**header-only方式**
+Ideal for C++ projects that require **parsing, editing, and storing** INI configuration files.
 
-1. 直接将[`inifile.h`](./include/inifile/inifile.h)头文件复制到您的项目文件夹中
+### 📦 Usage
 
-2. 然后在源代码文件中直接`#include "inifile.h"`即可使用
+**Header-Only Approach**
 
-**cmake方式**
+1. Copy the [`inifile.h`](./include/inifile/inifile.h) header file to your project folder.
+2. Include it in your source code using `#include "inifile.h"`.
 
-1. 在项目中创建一个`inifile`文件夹(名称随意)
+**CMake Approach**
 
-2. 将本项目的[`include`](./include/)文件夹中的所有内容复制到刚才步骤1创建的`inifile`文件夹内
+1. Create an `inifile` folder in your project (name can be customized).
 
-3. 然后在您的主`CMakeLists.txt`中添加以下内容
+2. Copy all contents from the [`include`](./include/) folder of this project into the `inifile` folder.
+
+3. Add the following line to your main `CMakeLists.txt` file:
 
    ```cmake
-   add_subdirectory(inifile) # inifile为步骤1创建的文件夹名称
+   add_subdirectory(inifile) # "inifile" is the folder name created in step 1
    ```
 
-4. 在源代码中添加`#include <inifile/inifile.h>`既可使用
+4. Include it in your source code using `#include <inifile/inifile.h>`.
 
-### 🔧 使用示例
+### 🔧 Usage Examples
 
-下面提供简单的使用案例, 更多详细的案例请查看[`./examples/`](./examples/)文件夹下的案例
+Below are some simple usage examples. For more details, refer to the[`./examples/`](./examples/) folder.
 
-#### 创建并保存ini文件
+#### Creating and Saving an INI File
 
 ```cpp
 #include "inifile.h"
@@ -55,7 +56,7 @@ int main()
 }
 ```
 
-#### 读取ini文件
+#### Reading an INI File
 
 ```cpp
 #include "inifile.h"
@@ -71,45 +72,35 @@ int main()
 }
 ```
 
-#### `stream`流中读/写ini信息
-
-支持`stream`流, 允许从`std::istream`流中读取ini数据, 也能向`std::ostream`中写入ini数据.
+#### Reading/Writing INI Data from `std::istream` or `std::ostream`
 
 ```cpp
 #include "inifile.h"
 int main()
 {
-  // create istream object "is" ...
+  // Create istream object "is" ...
   ini::inifile inif;
   inif.read(is);
 }
-```
-
-```cpp
 #include "inifile.h"
 int main()
 {
-  // create ostream object "os" ...
+  // Create ostream object "os" ...
   ini::inifile inif;
   inif.write(os);
 }
 ```
 
-#### `std::string`中读写ini信息
-
-支持从`std::string`中读取ini数据, 也能将`inifile` 转为`std::string`.
+#### Reading/Writing INI Data from `std::string`
 
 ```cpp
 #include "inifile.h"
 int main()
 {
-  // create string object "s" ...
+  // Create string object "s" ...
   ini::inifile inif;
   inif.from_string(s);
 }
-```
-
-```cpp
 #include "inifile.h"
 int main()
 {
@@ -119,9 +110,8 @@ int main()
 }
 ```
 
-#### 设置值
-
-说明: 若section-key不存在, `operator[]`操作符和`set`函数会**直接插入**section-key, 若section-key存在则**更新**field值.
+#### Set value
+Explanation: If the section or key does not exist, The `operator[]` and `set` functions will **directly insert** the section key, and if the section key exists, **update** the field value.
 
 ```cpp
 #include "inifile.h"
@@ -144,17 +134,17 @@ int main()
 }
 ```
 
-#### 获取值
+#### Get value
 
-说明: 获取值的时候需要注意以下两点:
+Explanation: There are two things to keep in mind when getting values.
 
-- 给定的section-key是否存在, 当section-key不存在时调用不同的函数会有不同的策略处理;
-  - 使用`operator[]`返回**引用**, 若给定section或key不存在则**会插入**空的field值, 并设置field为空字符串. (行为类似`std::map`的[])
-  - 使用`get()`函数返回**值**, 若给定的section或key不存在**不会插入**field, 而是返回一个默认的空field值(可以指定默认值).
-  - 使用`at()`函数返回**引用**, 若给定的section或key不存在则**抛出异常** :`std::out_of_range`
-- 是否可以执行类型自动转换, 以上三个函数返回的是`ini::field`包装对象, 若将该对象转为其他类型需注意:
-  - 类型转换是否允许, 若类型转换不允许则**抛出异常**: `std::invalid_argument`, (例如将`"abc"`转为`int`)
-  - 数值类型转换范围是否溢出, 若超出目标类型的范围则**抛出异常**: `std::out_of_range`, (例如将`INT_MAX`转为`uint8_t`)
+- It is important to know whether a given section key exists or not, and different calling functions will have different strategies for handling this;
+  - Use `operator[]` to return **reference**. If the given section or key does not exist, will **insert** an empty field value and set the field to an empty string (Behavior similar to ` std:: map`'s `[]`).
+  - Use the ` get() ` function to return the  **value**. If the given section or key does not exist,  field will **not** be inserted, but a default empty field value (default value can be specified) will be returned.
+  - Use the ` at() ` function to return a **reference**, and if the given section or key does not exist, **throw an exception**: ` std::out_of_range`
+- Whether you can perform type automatic conversion, the above three functions return the `ini::field` wrapper object, if the object to other types should be noted:
+  - Whether the type conversion is allowed, if the type conversion is not allowed, an **exception** is thrown: `std::invalid_argument`, (e.g. converting `"abc"` to `int`).
+  - Whether the range of numeric type conversion overflows, throwing an **exception** if it is outside the range of the target type: `std::out_of_range`, (e.g. converting `INT_MAX` to `uint8_t`).
 
 ```cpp
 #include "inifile.h"
@@ -176,9 +166,9 @@ int main()
 }
 ```
 
-#### 关于自动类型转换
+#### About automatic type conversion
 
-自动类型转换作用在`ini::field`对象上, 允许`ini::field` <=> `other type`互相转换; 但是需要注意: **若转换失败会抛出异常.**
+Automatic type conversion works on `ini::field` objects, allowing `ini::field` <=> `other type` to be converted to and from each other; but be careful:  **An exception will be thrown if the conversion fails**.
 
 ```cpp
 #include "inifile.h"
@@ -216,7 +206,7 @@ int main()
 }
 ```
 
-支持自动转换的类型包括:
+Supported types for automatic conversions:
 
 - `bool`
 - `char`, `signed char`, `unsigned char`
@@ -231,9 +221,9 @@ int main()
 - `const char *`
 - `std::string_view` (C++17)
 
-#### 其他工具函数
+#### Other utility functions
 
-提供多种工具函数, 查询个数`size()`,  是否包含元素`contains()`,  移除元素 `remove()`,  清除所有元素`clear()`,  迭代器访问: `begin()`, `end()`, `cbegin()`, `cend()`, 支持range-base for循环.  具体详情请查看常用 API 说明. 下面提供一个迭代器访问ini信息:
+Provides a variety of utility functions, query the number 'size()', whether it contains the element 'contains()', remove the element 'remove()', clear all the elements' clear() ', iterator access: 'begin()', 'end()', 'cbegin()', 'cend()', support range-base for loops. See common API descriptions for details. The following provides an iterator to access ini information:
 
 ```cpp
 #include "inifile.h"
@@ -258,71 +248,70 @@ int main()
 }
 ```
 
+### 📄 Common  API  Descriptions
 
+#### class Description
 
-### 📄 常用API说明
-
-#### class 类型说明
-
-| class名称    | 描述                                                         |
+| class name   | description                                                  |
 | ------------ | ------------------------------------------------------------ |
-| ini::inifile | 对应整个ini数据, 包含了所有的section                         |
-| ini::section | 对应整个section内容, 里面包含了本section所有的key-value值    |
-| ini::field   | 对应ini文件中的 value 字段, 支持多种数据类型,  支持自动类型转换 |
+| ini::inifile | Corresponds to the entire ini data, including all sections   |
+| ini::section | corresponds to the content of the entire section, which contains all the key-value values of the section. |
+| ini::field   | corresponds to the value field in the ini data, supports multiple data types, supports automatic type conversion |
 
-#### ini::field类API说明
+#### ini::field API Description
 
-以下函数类型转换失败或者值溢出将抛异常
+The following functions will throw an exception if the type conversion fails or the value overflows:
 
-| 函数名     | 函数签名                       | 功能描述                          |
-| ---------- | ------------------------------ | --------------------------------- |
-| field      | field(const T &other)          | 构造field对象, 将T类型转为field值 |
-| set        | void set(const T &value)       | 设置field值, 将T类型转为field值   |
-| operator=  | field &operator=(const T &rhs) | 设置field值, 将T类型转为field值   |
-| operator T | operator T() const             | 将field类型转为T类型              |
-| as         | T as() const                   | 将field类型转为T类型              |
+| function name | function signature             | function description                                         |
+| ------------- | ------------------------------ | ------------------------------------------------------------ |
+| field         | field(const T &other)          | Constructs a field object, converting a T type to a field value. |
+| set           | void set(const T &value)       | Set field value, convert T type to field value.              |
+| operator=     | field &operator=(const T &rhs) | Set field value, convert T type to field value.              |
+| operator T    | operator T() const             | Converting field types to T type                             |
+| as            | T as() const                   | Converting field types to T type                             |
 
-#### ini::section类API说明
+#### ini::section API Description
 
-| 函数名     | 函数签名                                                     | 功能描述                                                     |
-| ---------- | ------------------------------------------------------------ | ------------------------------------------------------------ |
-| operator[] | field &operator\[\](const std::string &key)                  | 返回ini::field引用, 不存在则插入空ini::field                 |
-| set        | void set(std::string key, T &&value)                         | 插入或更新指定key的field                                     |
-| contains   | bool contains(std::string key) const                         | 判断key是否存在                                              |
-| at         | field &at(std::string key)                                   | 返回指定key键的元素的字段值的引用。如果元素不存则抛 std::out_of_range异常 |
-| get        | field get(std::string key, field default_value = field{}) const | 获取key对应的值(副本), 若key不存在则返回default_value默认值  |
-| remove     | bool remove(std::string key)                                 | 删除指定的key-value键值对, 若不存在则什么都不做              |
-| clear      | void clear() noexcept                                        | 清除所有key - value键值对                                    |
-| size       | size_type size() const noexcept                              | 返回有多少key - value键值对                                  |
-| begin      | iterator begin() noexcept                                    | 返回起始迭代器                                               |
-| end        | iterator end() noexcept                                      | 返回末尾迭代器                                               |
+| function name | function signature                                           | function description                                         |
+| ------------- | ------------------------------------------------------------ | ------------------------------------------------------------ |
+| operator[]    | field &operator\[\](const std::string &key)                  | Return an ini::field reference, or insert an empty ini::field if it doesn't exist. |
+| set           | void set(std::string key, T &&value)                         | Inserts or updates a field with the specified key            |
+| contains      | bool contains(std::string key) const                         | Determine if the key exists                                  |
+| at            | field &at(std::string key)                                   | Returns a reference to the field value of the element with the specified key. Throws std::out_of_range exception if element does not exist |
+| get           | field get(std::string key, field default_value = field{}) const | Get the value (copy) of the key, if the key does not exist, then return the default value of default_value. |
+| remove        | bool remove(std::string key)                                 | Removes the specified key-value key pair, or does nothing if it does not exist. |
+| clear         | void clear() noexcept                                        | Clear all key-value pairs                                    |
+| size          | size_type size() const noexcept                              | Returns how many key-value pairs there are.                  |
+| begin         | iterator begin() noexcept                                    | Returns the begin iterator.                                  |
+| end           | iterator end() noexcept                                      | Returns the end iterator.                                    |
 
-#### ini::inifile类API说明
+#### ini::inifile API Description
 
-| 函数名      | 函数签名                                                     | 功能描述                                                     |
-| ----------- | ------------------------------------------------------------ | ------------------------------------------------------------ |
-| operator[]  | section &operator\[\](const std::string &section)            | 返回ini::section引用, 不存在则插入空ini::section             |
-| set         | void set(const std::string &section, const std::string &key, T &&value) | 设置section key-value                                        |
-| contains    | bool contains(std::string section) const                     | 判断指定的section是否存在                                    |
-| contains    | bool contains(std::string section, std::string key) const    | 判断指定section下指定的key是否存在                           |
-| at          | section &at(std::string section)                             | 返回指定section的引用。如果不存在这样的元素，则会抛出 std::out_of_range 类型的异常 |
-| get         | field get(std::string sec, std::string key, field default_value = field{}) const | 返回指定section的指定key键的字段值, 若section或key不存在则返回默认值default_value |
-| remove      | bool remove(std::string sec)                                 | 删除指定的section(包括其所有元素)                            |
-| clear       | void clear() noexcept                                        | 清空所有的section                                            |
-| size        | size_type size() const noexcept                              | 返回有多少section                                            |
-| begin       | iterator begin() noexcept                                    | 返回起始迭代器                                               |
-| end         | iterator end() noexcept                                      | 返回末尾迭代器                                               |
-| read        | void read(std::istream &is)                                  | 从istream中读取ini信息                                       |
-| write       | void write(std::ostream &os) const                           | 向ostream中写入ini信息                                       |
-| from_string | void from_string(const std::string &str)                     | 从string中读取ini信息                                        |
-| to_strig    | std::string to_string() const                                | 将inifile对象转为对应字符串                                  |
-| load        | bool load(const std::string &filename)                       | 从ini文件中加载ini信息, 返回是否成功                         |
-| save        | bool save(const std::string &filename)                       | 将ini信息保存到ini文件, 返回是否成功                         |
+| function name | function signature                                           | function description                                         |
+| ------------- | ------------------------------------------------------------ | ------------------------------------------------------------ |
+| operator[]    | section &operator\[\](const std::string &section)            | Returns a reference to ini::section, or inserts an empty ini::section if it does not exist. |
+| set           | void set(const std::string &section, const std::string &key, T &&value) | Set section key-value                                        |
+| contains      | bool contains(std::string section) const                     | Determines if the specified section exists.                  |
+| contains      | bool contains(std::string section, std::string key) const    | Determines if the specified key exists in the specified section. |
+| at            | section &at(std::string section)                             | Returns a reference to the specified section. If no such element exists, an exception of type std::out_of_range is thrown |
+| get           | field get(std::string sec, std::string key, field default_value = field{}) const | Returns the field value of the specified key for the specified section, or the default value default_value if section or key does not exist |
+| remove        | bool remove(std::string sec)                                 | Removes the specified section (including all its elements).  |
+| clear         | void clear() noexcept                                        | Clear all sections                                           |
+| size          | size_type size() const noexcept                              | Returns how many sections                                    |
+| begin         | iterator begin() noexcept                                    | Returns the begin iterator.                                  |
+| end           | iterator end() noexcept                                      | Returns the end iterator.                                    |
+| read          | void read(std::istream &is)                                  | Read ini information from istream                            |
+| write         | void write(std::ostream &os) const                           | Writes ini information to ostream                            |
+| from_string   | void from_string(const std::string &str)                     | Read ini information from string                             |
+| to_strig      | std::string to_string() const                                | Converts the inifile object to the corresponding string      |
+| load          | bool load(const std::string &filename)                       | Load ini information from ini file, return whether it was successful or not |
+| save          | bool save(const std::string &filename)                       | Save ini information to an ini file, return whether it was successful or not |
 
-### 💡 贡献指南
+### 💡 Contribution Guidelines
 
-欢迎提交 **Issue** 和 **Pull request** 来改进本项目！
+We welcome contributions! Feel free to submit **Issues** and **Pull Requests** to improve this project.
 
-### 📜 许可证
+### 📜 License
 
-本项目采用[ **MIT** 许可证](./LICENSE)。
+This project is licensed under the [**MIT** License](./LICENSE).
+
