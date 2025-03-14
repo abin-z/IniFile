@@ -264,50 +264,50 @@ int main()
 
 The following functions will throw an exception if the type conversion fails or the value overflows:
 
-| function name | function signature             | function description                                         |
-| ------------- | ------------------------------ | ------------------------------------------------------------ |
-| field         | field(const T &other)          | Constructs a field object, converting a T type to a field value. |
-| set           | void set(const T &value)       | Set field value, convert T type to field value.              |
-| operator=     | field &operator=(const T &rhs) | Set field value, convert T type to field value.              |
-| operator T    | operator T() const             | Converting field types to T type                             |
-| as            | T as() const                   | Converting field types to T type                             |
+| function name | function signature               | function description                                         |
+| ------------- | -------------------------------- | ------------------------------------------------------------ |
+| field         | `field(const T &other)`          | Constructs a field object, converting a T type to a field value. |
+| set           | `void set(const T &value)`       | Set field value, convert T type to field value.              |
+| operator=     | `field &operator=(const T &rhs)` | Set field value, convert T type to field value.              |
+| operator T    | `operator T() const`             | Converting field types to T type                             |
+| as            | `T as() const`                   | Converting field types to T type                             |
 
 #### ini::section API Description
 
 | function name | function signature                                           | function description                                         |
 | ------------- | ------------------------------------------------------------ | ------------------------------------------------------------ |
-| operator[]    | field &operator\[\](const std::string &key)                  | Return an ini::field reference, or insert an empty ini::field if it doesn't exist. |
-| set           | void set(std::string key, T &&value)                         | Inserts or updates a field with the specified key            |
-| contains      | bool contains(std::string key) const                         | Determine if the key exists                                  |
-| at            | field &at(std::string key)                                   | Returns a reference to the field value of the element with the specified key. Throws std::out_of_range exception if element does not exist |
-| get           | field get(std::string key, field default_value = field{}) const | Get the value (copy) of the key, if the key does not exist, then return the default value of default_value. |
-| remove        | bool remove(std::string key)                                 | Removes the specified key-value key pair, or does nothing if it does not exist. |
-| clear         | void clear() noexcept                                        | Clear all key-value pairs                                    |
-| size          | size_type size() const noexcept                              | Returns how many key-value pairs there are.                  |
-| begin         | iterator begin() noexcept                                    | Returns the begin iterator.                                  |
-| end           | iterator end() noexcept                                      | Returns the end iterator.                                    |
+| operator[]    | `field &operator\[\](const std::string &key)`                | Return an ini::field reference, or insert an empty ini::field if it doesn't exist. |
+| set           | `void set(std::string key, T &&value)`                       | Inserts or updates a field with the specified key            |
+| contains      | `bool contains(std::string key) const`                       | Determine if the key exists                                  |
+| at            | `field &at(std::string key)`                                 | Returns a reference to the field value of the element with the specified key. Throws std::out_of_range exception if element does not exist |
+| get           | `field get(std::string key, field default_value = field{}) const` | Get the value (copy) of the key, if the key does not exist, then return the default value of default_value. |
+| remove        | `bool remove(std::string key)`                               | Removes the specified key-value key pair, or does nothing if it does not exist. |
+| clear         | `void clear() noexcept`                                      | Clear all key-value pairs                                    |
+| size          | `size_type size() const noexcept`                            | Returns how many key-value pairs there are.                  |
+| begin         | `iterator begin() noexcept`                                  | Returns the begin iterator.                                  |
+| end           | `iterator end() noexcept`                                    | Returns the end iterator.                                    |
 
 #### ini::inifile API Description
 
 | function name | function signature                                           | function description                                         |
 | ------------- | ------------------------------------------------------------ | ------------------------------------------------------------ |
-| operator[]    | section &operator\[\](const std::string &section)            | Returns a reference to ini::section, or inserts an empty ini::section if it does not exist. |
-| set           | void set(const std::string &section, const std::string &key, T &&value) | Set section key-value                                        |
-| contains      | bool contains(std::string section) const                     | Determines if the specified section exists.                  |
-| contains      | bool contains(std::string section, std::string key) const    | Determines if the specified key exists in the specified section. |
-| at            | section &at(std::string section)                             | Returns a reference to the specified section. If no such element exists, an exception of type std::out_of_range is thrown |
-| get           | field get(std::string sec, std::string key, field default_value = field{}) const | Returns the field value of the specified key for the specified section, or the default value default_value if section or key does not exist |
-| remove        | bool remove(std::string sec)                                 | Removes the specified section (including all its elements).  |
-| clear         | void clear() noexcept                                        | Clear all sections                                           |
-| size          | size_type size() const noexcept                              | Returns how many sections                                    |
-| begin         | iterator begin() noexcept                                    | Returns the begin iterator.                                  |
-| end           | iterator end() noexcept                                      | Returns the end iterator.                                    |
-| read          | void read(std::istream &is)                                  | Read ini information from istream                            |
-| write         | void write(std::ostream &os) const                           | Writes ini information to ostream                            |
-| from_string   | void from_string(const std::string &str)                     | Read ini information from string                             |
-| to_strig      | std::string to_string() const                                | Converts the inifile object to the corresponding string      |
-| load          | bool load(const std::string &filename)                       | Load ini information from ini file, return whether it was successful or not |
-| save          | bool save(const std::string &filename)                       | Save ini information to an ini file, return whether it was successful or not |
+| operator[]    | `section &operator[](const std::string &section)`            | Returns a reference to ini::section, or inserts an empty ini::section if it does not exist. |
+| set           | `void set(const std::string &section, const std::string &key, T &&value)` | Set section key-value                                        |
+| contains      | `bool contains(std::string section) const`                   | Determines if the specified section exists.                  |
+| contains      | `bool contains(std::string section, std::string key) const`  | Determines if the specified key exists in the specified section. |
+| at            | `section &at(std::string section)`                           | Returns a reference to the specified section. If no such element exists, an exception of type std::out_of_range is thrown |
+| get           | `field get(std::string sec, std::string key, field default_value = field{}) const` | Returns the field value of the specified key for the specified section, or the default value default_value if section or key does not exist |
+| remove        | `bool remove(std::string sec)`                               | Removes the specified section (including all its elements).  |
+| clear         | `void clear() noexcept`                                      | Clear all sections                                           |
+| size          | `size_type size() const noexcept`                            | Returns how many sections                                    |
+| begin         | `iterator begin() noexcept`                                  | Returns the begin iterator.                                  |
+| end           | `iterator end() noexcept`                                    | Returns the end iterator.                                    |
+| read          | `void read(std::istream &is)`                                | Read ini information from istream                            |
+| write         | `void write(std::ostream &os) const`                         | Writes ini information to ostream                            |
+| from_string   | `void from_string(const std::string &str)`                   | Read ini information from string                             |
+| to_strig      | `std::string to_string() const`                              | Converts the inifile object to the corresponding string      |
+| load          | `bool load(const std::string &filename)`                     | Load ini information from ini file, return whether it was successful or not |
+| save          | `bool save(const std::string &filename)`                     | Save ini information to an ini file, return whether it was successful or not |
 
 ### 💡 Contribution Guidelines
 
