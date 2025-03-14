@@ -276,7 +276,7 @@ The following functions will throw an exception if the type conversion fails or 
 
 | function name | function signature                                           | function description                                         |
 | ------------- | ------------------------------------------------------------ | ------------------------------------------------------------ |
-| operator[]    | `field &operator\[\](const std::string &key)`                | Return an ini::field reference, or insert an empty ini::field if it doesn't exist. |
+| operator[]    | `field &operator[](const std::string &key)`                  | Return an ini::field reference, or insert an empty ini::field if it doesn't exist. |
 | set           | `void set(std::string key, T &&value)`                       | Inserts or updates a field with the specified key            |
 | contains      | `bool contains(std::string key) const`                       | Determine if the key exists                                  |
 | at            | `field &at(std::string key)`                                 | Returns a reference to the field value of the element with the specified key. Throws std::out_of_range exception if element does not exist |
