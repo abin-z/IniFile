@@ -1,6 +1,6 @@
 ## 🛠️ Lightweight INI File Parsing Library
 
-🌍 Available languages/可用的语言:  [English](README.md)  |  [简体中文](README.zh-CN.md)
+🌍 Languages/语言:  [English](README.md)  |  [简体中文](README.zh-CN.md)
 
 ### 📌 Project Overview
 
