@@ -84,6 +84,9 @@ int main()
   ini::inifile inif;
   inif.read(is);
 }
+```
+
+```cpp
 #include "inifile.h"
 int main()
 {
@@ -103,6 +106,9 @@ int main()
   ini::inifile inif;
   inif.from_string(s);
 }
+```
+
+```cpp
 #include "inifile.h"
 int main()
 {
