@@ -1,6 +1,6 @@
 ##  🌟轻量级ini文件解析库
 
-🌍 Available languages/可用的语言:  [English](README.md)  |  [简体中文](README.zh-CN.md)
+🌍 Languages/语言:  [English](README.md)  |  [简体中文](README.zh-CN.md)
 
 ### 📌 项目简介
 这是一个轻量级、高效且 header-only 的 INI 配置文件解析库，专为 C++ 项目设计。它提供简洁直观的 API，支持快速解析、修改和写入 INI 文件，让配置管理变得更简单。

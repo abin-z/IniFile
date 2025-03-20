@@ -12,14 +12,14 @@ void save_func()
   inif["section"]["key0"] = true;
   inif["section"]["key1"] = 3.14159;
   inif["section"]["key2"] = "value";
-  // 调用save方法保存ini文件, 返回是否保存成功
+  // Call the save method to save the ini file and return whether the save was successful
   bool isok = inif.save(path);
 }
 
 void load_func()
 {
   ini::inifile inif;
-  // 调用load方法加载ini文件, 返回是否加载成功
+  // Call the load method to load the ini file and return whether the loading was successful
   bool isok = inif.load(path);
   bool b = inif["section"]["key0"];
   double d = inif["section"]["key1"];
@@ -28,14 +28,14 @@ void load_func()
 
 void read_func()
 {
-  std::istringstream is(str); // 其他istream也可以, 这里用stringstream演示
+  std::istringstream is(str); // Other istreams are also possible
   ini::inifile inif;
   inif.read(is);
 }
 
 void write_func()
 {
-  std::ostringstream os; // 其他ostream也可以, 这里用stringstream演示
+  std::ostringstream os; // Other istreams are also possible
   ini::inifile inif;
   inif["section"]["key"] = "value";
   inif.write(os);
