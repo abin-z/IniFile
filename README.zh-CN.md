@@ -1,4 +1,4 @@
-##  🌟轻量级ini文件解析库
+##  🌟 轻量级ini文件解析库
 
 🌍 Languages/语言:  [English](README.md)  |  [简体中文](README.zh-CN.md)
 
