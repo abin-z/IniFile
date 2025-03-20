@@ -1,4 +1,4 @@
-##  🛠️ 轻量级ini文件解析库
+##  🌟轻量级ini文件解析库
 
 🌍 Available languages/可用的语言:  [English](README.md)  |  [简体中文](README.zh-CN.md)
 
@@ -37,7 +37,7 @@
 
 4. 在源代码中添加`#include <inifile/inifile.h>`既可使用
 
-### 🔧 使用示例
+## 🛠️ 使用示例
 
 下面提供简单的使用案例, 更多详细的案例请查看[`./examples/`](./examples/)文件夹下的案例
 

@@ -1,4 +1,4 @@
-## 🛠️ Lightweight INI File Parsing Library
+## 🌟Lightweight INI File Parsing Library
 
 🌍 Available languages/可用的语言:  [English](README.md)  |  [简体中文](README.zh-CN.md)
 
@@ -38,7 +38,7 @@ Ideal for C++ projects that require **parsing, editing, and storing** INI config
 
 4. Include it in your source code using `#include <inifile/inifile.h>`.
 
-### 🔧 Usage Examples
+### 🛠️ Usage Examples
 
 Below are some simple usage examples. For more details, refer to the[`./examples/`](./examples/) folder.
 
