@@ -151,7 +151,7 @@ int main()
 说明: 获取值的时候需要注意以下两点:
 
 - 给定的section-key是否存在, 当section-key不存在时调用不同的函数会有不同的策略处理;
-  - 使用`operator[]`返回**引用**, 若给定section或key不存在则**会插入**空的field值, 并设置field为空字符串. (行为类似`std::map`的[])
+  - 使用`operator[]`返回**引用**, 若给定section或key不存在则**会插入**空的field值, 并设置field为空字符串. (行为类似`std::map`的`[]`)
   - 使用`get()`函数返回**值**, 若给定的section或key不存在**不会插入**field, 而是返回一个默认的空field值(可以指定默认值).
   - 使用`at()`函数返回**引用**, 若给定的section或key不存在则**抛出异常** :`std::out_of_range`
 - 是否可以执行类型自动转换, 以上三个函数返回的是`ini::field`包装对象, 若将该对象转为其他类型需注意:
