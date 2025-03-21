@@ -195,7 +195,6 @@ TEST_CASE("member func test03", "[inifile]")
                     { file.at("section").at("key_no"); }(), std::out_of_range);
 }
 
-
 TEST_CASE("member func test04", "[inifile]")
 {
   ini::inifile file;
@@ -232,8 +231,7 @@ TEST_CASE("member func test06", "[inifile]")
                     ini::field f6(3.14f);
                     ini::field f7(999999999ll);
                     ini::field f8 = "hello";
-                    f8 = 3.14;
-                  }());
+                    f8 = 3.14; }());
 }
 
 TEST_CASE("member func test07", "[inifile]")
@@ -265,8 +263,7 @@ TEST_CASE("member func test07", "[inifile]")
                     bool bb = inif["section"]["key"].as<bool>();
                       
                     /// automatic type conversion
-                    bool bb2 = inif["section"]["key"];
-                  }());
+                    bool bb2 = inif["section"]["key"]; }());
 }
 
 TEST_CASE("member func test08", "[inifile]")
@@ -279,10 +276,8 @@ TEST_CASE("member func test08", "[inifile]")
                     inif[""][""];
                     inif[""]["key"];
                     inif["section0"][""];
-                    inif.save("./test.ini");
-                  }());
+                    inif.save("./test.ini"); }());
 }
-
 
 TEST_CASE("member func test09", "[inifile]")
 {
@@ -306,4 +301,21 @@ TEST_CASE("member func test09", "[inifile]")
 
   inif[""]["num"] = 12345;
   CHECK(inif[""].contains("num") == true); // 允许key为空字符串
+}
+
+TEST_CASE("member func test10", "[inifile]")
+{
+  ini::inifile inif;
+  CHECK(inif.empty() == true);
+  CHECK(inif.size() == 0);
+  CHECK(inif.count("section") == 0);
+  CHECK((inif.find("section") == inif.end()) == true);
+
+  inif["section"]["key"] = true;
+  inif["section"]["key"] = false;
+  CHECK(inif.empty() == false);
+  CHECK(inif.size() == 1);
+  CHECK(inif.count("section") == 1);
+  bool ret = inif.find("section") != inif.end();
+  CHECK(ret == true);
 }
