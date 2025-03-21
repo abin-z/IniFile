@@ -147,9 +147,9 @@ int main()
 Explanation: There are two things to keep in mind when getting values.
 
 - It is important to know whether a given section key exists or not, and different calling functions will have different strategies for handling this;
-  - Use `operator[]` to return **reference**. If the given section or key does not exist, will **insert** an empty field value and set the field to an empty string (Behavior similar to ` std::map`'s`[]`).
+  - Use `operator[]` to return **reference**. If the given section or key does not exist, will **insert** an empty field value and set the field to an empty string (Behavior similar to `std::map`'s`[]`).
   - Use the ` get() ` function to return the  **value**. If the given section or key does not exist,  field will **not** be inserted, but a default empty field value (default value can be specified) will be returned.
-  - Use the ` at() ` function to return a **reference**, and if the given section or key does not exist, **throw an exception**: ` std::out_of_range`
+  - Use the ` at() ` function to return a **reference**, and if the given section or key does not exist, **throw an exception**: `std::out_of_range`
 - Whether you can perform type automatic conversion, the above three functions return the `ini::field` wrapper object, if the object to other types should be noted:
   - Whether the type conversion is allowed, if the type conversion is not allowed, an **exception** is thrown: `std::invalid_argument`, (e.g. converting `"abc"` to `int`).
   - Whether the range of numeric type conversion overflows, throwing an **exception** if it is outside the range of the target type: `std::out_of_range`, (e.g. converting `INT_MAX` to `uint8_t`).
