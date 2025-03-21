@@ -590,6 +590,20 @@ namespace ini
       return data_.empty();
     }
 
+    iterator find(const key_type &key)
+    {
+      return data_.find(key);
+    }
+    const_iterator find(const key_type &key) const
+    {
+      return data_.find(key);
+    }
+
+    size_type count(const key_type &key) const
+    {
+      return data_.count(key);
+    }
+
     iterator erase(iterator pos)
     {
       return data_.erase(pos);
@@ -752,6 +766,20 @@ namespace ini
     bool empty() const noexcept
     {
       return data_.empty();
+    }
+
+    iterator find(const key_type &key)
+    {
+      return data_.find(key);
+    }
+    const_iterator find(const key_type &key) const
+    {
+      return data_.find(key);
+    }
+
+    size_type count(const key_type &key) const
+    {
+      return data_.count(key);
     }
 
     iterator erase(iterator pos)
