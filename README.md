@@ -231,7 +231,9 @@ Supported types for automatic conversions:
 
 #### Other utility functions
 
-Provides a variety of utility functions, query the number `size()`, whether it contains the element  `contains()`, remove the element `remove()`, clear all the elements `clear()`, iterator access:  `begin()`, `end()`, `cbegin()`, `cend()`, support range-base for loops. See common API descriptions for details. The following provides an iterator to access ini information:
+Provides a variety of other utility functions, including checking whether it is empty `empty()`, querying the total number `size()`, querying the number of keys `count()`, checking whether it contains elements `contains()`, finding elements `find()`, removing elements `remove()` and `erase()`, clearing all elements `clear()`, iterator access: `begin()`, `end()`, `cbegin()`, `cend()`, and supporting range base `for` loops. For details, please refer to the Common API Description.
+
+Here is an iterator to access ini information:
 
 ```cpp
 #include "inifile.h"
@@ -287,9 +289,13 @@ The following functions will throw an exception if the type conversion fails or 
 | contains      | `bool contains(std::string key) const`                       | Determine if the key exists                                  |
 | at            | `field &at(std::string key)`                                 | Returns a reference to the field value of the element with the specified key. Throws std::out_of_range exception if element does not exist |
 | get           | `field get(std::string key, field default_value = field{}) const` | Get the value (copy) of the key, if the key does not exist, then return the default value of default_value. |
+| find          | `iterator find(const key_type &key)`                         | Find the iterator of the specified key value, if it does not exist, return the end iterator |
+| erase         | `iterator erase(iterator pos)`                               | Delete the key-value pair of the specified iterator          |
 | remove        | `bool remove(std::string key)`                               | Removes the specified key-value key pair, or does nothing if it does not exist. |
+| empty         | `bool empty() const noexcept`                                | Determine whether the key-value pair is empty, and return true if it is empty |
 | clear         | `void clear() noexcept`                                      | Clear all key-value pairs                                    |
 | size          | `size_type size() const noexcept`                            | Returns how many key-value pairs there are.                  |
+| count         | `size_type count(const key_type &key) const`                 | Returns the number of key-value pairs for the specified key. |
 | begin         | `iterator begin() noexcept`                                  | Returns the begin iterator.                                  |
 | end           | `iterator end() noexcept`                                    | Returns the end iterator.                                    |
 
@@ -303,15 +309,19 @@ The following functions will throw an exception if the type conversion fails or 
 | contains      | `bool contains(std::string section, std::string key) const`  | Determines if the specified key exists in the specified section. |
 | at            | `section &at(std::string section)`                           | Returns a reference to the specified section. If no such element exists, an exception of type std::out_of_range is thrown |
 | get           | `field get(std::string sec, std::string key, field default_value = field{}) const` | Returns the field value of the specified key for the specified section, or the default value default_value if section or key does not exist |
+| find          | `iterator find(const key_type &key)`                         | Find the iterator of the specified section, if it does not exist, return the end iterator |
+| erase         | `iterator erase(iterator pos)`                               | Deletes the section of the specified iterator (including all its elements) |
 | remove        | `bool remove(std::string sec)`                               | Removes the specified section (including all its elements).  |
+| empty         | `bool empty() const noexcept`                                | Determines whether there is no section, returns true if there is no section |
 | clear         | `void clear() noexcept`                                      | Clear all sections                                           |
 | size          | `size_type size() const noexcept`                            | Returns how many sections                                    |
+| count         | `size_type count(const key_type &key) const`                 | Returns how many sections have the specified section-name    |
 | begin         | `iterator begin() noexcept`                                  | Returns the begin iterator.                                  |
 | end           | `iterator end() noexcept`                                    | Returns the end iterator.                                    |
 | read          | `void read(std::istream &is)`                                | Read ini information from istream                            |
 | write         | `void write(std::ostream &os) const`                         | Writes ini information to ostream                            |
 | from_string   | `void from_string(const std::string &str)`                   | Read ini information from string                             |
-| to_strig      | `std::string to_string() const`                              | Converts the inifile object to the corresponding string      |
+| to_string     | `std::string to_string() const`                              | Converts the inifile object to the corresponding string      |
 | load          | `bool load(const std::string &filename)`                     | Load ini information from ini file, return whether it was successful or not |
 | save          | `bool save(const std::string &filename)`                     | Save ini information to an ini file, return whether it was successful or not |
 
