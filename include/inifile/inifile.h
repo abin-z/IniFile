@@ -30,6 +30,8 @@
 #include <stdexcept>
 #include <cstdlib>
 #include <cerrno>
+#include <memory>
+#include <stack>
 
 #ifdef __cpp_lib_string_view // If we have std::string_view
 #include <string_view>
@@ -388,17 +390,31 @@ namespace ini
     /// 默认析构函数，使用编译器生成的默认实现。
     ~field() = default;
 
-    /// 默认拷贝构造函数，按值拷贝另一个 field 对象。
-    field(const field &other) = default;
-
-    /// 默认拷贝赋值运算符，按值拷贝另一个 field 对象。
-    field &operator=(const field &rhs) = default;
-
     /// 默认移动构造函数，按值移动另一个 field 对象。
     field(field &&other) noexcept = default;
 
     /// 默认移动赋值运算符，按值移动另一个 field 对象。
     field &operator=(field &&rhs) noexcept = default;
+
+    /// 重写拷贝构造函数，深拷贝 other 对象。
+    field(const field &other) : value_(other.value_),
+                                comment_(other.comment_ ? std::unique_ptr<std::stack<std::string>>(new std::stack<std::string>(*other.comment_)) : nullptr)
+    {
+    }
+
+    // 友元 swap（非成员函数）
+    friend void swap(field &lhs, field &rhs) noexcept
+    {
+      using std::swap;
+      swap(lhs.value_, rhs.value_);
+      swap(lhs.comment_, rhs.comment_);
+    }
+    /// 重写拷贝赋值(copy-and-swap 方式)
+    field &operator=(field rhs) noexcept
+    {
+      swap(*this, rhs); // 利用拷贝构造+swap, 确保异常安全,也能处理自赋值问题
+      return *this;
+    }
 
     /**
      * @brief 模板构造函数：从其他类型的值构造 `field` 对象。
@@ -474,6 +490,8 @@ namespace ini
 
   private:
     std::string value_; // 存储字符串值，用于存储读取的 INI 文件字段值
+    // 当前key-value的注释stack, 采用懒加载策略(默认为nullptr), 深拷贝机制.
+    std::unique_ptr<std::stack<std::string>> comment_; // 使用unique_ptr主要考虑内存占用更小. <如果在c++17标准下使用std::option更优>
   };
 
   inline std::ostream &operator<<(std::ostream &os, const field &data)
@@ -495,6 +513,34 @@ namespace ini
 
     using iterator = DataContainer::iterator;
     using const_iterator = DataContainer::const_iterator;
+
+    // 默认构造
+    section() = default;
+    // 默认析构函数
+    ~section() = default;
+    // 默认移动构造函数
+    section(section &&) noexcept = default;
+    // 默认移动赋值函数
+    section &operator=(section &&) noexcept = default;
+
+    /// 重写拷贝构造函数, 深拷贝
+    section(const section &other) : data_(other.data_),
+                                    comment_(other.comment_ ? std::unique_ptr<std::stack<std::string>>(new std::stack<std::string>(*other.comment_)) : nullptr)
+    {
+    }
+    // 友元 swap函数(非成员函数)
+    friend void swap(section &lhs, section &rhs) noexcept
+    {
+      using std::swap;
+      swap(lhs.data_, rhs.data_);
+      swap(lhs.comment_, rhs.comment_);
+    }
+    /// 重写拷贝赋值函数(copy and swap)
+    section &operator=(section rhs) noexcept
+    {
+      swap(*this, rhs); // copy and swap
+      return *this;
+    }
 
     /// @brief 获取或插入一个字段，键是常量引用, 如果key不存在，插入一个默认构造的 field 对象
     /// @param key 键名称
@@ -650,6 +696,8 @@ namespace ini
 
   private:
     DataContainer data_; // key - value
+    // 当前section的注释stack, 采用懒加载策略(默认为nullptr), 深拷贝机制.
+    std::unique_ptr<std::stack<std::string>> comment_; // 使用unique_ptr主要考虑内存占用更小
   };
 
   /// @brief ini文件类
