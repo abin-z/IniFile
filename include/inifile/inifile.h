@@ -2,13 +2,13 @@
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  * @description: Easy-to-use ini file parsing library that supports parsing, modifying and saving ini files.
  * - Features :
- *   - Lightweight & Easy-to-Use: A header-only INI parser with no external dependencies (C++11 only).  
- *   - Read, Modify & Write: Easily handle INI configuration files. 
- *   - Intuitive API: Simple and clear interface for reading, modifying, and writing INI files.  
- *   - Versatile Data Handling: Supports `std::string` and `std::istream` for input/output.  
- *   - Automatic Type Conversion: Seamlessly handles various data types.  
- * 
- * 
+ *   - Lightweight & Easy-to-Use: A header-only INI parser with no external dependencies (C++11 only).
+ *   - Read, Modify & Write: Easily handle INI configuration files.
+ *   - Intuitive API: Simple and clear interface for reading, modifying, and writing INI files.
+ *   - Versatile Data Handling: Supports `std::string` and `std::istream` for input/output.
+ *   - Automatic Type Conversion: Seamlessly handles various data types.
+ *
+ *
  * @author: abin
  * @date: 2025-02-23
  * @license: MIT
@@ -585,6 +585,28 @@ namespace ini
       return data_.size();
     }
 
+    bool empty() const noexcept
+    {
+      return data_.empty();
+    }
+
+    iterator erase(iterator pos)
+    {
+      return data_.erase(pos);
+    }
+    iterator erase(const_iterator pos)
+    {
+      return data_.erase(pos);
+    }
+    iterator erase(const_iterator first, const_iterator last)
+    {
+      return data_.erase(first, last);
+    }
+    size_type erase(const key_type &key)
+    {
+      return data_.erase(key);
+    }
+
     iterator begin() noexcept
     {
       return data_.begin();
@@ -721,9 +743,32 @@ namespace ini
     {
       data_.clear();
     }
+
     size_type size() const noexcept
     {
       return data_.size();
+    }
+
+    bool empty() const noexcept
+    {
+      return data_.empty();
+    }
+
+    iterator erase(iterator pos)
+    {
+      return data_.erase(pos);
+    }
+    iterator erase(const_iterator pos)
+    {
+      return data_.erase(pos);
+    }
+    iterator erase(const_iterator first, const_iterator last)
+    {
+      return data_.erase(first, last);
+    }
+    size_type erase(const key_type &key)
+    {
+      return data_.erase(key);
     }
 
     iterator begin() noexcept
