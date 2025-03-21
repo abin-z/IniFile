@@ -231,7 +231,7 @@ Supported types for automatic conversions:
 
 #### Other utility functions
 
-Provides a variety of utility functions, query the number 'size()', whether it contains the element 'contains()', remove the element 'remove()', clear all the elements' clear() ', iterator access: 'begin()', 'end()', 'cbegin()', 'cend()', support range-base for loops. See common API descriptions for details. The following provides an iterator to access ini information:
+Provides a variety of utility functions, query the number `size()`, whether it contains the element  `contains()`, remove the element `remove()`, clear all the elements `clear()`, iterator access:  `begin()`, `end()`, `cbegin()`, `cend()`, support range-base for loops. See common API descriptions for details. The following provides an iterator to access ini information:
 
 ```cpp
 #include "inifile.h"

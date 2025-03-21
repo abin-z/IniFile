@@ -235,7 +235,7 @@ int main()
 
 #### 其他工具函数
 
-提供多种工具函数, 查询个数`size()`,  是否包含元素`contains()`,  移除元素 `remove()`,  清除所有元素`clear()`,  迭代器访问: `begin()`, `end()`, `cbegin()`, `cend()`, 支持range-base for循环.  具体详情请查看常用 API 说明. 下面提供一个迭代器访问ini信息:
+提供多种工具函数, 查询个数 `size()`,  是否包含元素 `contains()`,  移除元素 `remove()`,  清除所有元素 `clear()`,  迭代器访问: `begin()`, `end()`, `cbegin()`, `cend()`, 支持range-base for循环.  具体详情请查看常用 API 说明. 下面提供一个迭代器访问ini信息:
 
 ```cpp
 #include "inifile.h"
