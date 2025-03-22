@@ -59,10 +59,10 @@ namespace ini
     }
 
     /// @brief 格式化注释字符串
-    /// @param comment 注释内容(右值传递方式)
+    /// @param comment 注释内容(值传递方式)
     /// @param symbol 注释前缀符号
     /// @return 格式化的注释字符串
-    inline std::string format_comment(std::string &&comment, char symbol)
+    inline std::string format_comment(std::string comment, char symbol)
     {
       trim(comment);
       char comment_prefix = symbol == '#' ? '#' : ';'; // 只支持 ';' 和 '#' 注释, 默认使用 ';'
@@ -407,6 +407,7 @@ namespace ini
   /// @brief ini文件的字段值
   class field
   {
+    friend class inifile;
     friend std::ostream &operator<<(std::ostream &os, const field &data);
 
   public:
@@ -564,6 +565,20 @@ namespace ini
         comments_.reset(new comment_container());
       }
     }
+    /// @brief 设置注释容器(重载函数)
+    /// @param comments 值传递方式
+    void set_comment(comment_container comments)
+    {
+      if (comments.empty())
+      {
+        clear_comment();
+      }
+      else
+      {
+        ensure_comments();
+        *comments_ = std::move(comments);
+      }
+    }
 
   private:
     std::string value_; // 存储字符串值，用于存储读取的 INI 文件字段值
@@ -579,6 +594,7 @@ namespace ini
   /// @brief ini文件的section
   class section
   {
+    friend class inifile;
     using DataContainer = std::unordered_map<std::string, field>;
 
   public:
@@ -821,6 +837,21 @@ namespace ini
       }
     }
 
+    /// @brief 设置注释容器(重载函数)
+    /// @param comments 值传递方式
+    void set_comment(comment_container comments)
+    {
+      if (comments.empty())
+      {
+        clear_comment();
+      }
+      else
+      {
+        ensure_comments();
+        *comments_ = std::move(comments);
+      }
+    }
+
   private:
     DataContainer data_; // key-value pairs
     // 当前section的注释容器, 采用懒加载策略(默认为nullptr), 深拷贝机制.
@@ -1007,11 +1038,17 @@ namespace ini
     {
       data_.clear();
       std::string line, current_section;
+      section::comment_container comments; // 注释容器
       while (std::getline(is, line))
       {
         detail::trim(line);
-        if (line.empty() || line[0] == '#' || line[0] == ';') // 跳过注释
+        if (line.empty()) // 跳过空行
         {
+          continue;
+        }
+        if (line[0] == ';' || line[0] == '#') // 添加注释行
+        {
+          comments.emplace_back(line);
           continue;
         }
         if (line.front() == '[' && line.back() == ']') // 处理section
@@ -1021,6 +1058,10 @@ namespace ini
           if (!current_section.empty())
           {
             data_[current_section]; // 添加没有key=value的section
+            if (!comments.empty())  // 添加注释
+            {
+              data_[current_section].set_comment(std::move(comments)); // After set_comment, comments.clear() should be called, but it is not necessary after using std::move
+            }
           }
         }
         else // 处理key=value
@@ -1033,6 +1074,10 @@ namespace ini
             detail::trim(key);
             detail::trim(value);
             data_[current_section][key] = value; // 允许section为空字符串
+            if (!comments.empty())               // 添加注释
+            {
+              data_[current_section][key].set_comment(std::move(comments)); // set_comment后应该调用comments.clear()的, 但使用std::move后就不需要了
+            }
           }
         }
       }
@@ -1050,6 +1095,7 @@ namespace ini
       {
         for (const auto &kv : it->second)
         {
+          write_comment(os, kv.second.comments_); // 添加kv注释
           os << kv.first << "=" << kv.second << "\n";
         }
         first_section = false;
@@ -1064,9 +1110,11 @@ namespace ini
         if (!first_section)
           os << "\n"; // Section 之间插入空行
         first_section = false;
+        write_comment(os, sec.second.comments_); // 添加section注释
         os << "[" << sec.first << "]\n";
         for (const auto &kv : sec.second)
         {
+          write_comment(os, kv.second.comments_); // 添加kv注释
           os << kv.first << "=" << kv.second << "\n";
         }
       }
@@ -1115,6 +1163,21 @@ namespace ini
       write(os);
       os.flush();
       return !os.fail() && !os.bad();
+    }
+
+  private:
+    /// @brief 写注释内容
+    /// @param os 输出流
+    /// @param comments 注释容器指针
+    void write_comment(std::ostream &os, const std::unique_ptr<section::comment_container> &comments) const
+    {
+      if (comments && !comments->empty())
+      {
+        for (const auto &item : *comments)
+        {
+          os << item << '\n';
+        }
+      }
     }
 
   private:
