@@ -9,9 +9,15 @@ const char *str = R"(
 void save_func()
 {
   ini::inifile inif;
+  // Set value
   inif["section"]["key0"] = true;
   inif["section"]["key1"] = 3.14159;
   inif["section"]["key2"] = "value";
+
+  // Add comments if necessary
+  inif["section"].set_comment("This is a section comment.");
+  inif["section"]["key1"].set_comment("This is a key-value pairs comment");
+
   // Call the save method to save the ini file and return whether the save was successful
   bool isok = inif.save(path);
 }

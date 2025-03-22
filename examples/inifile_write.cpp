@@ -10,11 +10,13 @@ int main()
   inif["section1"]["double"] = 3.141592;
   inif["section1"]["char"] = 'c';
   inif["section1"]["bool"] = true;
+  inif["section1"].set_comment("Comments on section1");
 
   inif.set("section2", "int", 99);
   inif.set("section2", "bool", false);
   inif.set("section2", "double", 1.67);
   inif.set("section2", "string", "abcdef");
+  inif.at("section2").add_comment("Comments on section2");
 
   inif["section3"].set("int", 100);
   inif["section3"].set("bool", true);
