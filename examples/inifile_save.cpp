@@ -17,16 +17,20 @@ int main()
   inif["section1"]["int"].set(1);
   inif["section1"]["double"].set(3.14159);
   inif["section1"]["bool"].set(false);
+  inif["section1"].set_comment("This is a comment about section1");
 
   inif.set("section2", "int", 99);
   inif.set("section2", "bool", false);
   inif.set("section2", "double", 1.67);
   inif.set("section2", "string", "abcdef");
+  inif["section2"].add_comment("This is a comment01 about section2", '#');
+  inif["section2"].add_comment("This is a comment02 about section2\nThis is a comment03 about section2");
 
   inif["section3"].set("int", 100);
   inif["section3"].set("bool", true);
   inif["section3"].set("float", 0.99);
   inif["section3"].set("string", std::string("inifile"));
+  inif["section3"]["bool"].set_comment("This is a comment about section3-bool key");
 
   inif["section4"].set({{"bool", true},
                         {"int", 123},
