@@ -518,9 +518,9 @@ namespace ini
       conv.encode(value, value_);
     }
 
-    /// @brief Set multiple comments, overwriting the original comment.
-    /// @param str Multiline comment content, lines separated by `\n`.
-    /// @param symbol Comment symbol, default is ;, only supports ; and #
+    /// @brief Set `key=value` comment, overwriting the original comment.
+    /// @param str Comment content, Multi-line comments are allowed, lines separated by `\n`.
+    /// @param symbol Comment symbol, default is `;`, only supports `;` and `#`
     void set_comment(const std::string &str, char symbol = ';')
     {
       ensure_comments();
@@ -535,9 +535,9 @@ namespace ini
       }
     }
 
-    /// @brief Add comments from a single string, splitting by `\n`, appending them.
-    /// @param str Multiline comment content.
-    /// @param symbol Comment symbol, default is `;`, only supports ; and #
+    /// @brief Add `key=value` comments and then append them.
+    /// @param str Comment content, Multi-line comments are allowed, lines separated by `\n`.
+    /// @param symbol Comment symbol, default is `;`, only supports `;` and `#`
     void add_comment(const std::string &str, char symbol = ';')
     {
       ensure_comments();
@@ -550,7 +550,7 @@ namespace ini
       }
     }
 
-    /// @brief Clear comment
+    /// @brief Clear `key=value` comment
     void clear_comment()
     {
       comments_.reset();
@@ -789,9 +789,9 @@ namespace ini
       return data_.cend();
     }
 
-    /// @brief Set multiple comments, overwriting the original comment.
-    /// @param str Multiline comment content, lines separated by `\n`.
-    /// @param symbol Comment symbol, default is ;, only supports ; and #
+    /// @brief Set `[section]` comment, overwriting the original comment.
+    /// @param str Comment content, Multi-line comments are allowed, lines separated by `\n`.
+    /// @param symbol Comment symbol, default is `;`, only supports `;` and `#`
     void set_comment(const std::string &str, char symbol = ';')
     {
       ensure_comments();
@@ -806,9 +806,9 @@ namespace ini
       }
     }
 
-    /// @brief Add comments from a single string, splitting by `\n`, appending them.
-    /// @param str Multiline comment content.
-    /// @param symbol Comment symbol, default is `;`, only supports ; and #
+    /// @brief Add `[section]` comments and then append them.
+    /// @param str Comment content, Multi-line comments are allowed, lines separated by `\n`.
+    /// @param symbol Comment symbol, default is `;`, only supports `;` and `#`
     void add_comment(const std::string &str, char symbol = ';')
     {
       ensure_comments();
@@ -821,7 +821,7 @@ namespace ini
       }
     }
 
-    /// @brief Clear comment
+    /// @brief Clear `[section]` comment
     void clear_comment()
     {
       comments_.reset();
