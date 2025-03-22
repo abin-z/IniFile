@@ -408,9 +408,9 @@ namespace ini
   class field
   {
     friend std::ostream &operator<<(std::ostream &os, const field &data);
-    using CommentContainer = std::vector<std::string>;
 
   public:
+    using comment_container = std::vector<std::string>; // 注释容器
     /// 默认构造函数，使用编译器生成的默认实现。
     field() = default;
 
@@ -428,7 +428,7 @@ namespace ini
 
     /// 重写拷贝构造函数，深拷贝 other 对象。
     field(const field &other) : value_(other.value_),
-                                comments_(other.comments_ ? std::unique_ptr<CommentContainer>(new CommentContainer(*other.comments_)) : nullptr)
+                                comments_(other.comments_ ? std::unique_ptr<comment_container>(new comment_container(*other.comments_)) : nullptr)
     {
     }
     // 友元 swap（非成员函数）
@@ -561,14 +561,14 @@ namespace ini
     {
       if (!comments_)
       {
-        comments_.reset(new CommentContainer());
+        comments_.reset(new comment_container());
       }
     }
 
   private:
     std::string value_; // 存储字符串值，用于存储读取的 INI 文件字段值
     // 当前key-value的注释容器, 采用懒加载策略(默认为nullptr), 深拷贝机制.
-    std::unique_ptr<CommentContainer> comments_; // 使用unique_ptr主要考虑内存占用更小. <如果在c++17标准下使用std::option更优>
+    std::unique_ptr<comment_container> comments_; // 使用unique_ptr主要考虑内存占用更小. <如果在c++17标准下使用std::option更优>
   };
 
   inline std::ostream &operator<<(std::ostream &os, const field &data)
@@ -580,9 +580,10 @@ namespace ini
   class section
   {
     using DataContainer = std::unordered_map<std::string, field>;
-    using CommentContainer = std::vector<std::string>;
 
   public:
+    using comment_container = field::comment_container; // 注释容器
+
     using key_type = DataContainer::key_type;
     using mapped_type = DataContainer::mapped_type;
     using value_type = DataContainer::value_type;
@@ -603,7 +604,7 @@ namespace ini
 
     /// 重写拷贝构造函数, 深拷贝
     section(const section &other) : data_(other.data_),
-                                    comments_(other.comments_ ? std::unique_ptr<CommentContainer>(new CommentContainer(*other.comments_)) : nullptr)
+                                    comments_(other.comments_ ? std::unique_ptr<comment_container>(new comment_container(*other.comments_)) : nullptr)
     {
     }
     // 友元 swap函数(非成员函数)
@@ -816,14 +817,14 @@ namespace ini
     {
       if (!comments_)
       {
-        comments_.reset(new CommentContainer());
+        comments_.reset(new comment_container());
       }
     }
 
   private:
     DataContainer data_; // key-value pairs
     // 当前section的注释容器, 采用懒加载策略(默认为nullptr), 深拷贝机制.
-    std::unique_ptr<CommentContainer> comments_; // 使用unique_ptr主要考虑内存占用更小, c++17使用std::option会更好
+    std::unique_ptr<comment_container> comments_; // 使用unique_ptr主要考虑内存占用更小, c++17使用std::option会更好
   };
 
   /// @brief ini文件类
