@@ -31,7 +31,7 @@
 #include <cstdlib>
 #include <cerrno>
 #include <memory>
-#include <stack>
+#include <vector>
 
 #ifdef __cpp_lib_string_view // If we have std::string_view
 #include <string_view>
@@ -379,7 +379,7 @@ namespace ini
   class field
   {
     friend std::ostream &operator<<(std::ostream &os, const field &data);
-    using CommentContainer = std::stack<std::string>;
+    using CommentContainer = std::vector<std::string>;
 
   public:
     /// 默认构造函数，使用编译器生成的默认实现。
@@ -503,7 +503,7 @@ namespace ini
   class section
   {
     using DataContainer = std::unordered_map<std::string, field>;
-    using CommentContainer = std::stack<std::string>;
+    using CommentContainer = std::vector<std::string>;
 
   public:
     using key_type = DataContainer::key_type;
