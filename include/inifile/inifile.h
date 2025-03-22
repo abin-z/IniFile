@@ -58,6 +58,35 @@ namespace ini
       str.erase(0, str.find_first_not_of(whitespaces));
     }
 
+    /// @brief 格式化注释字符串
+    /// @param comment 注释内容(右值传递方式)
+    /// @param symbol 注释前缀符号
+    /// @return 格式化的注释字符串
+    inline std::string format_comment(std::string &&comment, char symbol)
+    {
+      trim(comment);
+      char comment_prefix = symbol == '#' ? '#' : ';'; // 只支持 ';' 和 '#' 注释, 默认使用 ';'
+      if (comment.empty())
+      {
+        return std::string(1, comment_prefix);
+      }
+      if (comment[0] != comment_prefix)
+      {
+        comment = comment_prefix + std::string(" ") + comment;
+      }
+      return comment;
+    }
+
+    /// @brief 去除单行字符串末尾的 Windows 换行符 '\r'
+    /// @param line 输入字符串
+    inline void remove_trailing_cr(std::string &line)
+    {
+      if (!line.empty() && line.back() == '\r')
+      {
+        line.pop_back();
+      }
+    }
+
     /**
      * @brief 通用转换模板，未特化的 convert 结构体
      * 由于 SFINAE（替换失败不算错误）原则，未特化的 convert 不能实例化
@@ -488,6 +517,54 @@ namespace ini
       conv.encode(value, value_);
     }
 
+    /// @brief Set multiple comments, overwriting the original comment.
+    /// @param str Multiline comment content, lines separated by `\n`.
+    /// @param symbol Comment symbol, default is ;, only supports ; and #
+    void set_comment(const std::string &str, char symbol = ';')
+    {
+      ensure_comments();
+      comments_->clear();
+
+      std::istringstream stream(str);
+      std::string line;
+      while (std::getline(stream, line))
+      {
+        detail::remove_trailing_cr(line);                                         // 处理 Windows 换行符 "\r\n"
+        comments_->emplace_back(detail::format_comment(std::move(line), symbol)); // line 被移动后不会再使用，但会在循环的下一次迭代中被重新赋值。
+      }
+    }
+
+    /// @brief Add comments from a single string, splitting by `\n`, appending them.
+    /// @param str Multiline comment content.
+    /// @param symbol Comment symbol, default is `;`, only supports ; and #
+    void add_comment(const std::string &str, char symbol = ';')
+    {
+      ensure_comments();
+      std::istringstream stream(str);
+      std::string line;
+      while (std::getline(stream, line))
+      {
+        detail::remove_trailing_cr(line);                                         // 处理 Windows 换行符 "\r\n"
+        comments_->emplace_back(detail::format_comment(std::move(line), symbol)); // line 被移动后不会再使用，但会在循环的下一次迭代中被重新赋值。
+      }
+    }
+
+    /// @brief Clear comment
+    void clear_comment()
+    {
+      comments_.reset();
+    }
+
+  private:
+    /// @brief 确保comments_是有效的
+    inline void ensure_comments()
+    {
+      if (!comments_)
+      {
+        comments_.reset(new CommentContainer());
+      }
+    }
+
   private:
     std::string value_; // 存储字符串值，用于存储读取的 INI 文件字段值
     // 当前key-value的注释容器, 采用懒加载策略(默认为nullptr), 深拷贝机制.
@@ -693,6 +770,54 @@ namespace ini
     const_iterator cend() const noexcept
     {
       return data_.cend();
+    }
+
+    /// @brief Set multiple comments, overwriting the original comment.
+    /// @param str Multiline comment content, lines separated by `\n`.
+    /// @param symbol Comment symbol, default is ;, only supports ; and #
+    void set_comment(const std::string &str, char symbol = ';')
+    {
+      ensure_comments();
+      comments_->clear();
+
+      std::istringstream stream(str);
+      std::string line;
+      while (std::getline(stream, line))
+      {
+        detail::remove_trailing_cr(line);                                         // 处理 Windows 换行符 "\r\n"
+        comments_->emplace_back(detail::format_comment(std::move(line), symbol)); // line 被移动后不会再使用，但会在循环的下一次迭代中被重新赋值。
+      }
+    }
+
+    /// @brief Add comments from a single string, splitting by `\n`, appending them.
+    /// @param str Multiline comment content.
+    /// @param symbol Comment symbol, default is `;`, only supports ; and #
+    void add_comment(const std::string &str, char symbol = ';')
+    {
+      ensure_comments();
+      std::istringstream stream(str);
+      std::string line;
+      while (std::getline(stream, line))
+      {
+        detail::remove_trailing_cr(line);                                         // 处理 Windows 换行符 "\r\n"
+        comments_->emplace_back(detail::format_comment(std::move(line), symbol)); // line 被移动后不会再使用，但会在循环的下一次迭代中被重新赋值。
+      }
+    }
+
+    /// @brief Clear comment
+    void clear_comment()
+    {
+      comments_.reset();
+    }
+
+  private:
+    /// @brief 确保comments_是有效的
+    inline void ensure_comments()
+    {
+      if (!comments_)
+      {
+        comments_.reset(new CommentContainer());
+      }
     }
 
   private:
