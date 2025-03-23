@@ -22,7 +22,7 @@
 key = value
 ```
 
-> 注: 本库内部使用`std::string`类型封装filed值, 可以很好的和 UTF-8 编码兼容, 但其他编码具体情况可能会有所不同.
+> 注: 本库内部使用`std::string`类型封装filed值, 可以很好的和 `UTF-8` 编码兼容, 但其他编码具体情况可能会有所不同.
 
 ### 📦 使用方式
 
@@ -356,7 +356,7 @@ int main()
 | begin         | `iterator begin() noexcept`                                  | 返回起始迭代器                                               |
 | end           | `iterator end() noexcept`                                    | 返回末尾迭代器                                               |
 | set_comment   | `void set_comment(const std::string &str, char symbol = ';')` | 设置section的注释, 覆盖模式, 注释字符串允许换行`\n`          |
-| add_comment   | `void add_comment(const std::string &str, char symbol = ';')` | 设置section的注释, 追加模式, 注释字符串允许换行`\n`          |
+| add_comment   | `void add_comment(const std::string &str, char symbol = ';')` | 添加section的注释, 追加模式, 注释字符串允许换行`\n`          |
 | clear_comment | `void clear_comment()`                                       | 清除section的注释                                            |
 
 #### ini::inifile类API说明
