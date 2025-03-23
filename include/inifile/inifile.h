@@ -404,7 +404,7 @@ namespace ini
 #endif
   } // namespace detail
 
-  /// @brief ini文件的字段值
+  /// @brief ini field value
   class field
   {
     friend class inifile;
@@ -440,18 +440,15 @@ namespace ini
       swap(lhs.comments_, rhs.comments_);
     }
     /// 重写拷贝赋值(copy-and-swap 方式)
-    field &operator=(field rhs) noexcept
+    field &operator=(field rhs) noexcept // `rhs` pass by value
     {
       swap(*this, rhs); // 利用拷贝构造+swap, 确保异常安全,也能处理自赋值问题
       return *this;
     }
 
-    /**
-     * @brief 模板构造函数：从其他类型的值构造 `field` 对象。
-     *
-     * @tparam T 传入的值的类型
-     * @param other 传入的值，类型为 `T`，将被转换并存储到 `value_` 中
-     */
+    /// @brief Template constructor: allows construction of `field` objects from values ​​of other types.
+    /// @tparam T Other type T
+    /// @param other Other type value
     template <typename T>
     field(const T &other)
     {
@@ -459,13 +456,10 @@ namespace ini
       conv.encode(other, value_); // 将传入的值编码成字符串并存储到 value_ 中
     }
 
-    /**
-     * @brief 类型赋值操作符：允许将其他类型的值赋值给 `field` 对象。
-     *
-     * @tparam T 赋值操作符所接收的值的类型
-     * @param rhs 右侧值，类型为 `T`，会被转换为字符串并赋值给当前对象
-     * @return 当前对象的引用，支持链式赋值
-     */
+    /// @brief Template copy assignment operator. Allows values ​​of other types to be assigned to `field` objects.
+    /// @tparam T Other type T
+    /// @param rhs Other type value
+    /// @return `field` reference
     template <typename T>
     field &operator=(const T &rhs)
     {
@@ -474,14 +468,11 @@ namespace ini
       return *this;             // 返回当前对象的引用，支持链式赋值
     }
 
-    /**
-     * 将 INI 字段的值转换为目标类型 T。
-     * 使用一个转换器（假设为 detail::convert<T>）来执行解码操作。
-     * 例如：将字符串值转换为 int、double 或其他类型。
-     *
-     * @tparam T 目标类型
-     * @return 转换后的值
-     */
+    /// @brief Converts an ini field to target type T. If the conversion fails, exception will be thrown.
+    /// @tparam T Target type T
+    /// @return Target type value
+    /// @throws `std::invalid_argument` If the field cannot be converted to type T.
+    /// @throws `std::out_of_range` If the field is out of the valid range for type T.
     template <typename T>
     T as() const
     {
@@ -491,30 +482,24 @@ namespace ini
       return result;               // 返回转换结果
     }
 
-    /**
-     * 类型转换操作符：允许将 field 对象转换为目标类型 T。
-     * 实际上，它会调用 `as<T>()` 函数来执行类型转换。
-     *
-     * @tparam T 目标类型
-     * @return 转换后的目标类型的值
-     */
+    /// @brief Type conversion operator: allows field objects to be converted to the target type T. If the conversion fails, exception will be thrown.
+    /// @tparam T Target type to be converted
+    /// @return The value of the target type after conversion
+    /// @throws `std::invalid_argument` If the field cannot be converted to type T.
+    /// @throws `std::out_of_range` If the field is out of the valid range for type T.
     template <typename T>
     operator T() const
     {
-      return this->as<T>(); // 使用 as<T> 方法将值转换为目标类型 T
+      return this->as<T>(); // 使用 as<T> 方法将值转换为目标类型 T, 转换失败抛异常: std::invalid_argument
     }
 
-    /**
-     * 设置字段值：将传入的值编码并存储到 value_ 中。
-     * 使用一个转换器（假设为 detail::convert<T>）将给定的值编码为字符串。
-     *
-     * @tparam T 设置的值的类型
-     * @param value 需要设置的值
-     */
+    /// @brief Setting field value
+    /// @tparam T field value type
+    /// @param value field value
     template <typename T>
     void set(const T &value)
     {
-      detail::convert<T> conv;
+      detail::convert<T> conv; // 使用一个转换器（假设为 detail::convert<T>）将给定的值编码为字符串。
       conv.encode(value, value_);
     }
 
@@ -681,6 +666,7 @@ namespace ini
     /// @brief Returns a reference to the field value of the specified key. If the key does not exist, an `std::out_of_range` exception will be thrown.
     /// @param key key - an exception will be thrown if the key does not exist
     /// @return field value reference
+    /// @throws `std::out_of_range` if key does not exist
     field &at(std::string key)
     {
       detail::trim(key);
@@ -921,9 +907,10 @@ namespace ini
       return false;
     }
 
-    /// @brief Returns a reference to the specified section. If no such element exists, an exception of type `std::out_of_range` will be thrown.
+    /// @brief Returns a reference to the specified section. If section does not exist, an exception of type `std::out_of_range` will be thrown.
     /// @param section section-name - an exception will be thrown if the section does not exist
     /// @return section reference
+    /// @throws `std::out_of_range` if section does not exist
     section &at(std::string section)
     {
       detail::trim(section);
