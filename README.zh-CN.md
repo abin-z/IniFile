@@ -3,17 +3,26 @@
 🌍 Languages/语言:  [English](README.md)  |  [简体中文](README.zh-CN.md)
 
 ### 📌 项目简介
-这是一个轻量级、高效且 header-only 的 INI 配置文件解析库，专为 C++ 项目设计。它提供简洁直观的 API，支持快速解析、修改和写入 INI 文件，让配置管理变得更简单。
+这是一个轻量级、高效且 **header-only** 的 INI 配置解析库，专为 C++ 项目打造。它提供简洁、直观且优雅的 API，支持从文件、`std::istream` 或 `std::string` 解析、修改并写入 INI 配置信息，并具备行级注释保留功能，确保原始注释不丢失，使配置管理更加轻松高效。
 
 ### 🚀 特性
 - **轻量级 & 无依赖**：仅依赖 C++11 标准库，无需额外依赖项
-- **易于集成**：Header-only 设计，开箱即用
+- **易于集成**：Header-only 设计，开箱即用，足够简单
 - **直观 API**：提供清晰友好的接口，简化 INI 文件操作
 - **全面支持**：可读取、修改、写入 INI 数据至文件
-- **多种数据源**：支持从 `std::string` 或 `std::istream` 解析 INI 数据，并写入其中
-- **自动类型转换**：支持多种数据类型，自动处理类型转换
+- **多种数据源**：支持从文件，`std::string` 或 `std::istream` 解析 INI 数据，并写入其中
+- **自动类型转换**：支持多种数据类型，能自动处理类型转换(优雅的类型转换接口)
+- **支持注释功能**: 支持ini行注释(`;`或者`#`), 可以为`[section]`和`key=value`添加行注释(不支持行尾注释)
 
-适用于对 INI 配置文件有 **解析、编辑、存储** 需求的 C++ 项目。
+适用于对 INI 配置有 **解析、编辑、存储** 需求的 C++ 项目。以下是基础的ini格式:
+
+```ini
+; comment
+[section]
+key = value
+```
+
+> 注: 本库内部使用`std::string`类型封装filed值, 可以很好的和 UTF-8 编码兼容, 但其他编码具体情况可能会有所不同.
 
 ### 📦 使用方式
 
@@ -35,9 +44,9 @@
    add_subdirectory(inifile) # inifile为步骤1创建的文件夹名称
    ```
 
-4. 在源代码中添加`#include <inifile/inifile.h>`既可使用
+4. 在源代码中添加`#include <inifile/inifile.h>`即可使用
 
-## 🛠️ 使用示例
+## 🛠️ 基础使用案例
 
 下面提供简单的使用案例, 更多详细的案例请查看[`./examples/`](./examples/)文件夹下的案例
 
@@ -233,6 +242,45 @@ int main()
 - `const char *`
 - `std::string_view` (C++17)
 
+#### 注释功能
+
+本库支持设置`[section]`和`key=value`的行级注释(不支持行尾注释), 注释符号可选`;`和`#`两种; 也能从数据源中保留注释内容.
+
+```cpp
+#include "inifile.h"
+int main()
+{
+  ini::inifile inif;
+  // Set value
+  inif["section"]["key0"] = true;
+  inif["section"]["key1"] = 3.141592;
+  inif["section"]["key2"] = "value";
+
+  // Add comments if necessary
+  inif["section"].set_comment("This is a section comment.");                     // set section comment, Overwrite Mode
+  inif["section"]["key1"].set_comment("This is a key-value pairs comment", '#'); // set key=value pairs comment
+
+  inif["section"].clear_comment();                                     // clear section comments
+  inif["section"].add_comment("section comment01");                    // add section comment, Append Mode
+  inif["section"].add_comment("section comment02\nsection comment03"); // Multi-line comments are allowed, lines separated by `\n`
+  
+  bool isok = inif.save("config.ini");
+}
+```
+
+`config.ini`的内容应该为:
+
+```ini
+; section comment01
+; section comment02
+; section comment03
+[section]
+key0=true
+# This is a key-value pairs comment
+key1=3.141592
+key2=value
+```
+
 #### 其他工具函数
 
 提供其他多种工具函数, 判断是否为空`empty()`, 查询总个数`size()`, 查询key的个数`count()`,  是否包含元素`contains()`,  查找元素`find()`, 移除元素`remove()` 和 `erase()`,  清除所有元素`clear()`,  迭代器访问:`begin()`, `end()`, `cbegin()`, `cend()`, 支持范围`for`循环.  具体详情请查看常用 API 说明. 
@@ -278,32 +326,38 @@ int main()
 
 以下函数类型转换失败或者值溢出将抛异常
 
-| 函数名     | 函数签名                         | 功能描述                          |
-| ---------- | -------------------------------- | --------------------------------- |
-| field      | `field(const T &other)`          | 构造field对象, 将T类型转为field值 |
-| set        | `void set(const T &value)`       | 设置field值, 将T类型转为field值   |
-| operator=  | `field &operator=(const T &rhs)` | 设置field值, 将T类型转为field值   |
-| operator T | `operator T() const`             | 将field类型转为T类型              |
-| as         | `T as() const`                   | 将field类型转为T类型              |
+| 函数名        | 函数签名                                                     | 功能描述                          |
+| ------------- | ------------------------------------------------------------ | --------------------------------- |
+| field         | `field(const T &other)`                                      | 构造field对象, 将T类型转为field值 |
+| set           | `void set(const T &value)`                                   | 设置field值, 将T类型转为field值   |
+| operator=     | `field &operator=(const T &rhs)`                             | 设置field值, 将T类型转为field值   |
+| operator T    | `operator T() const`                                         | 将field类型转为T类型              |
+| as            | `T as() const`                                               | 将field类型转为T类型              |
+| set_comment   | `void set_comment(const std::string &str, char symbol = ';')` | 设置key-value的注释, 覆盖模式     |
+| add_comment   | `void add_comment(const std::string &str, char symbol = ';')` | 添加key-value的注释, 追加模式     |
+| clear_comment | `void clear_comment()`                                       | 清除key-value的注释               |
 
 #### ini::section类API说明
 
-| 函数名     | 函数签名                                                     | 功能描述                                                     |
-| ---------- | ------------------------------------------------------------ | ------------------------------------------------------------ |
-| operator[] | `field &operator[](const std::string &key)`                  | 返回ini::field引用, 不存在则插入空ini::field                 |
-| set        | `void set(std::string key, T &&value)`                       | 插入或更新指定key的field                                     |
-| contains   | `bool contains(std::string key) const`                       | 判断key是否存在                                              |
-| at         | `field &at(std::string key)`                                 | 返回指定key键的元素的字段值的引用。如果元素不存则抛 std::out_of_range异常 |
-| get        | `field get(std::string key, field default_value = field{}) const` | 获取key对应的值(副本), 若key不存在则返回default_value默认值  |
-| find       | `iterator find(const key_type &key)`                         | 查找指定key值的迭代器, 不存在返回end迭代器                   |
-| erase      | `iterator erase(iterator pos)`                               | 删除指定迭代器的key-value键值对                              |
-| remove     | `bool remove(std::string key)`                               | 删除指定的key-value键值对, 若不存在则什么都不做              |
-| empty      | `bool empty() const noexcept`                                | 判断key-value键值对是否为空, 为空返回true                    |
-| clear      | `void clear() noexcept`                                      | 清除所有key - value键值对                                    |
-| size       | `size_type size() const noexcept`                            | 返回有多少key - value键值对                                  |
-| count      | `size_type count(const key_type &key) const`                 | 返回有多少指定key的key - value键值对                         |
-| begin      | `iterator begin() noexcept`                                  | 返回起始迭代器                                               |
-| end        | `iterator end() noexcept`                                    | 返回末尾迭代器                                               |
+| 函数名        | 函数签名                                                     | 功能描述                                                     |
+| ------------- | ------------------------------------------------------------ | ------------------------------------------------------------ |
+| operator[]    | `field &operator[](const std::string &key)`                  | 返回ini::field引用, 不存在则插入空ini::field                 |
+| set           | `void set(std::string key, T &&value)`                       | 插入或更新指定key的field                                     |
+| contains      | `bool contains(std::string key) const`                       | 判断key是否存在                                              |
+| at            | `field &at(std::string key)`                                 | 返回指定key键的元素的字段值的引用。如果元素不存则抛 std::out_of_range异常 |
+| get           | `field get(std::string key, field default_value = field{}) const` | 获取key对应的值(副本), 若key不存在则返回default_value默认值  |
+| find          | `iterator find(const key_type &key)`                         | 查找指定key值的迭代器, 不存在返回end迭代器                   |
+| erase         | `iterator erase(iterator pos)`                               | 删除指定迭代器的key-value键值对                              |
+| remove        | `bool remove(std::string key)`                               | 删除指定的key-value键值对, 若不存在则什么都不做              |
+| empty         | `bool empty() const noexcept`                                | 判断key-value键值对是否为空, 为空返回true                    |
+| clear         | `void clear() noexcept`                                      | 清除所有key - value键值对                                    |
+| size          | `size_type size() const noexcept`                            | 返回有多少key - value键值对                                  |
+| count         | `size_type count(const key_type &key) const`                 | 返回有多少指定key的key - value键值对                         |
+| begin         | `iterator begin() noexcept`                                  | 返回起始迭代器                                               |
+| end           | `iterator end() noexcept`                                    | 返回末尾迭代器                                               |
+| set_comment   | `void set_comment(const std::string &str, char symbol = ';')` | 设置section的注释, 覆盖模式, 注释字符串允许换行`\n`          |
+| add_comment   | `void add_comment(const std::string &str, char symbol = ';')` | 设置section的注释, 追加模式, 注释字符串允许换行`\n`          |
+| clear_comment | `void clear_comment()`                                       | 清除section的注释                                            |
 
 #### ini::inifile类API说明
 
