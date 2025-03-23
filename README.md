@@ -24,7 +24,7 @@ Ideal for C++ projects that require **parsing, editing, and storing** INI config
 key = value
 ```
 
-> Note: The library uses `std::string` to encapsulate filed values internally, which is very compatible with `UTF-8 `encoding, but other encoding specifics may be different.
+> Note: The library uses `std::string` to encapsulate filed values internally, which is very compatible with `UTF-8` encoding, but other encoding specifics may be different.
 
 ### 📦 Usage
 
