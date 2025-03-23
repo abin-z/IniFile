@@ -4,18 +4,27 @@
 
 ### 📌 Project Overview
 
-This is a lightweight, efficient, and header-only INI configuration file parsing library designed for C++ projects. It provides a simple and intuitive API that supports fast parsing, modification, and writing of INI files, making configuration management easier.
+This is a lightweight, efficient and **header-only** INI configuration parsing library designed for C++ projects. It provides a concise, intuitive and elegant API, supports parsing, modifying and writing INI configuration information from files, `std::istream` or `std::string`, and has line-level comment retention function to ensure that the original comments are not lost, making configuration management easier and more efficient.
 
 ### 🚀 Features
 
 - **Lightweight & Dependency-Free**: Only relies on the C++11 standard library, no additional dependencies required.
-- **Easy Integration**: Header-only design, ready to use out of the box.
+- **Easy Integration**: Header-only design, out of the box, simple enough.
 - **Intuitive API**: Provides a clear and user-friendly interface to simplify INI file operations.
 - **Comprehensive Support**: Allows reading, modifying, and writing INI data to files.
-- **Multiple Data Sources**: Supports parsing INI data from `std::string` or `std::istream` and writing back to them.
-- **Automatic Type Conversion**: Supports multiple data types with seamless type conversion.
+- **Multiple Data Sources**: Supports parsing INI data from files, `std::string` or `std::istream`, and writing to them.
+- **Automatic Type Conversion**: Supports multiple data types and can automatically handle type conversion (elegant API interface).
+- **Support comment function**: Support ini line comments (`;` or `#`), you can add line comments for `[section]` and `key=value` (does not support end-of-line comments).
 
-Ideal for C++ projects that require **parsing, editing, and storing** INI configuration files.
+Ideal for C++ projects that require **parsing, editing, and storing** INI configuration files. The following is the basic ini format:
+
+```ini
+; comment
+[section]
+key = value
+```
+
+> Note: The library uses `std::string` to encapsulate filed values internally, which is very compatible with UTF-8 encoding, but other encoding specifics may be different.
 
 ### 📦 Usage
 
@@ -229,6 +238,45 @@ Supported types for automatic conversions:
 - `const char *`
 - `std::string_view` (C++17)
 
+#### Comment function
+
+This library supports setting line-level comments for `[section]` and `key=value` (end-of-line comments are not supported), and the comment symbols can be `;` and `#`; it can also retain the comment content from the data source.
+
+```cpp
+#include "inifile.h"
+int main()
+{
+  ini::inifile inif;
+  // Set value
+  inif["section"]["key0"] = true;
+  inif["section"]["key1"] = 3.141592;
+  inif["section"]["key2"] = "value";
+
+  // Add comments if necessary
+  inif["section"].set_comment("This is a section comment.");                     // set section comment, Overwrite Mode
+  inif["section"]["key1"].set_comment("This is a key-value pairs comment", '#'); // set key=value pairs comment
+
+  inif["section"].clear_comment();                                     // clear section comments
+  inif["section"].add_comment("section comment01");                    // add section comment, Append Mode
+  inif["section"].add_comment("section comment02\nsection comment03"); // Multi-line comments are allowed, lines separated by `\n`
+  
+  bool isok = inif.save("config.ini");
+}
+```
+
+The contents of `config.ini` should be:
+
+```ini
+; section comment01
+; section comment02
+; section comment03
+[section]
+key0=true
+# This is a key-value pairs comment
+key1=3.141592
+key2=value
+```
+
 #### Other utility functions
 
 Provides a variety of other utility functions, including checking whether it is empty `empty()`, querying the total number `size()`, querying the number of keys `count()`, checking whether it contains elements `contains()`, finding elements `find()`, removing elements `remove()` and `erase()`, clearing all elements `clear()`, iterator access: `begin()`, `end()`, `cbegin()`, `cend()`, and supporting range base `for` loops. For details, please refer to the Common API Description.
@@ -272,13 +320,16 @@ int main()
 
 The following functions will throw an exception if the type conversion fails or the value overflows:
 
-| function name | function signature               | function description                                         |
-| ------------- | -------------------------------- | ------------------------------------------------------------ |
-| field         | `field(const T &other)`          | Constructs a field object, converting a T type to a field value. |
-| set           | `void set(const T &value)`       | Set field value, convert T type to field value.              |
-| operator=     | `field &operator=(const T &rhs)` | Set field value, convert T type to field value.              |
-| operator T    | `operator T() const`             | Converting field types to T type                             |
-| as            | `T as() const`                   | Converting field types to T type                             |
+| function name | function signature                                           | function description                                         |
+| ------------- | ------------------------------------------------------------ | ------------------------------------------------------------ |
+| field         | `field(const T &other)`                                      | Constructs a field object, converting a T type to a field value. |
+| set           | `void set(const T &value)`                                   | Set field value, convert T type to field value.              |
+| operator=     | `field &operator=(const T &rhs)`                             | Set field value, convert T type to field value.              |
+| operator T    | `operator T() const`                                         | Converting field types to T type                             |
+| as            | `T as() const`                                               | Converting field types to T type                             |
+| set_comment   | `void set_comment(const std::string &str, char symbol = ';')` | Set the key-value comment, overwrite mode                    |
+| add_comment   | `void add_comment(const std::string &str, char symbol = ';')` | Add key-value comments, append mode                          |
+| clear_comment | `void clear_comment()`                                       | Clear the comments of key-value                              |
 
 #### ini::section API Description
 
@@ -298,6 +349,9 @@ The following functions will throw an exception if the type conversion fails or 
 | count         | `size_type count(const key_type &key) const`                 | Returns the number of key-value pairs for the specified key. |
 | begin         | `iterator begin() noexcept`                                  | Returns the begin iterator.                                  |
 | end           | `iterator end() noexcept`                                    | Returns the end iterator.                                    |
+| set_comment   | `void set_comment(const std::string &str, char symbol = ';')` | Set section comment, overwrite mode, comment string allows line breaks `\n` |
+| add_comment   | `void add_comment(const std::string &str, char symbol = ';')` | Add section comments, append mode, comment string allows line breaks `\n` |
+| clear_comment | `void clear_comment()`                                       | Clear section comments                                       |
 
 #### ini::inifile API Description
 
