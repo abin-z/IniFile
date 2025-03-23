@@ -523,7 +523,7 @@ namespace ini
     /// @param symbol Comment symbol, default is `;`, only supports `;` and `#`
     void set_comment(const std::string &str, char symbol = ';')
     {
-      ensure_comments();
+      lazy_init_comments();
       comments_->clear();
 
       std::istringstream stream(str);
@@ -540,7 +540,7 @@ namespace ini
     /// @param symbol Comment symbol, default is `;`, only supports `;` and `#`
     void add_comment(const std::string &str, char symbol = ';')
     {
-      ensure_comments();
+      lazy_init_comments();
       std::istringstream stream(str);
       std::string line;
       while (std::getline(stream, line))
@@ -557,8 +557,8 @@ namespace ini
     }
 
   private:
-    /// @brief 确保comments_是有效的
-    inline void ensure_comments()
+    /// @brief 惰性初始化comments_, 确保comments_是有效的
+    inline void lazy_init_comments()
     {
       if (!comments_)
       {
@@ -575,7 +575,7 @@ namespace ini
       }
       else
       {
-        ensure_comments();
+        lazy_init_comments();
         *comments_ = std::move(comments);
       }
     }
@@ -591,7 +591,7 @@ namespace ini
     return os << data.value_;
   }
 
-  /// @brief ini文件的section
+  /// @brief ini section
   class section
   {
     friend class inifile;
@@ -637,9 +637,9 @@ namespace ini
       return *this;
     }
 
-    /// @brief 获取或插入一个字段，键是常量引用, 如果key不存在，插入一个默认构造的 field 对象
-    /// @param key 键名称
-    /// @return 返回对应键的 field 引用
+    /// @brief Get or insert a field reference. If the key does not exist, insert a default constructed field object
+    /// @param key key name
+    /// @return Return the field reference corresponding to the key
     field &operator[](const std::string &key)
     {
       return data_[key];
@@ -649,17 +649,18 @@ namespace ini
       return data_[std::move(key)];
     }
 
-    /// @brief 设置值
-    /// @tparam T
-    /// @param key
-    /// @param value
+    /// @brief Set key-value pairs
+    /// @tparam T field value type
+    /// @param key key
+    /// @param value field value
     template <typename T>
     void set(std::string key, T &&value)
     {
       detail::trim(key);
       data_[std::move(key)] = std::forward<T>(value);
     }
-
+    /// @brief Set multiple key-value pairs
+    /// @param args initializer_list of multiple key-value pairs
     void set(std::initializer_list<std::pair<std::string, field>> args)
     {
       for (auto &&pair : args)
@@ -668,34 +669,34 @@ namespace ini
       }
     }
 
-    /// @brief key是否存在
+    /// @brief key exists
     /// @param key
-    /// @return
+    /// @return returns true if exists
     bool contains(std::string key) const
     {
       detail::trim(key);
       return data_.find(key) != data_.end();
     }
 
-    /// @brief 返回指定key键的元素的字段值的引用。如果不存在这样的元素，则会出现 std::out_of_range 类型的异常。
-    /// @param key key键 - key不存在将抛出异常
-    /// @return 字段值引用
+    /// @brief Returns a reference to the field value of the specified key. If the key does not exist, an `std::out_of_range` exception will be thrown.
+    /// @param key key - an exception will be thrown if the key does not exist
+    /// @return field value reference
     field &at(std::string key)
     {
       detail::trim(key);
       return data_.at(key);
     }
-    // const 重载函数
+    // const overloading function
     const field &at(std::string key) const
     {
       detail::trim(key);
       return data_.at(key);
     }
 
-    /// @brief 获取key对应的值(副本), 若key不存在则返回default_value默认值
-    /// @param key key键
-    /// @param default_value 默认值 - 当key不存在返回默认值
-    /// @return 字段值
+    /// @brief Get the value corresponding to key. If key does not exist, return default_value.
+    /// @param key key
+    /// @param default_value default value - return default value when key does not exist
+    /// @return field value (a copy)
     field get(std::string key, field default_value = field{}) const
     {
       detail::trim(key);
@@ -706,16 +707,16 @@ namespace ini
       return default_value;
     }
 
-    /// @brief 删除值
-    /// @param key
-    /// @return 是否删除成功
+    /// @brief Remove the specified key-value pairs
+    /// @param key key
+    /// @return Return true if the deletion is successful, return false if it is not found
     bool remove(std::string key)
     {
       detail::trim(key);
       return data_.erase(key) != 0;
     }
 
-    /// @brief 清除所有key - value
+    /// @brief Clear all key-value pairs
     void clear() noexcept
     {
       data_.clear();
@@ -794,7 +795,7 @@ namespace ini
     /// @param symbol Comment symbol, default is `;`, only supports `;` and `#`
     void set_comment(const std::string &str, char symbol = ';')
     {
-      ensure_comments();
+      lazy_init_comments();
       comments_->clear();
 
       std::istringstream stream(str);
@@ -811,7 +812,7 @@ namespace ini
     /// @param symbol Comment symbol, default is `;`, only supports `;` and `#`
     void add_comment(const std::string &str, char symbol = ';')
     {
-      ensure_comments();
+      lazy_init_comments();
       std::istringstream stream(str);
       std::string line;
       while (std::getline(stream, line))
@@ -829,7 +830,7 @@ namespace ini
 
   private:
     /// @brief 确保comments_是有效的
-    inline void ensure_comments()
+    inline void lazy_init_comments()
     {
       if (!comments_)
       {
@@ -847,7 +848,7 @@ namespace ini
       }
       else
       {
-        ensure_comments();
+        lazy_init_comments();
         *comments_ = std::move(comments);
       }
     }
@@ -858,7 +859,7 @@ namespace ini
     std::unique_ptr<comment_container> comments_; // 使用unique_ptr主要考虑内存占用更小, c++17使用std::option会更好
   };
 
-  /// @brief ini文件类
+  /// @brief ini file class
   class inifile
   {
     using DataContainer = std::unordered_map<std::string, section>;
@@ -873,9 +874,9 @@ namespace ini
     using iterator = DataContainer::iterator;
     using const_iterator = DataContainer::const_iterator;
 
-    /// @brief 获取或插入一个字段，键是常量引用, 如果section_name不存在，插入一个默认构造的 section 对象
-    /// @param section section名称
-    /// @return 返回对应键的 section 引用
+    /// @brief Get or insert a field. If section_name does not exist, insert a default constructed section object
+    /// @param section section name
+    /// @return Returns the section reference corresponding to the key
     section &operator[](const std::string &section)
     {
       return data_[section];
@@ -885,30 +886,30 @@ namespace ini
       return data_[std::move(section)];
     }
 
-    /// @brief 设置section key-value
-    /// @tparam T 字段值类型
-    /// @param section section名称
-    /// @param key key键
-    /// @param value 字段值
+    /// @brief Set section key-value
+    /// @tparam T Field value type
+    /// @param section Section name
+    /// @param key Key
+    /// @param value Field value
     template <typename T>
     void set(const std::string &section, const std::string &key, T &&value)
     {
       data_[section][key] = std::forward<T>(value);
     }
 
-    /// @brief 判断指定的section是否存在
-    /// @param section section名称
-    /// @return 是否存在
+    /// @brief Check if the specified section exists
+    /// @param section section name
+    /// @return Return true if it exists, otherwise return false
     bool contains(std::string section) const
     {
       detail::trim(section);
       return data_.find(section) != data_.end();
     }
 
-    /// @brief 判断指定section下指定的key是否存在
-    /// @param section section名称
-    /// @param key key键
-    /// @return 是否存在
+    /// @brief Check if the specified key exists in the specified section
+    /// @param section section name
+    /// @param key key
+    /// @return Return true if it exists, otherwise return false
     bool contains(std::string section, std::string key) const
     {
       detail::trim(section);
@@ -920,25 +921,26 @@ namespace ini
       return false;
     }
 
-    /// @brief 返回指定section的引用。如果不存在这样的元素，则会抛出 std::out_of_range 类型的异常。
-    /// @param section section名称 - section不存在将抛出异常
-    /// @return section引用
+    /// @brief Returns a reference to the specified section. If no such element exists, an exception of type `std::out_of_range` will be thrown.
+    /// @param section section-name - an exception will be thrown if the section does not exist
+    /// @return section reference
     section &at(std::string section)
     {
       detail::trim(section);
       return data_.at(section);
     }
+    // const overloading function
     const section &at(std::string section) const
     {
       detail::trim(section);
       return data_.at(section);
     }
 
-    /// @brief 返回指定section的指定key键的字段值
-    /// @param sec section名称
-    /// @param key key键
-    /// @param default_value 默认值 - key不存在时将返回该默认值
-    /// @return 字段值
+    /// @brief Returns the field value of the specified section and the specified key
+    /// @param sec section name
+    /// @param key key
+    /// @param default_value default value - the default value will be returned if the key does not exist
+    /// @return field value(a copy)
     field get(std::string sec, std::string key, field default_value = field{}) const
     {
       detail::trim(sec);
@@ -953,6 +955,9 @@ namespace ini
       return default_value;
     }
 
+    /// @brief Remove the specified seciton
+    /// @param sec section-name
+    /// @return Return true if the deletion is successful, return false if it is not found
     bool remove(std::string sec)
     {
       detail::trim(sec);
@@ -1032,7 +1037,7 @@ namespace ini
       return data_.cend();
     }
 
-    /// @brief 从istream中读取ini信息
+    /// @brief Read ini information from istream
     /// @param is istream
     void read(std::istream &is)
     {
@@ -1083,7 +1088,7 @@ namespace ini
       }
     }
 
-    /// @brief 向ostream中写入ini信息
+    /// @brief Write ini information to ostream
     /// @param os ostream
     void write(std::ostream &os) const
     {
@@ -1120,16 +1125,16 @@ namespace ini
       }
     }
 
-    /// @brief 从str中读取ini信息
-    /// @param str ini字符串
+    /// @brief Read ini information from string
+    /// @param str ini string
     void from_string(const std::string &str)
     {
       std::istringstream is(str);
       read(is);
     }
 
-    /// @brief 将inifile对象转为对应字符串
-    /// @return ini字符串
+    /// @brief Convert the inifile object to a corresponding string
+    /// @return ini string
     std::string to_string() const
     {
       std::ostringstream ss;
@@ -1137,9 +1142,9 @@ namespace ini
       return ss.str();
     }
 
-    /// @brief 从ini文件中加载ini信息
-    /// @param filename 读取文件路径
-    /// @return 是否读取成功
+    /// @brief Load ini information from ini file
+    /// @param filename Read file path
+    /// @return Whether the loading is successful, return `true` if successful
     bool load(const std::string &filename)
     {
       std::ifstream is(filename);
@@ -1151,9 +1156,9 @@ namespace ini
       return !(is.fail() && !is.eof()) && !is.bad();
     }
 
-    /// @brief 将ini信息保存到ini文件
-    /// @param filename 保存文件路径
-    /// @return 是否保存成功
+    /// @brief Save ini information to ini file
+    /// @param filename Save file path
+    /// @return Whether the save is successful, return `true` if successful
     bool save(const std::string &filename)
     {
       std::ofstream os(filename);
