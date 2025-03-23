@@ -391,5 +391,5 @@ int main()
 
 ### 📜 许可证
 
-本项目采用[ **MIT** 许可证](./LICENSE)。
+本项目采用[ **MIT** 许可证](./LICENSE)。版权所有 © 2025–Present Abin。
 

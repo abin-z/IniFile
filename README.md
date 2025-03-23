@@ -385,5 +385,5 @@ We welcome contributions! Feel free to submit **Issues** and **Pull Requests** t
 
 ### 📜 License
 
-This project is licensed under the [**MIT** License](./LICENSE).
+This project is licensed under the [**MIT** License](./LICENSE). Copyright © 2025–Present Abin.
 
