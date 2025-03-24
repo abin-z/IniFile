@@ -319,3 +319,28 @@ TEST_CASE("member func test10", "[inifile]")
   bool ret = inif.find("section") != inif.end();
   CHECK(ret == true);
 }
+
+TEST_CASE("member func test11", "[inifile]")
+{
+  const char *path = "./test.ini";
+  ini::inifile inif;
+  inif.set("section", "key", 100);
+  inif.set("section", "key1", 101);
+  inif.set("section", "key2", 102);
+  inif.set("section", "key3", 103);
+  inif.set("section", "key4", 104);
+  inif.set("section", "key5", 105);
+
+  inif.at("section").clear_comment();
+  inif.at("section").set_comment("section注释信息");
+  inif.at("section").at("key1").set_comment("key-value注释信息1", '#');
+  inif.save(path);
+
+  ini::inifile inif2;
+  inif2.load(path);
+  inif2.at("section").at("key3").set_comment("key-value注释信息3");
+  inif2.save(path);
+
+  bool ret = inif2.find("section") != inif2.end();
+  CHECK(ret == true);
+}
