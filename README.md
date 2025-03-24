@@ -4,7 +4,7 @@
 
 ### 📌 Project Overview
 
-This is a lightweight, efficient and **header-only** INI configuration parsing library designed for C++ projects. It provides a concise, intuitive and elegant API, supports parsing, modifying and writing INI configuration information from files, `std::istream` or `std::string`, and has line-level comment retention function to ensure that the original comments are not lost, making configuration management easier and more efficient.
+This is a lightweight, cross-platform, efficient and **header-only** INI configuration parsing library designed for C++ projects. It provides a concise, intuitive and elegant API, supports parsing, modifying and writing INI configuration information from files, `std::istream` or `std::string`, and has line-level comment retention function to ensure that the original comments are not lost, making configuration management easier and more efficient.
 
 ### 🚀 Features
 
@@ -382,6 +382,10 @@ The following functions will throw an exception if the type conversion fails or 
 ### 💡 Contribution Guidelines
 
 We welcome contributions! Feel free to submit **Issues** and **Pull Requests** to improve this project.
+
+### 🙌 Acknowledgements
+
+Thanks to **[Catch2](https://github.com/catchorg/Catch2)** for providing strong support and facilitating the unit testing of this project!
 
 ### 📜 License
 
