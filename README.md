@@ -385,7 +385,7 @@ We welcome contributions! Feel free to submit **Issues** and **Pull Requests** t
 
 ### 🙌 Acknowledgements
 
-Thanks to **[Catch2](https://github.com/catchorg/Catch2)** for providing strong support and facilitating the unit testing of this project!
+Thank you **[Catch2](https://github.com/catchorg/Catch2)** for providing strong support and assisting in the unit testing of this project!
 
 ### 📜 License
 
