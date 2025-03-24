@@ -543,7 +543,7 @@ namespace ini
 
   private:
     /// @brief 惰性初始化comments_, 确保comments_是有效的
-    inline void lazy_init_comments()
+    void lazy_init_comments()
     {
       if (!comments_)
       {
@@ -816,7 +816,7 @@ namespace ini
 
   private:
     /// @brief 确保comments_是有效的
-    inline void lazy_init_comments()
+    void lazy_init_comments()
     {
       if (!comments_)
       {
