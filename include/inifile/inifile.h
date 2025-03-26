@@ -240,15 +240,16 @@ struct convert<char[N]>
  */
 template <typename T>
 struct is_char_type
-    : std::integral_constant<bool, std::is_same<typename std::remove_reference<typename std::remove_const<T>::type>::type, char>::value ||
-                                       std::is_same<typename std::remove_reference<typename std::remove_const<T>::type>::type, signed char>::value ||
-                                       std::is_same<typename std::remove_reference<typename std::remove_const<T>::type>::type, unsigned char>::value ||
-                                       std::is_same<typename std::remove_reference<typename std::remove_const<T>::type>::type, wchar_t>::value ||
+  : std::integral_constant<
+      bool, std::is_same<typename std::remove_reference<typename std::remove_const<T>::type>::type, char>::value ||
+              std::is_same<typename std::remove_reference<typename std::remove_const<T>::type>::type, signed char>::value ||
+              std::is_same<typename std::remove_reference<typename std::remove_const<T>::type>::type, unsigned char>::value ||
+              std::is_same<typename std::remove_reference<typename std::remove_const<T>::type>::type, wchar_t>::value ||
 #if defined(__cpp_char8_t)  // 仅在 C++20 及更高版本支持 char8_t
-                                       std::is_same<typename std::remove_reference<typename std::remove_const<T>::type>::type, char8_t>::value ||
+              std::is_same<typename std::remove_reference<typename std::remove_const<T>::type>::type, char8_t>::value ||
 #endif
-                                       std::is_same<typename std::remove_reference<typename std::remove_const<T>::type>::type, char16_t>::value ||
-                                       std::is_same<typename std::remove_reference<typename std::remove_const<T>::type>::type, char32_t>::value>
+              std::is_same<typename std::remove_reference<typename std::remove_const<T>::type>::type, char16_t>::value ||
+              std::is_same<typename std::remove_reference<typename std::remove_const<T>::type>::type, char32_t>::value>
 {
 };
 
@@ -424,8 +425,9 @@ class field
   field &operator=(field &&rhs) noexcept = default;
 
   /// 重写拷贝构造函数，深拷贝 other 对象。
-  field(const field &other)
-      : value_(other.value_), comments_(other.comments_ ? std::unique_ptr<comment_container>(new comment_container(*other.comments_)) : nullptr)
+  field(const field &other) :
+    value_(other.value_),
+    comments_(other.comments_ ? std::unique_ptr<comment_container>(new comment_container(*other.comments_)) : nullptr)
   {
   }
   // 友元 swap（非成员函数）
@@ -600,8 +602,9 @@ class section
   section &operator=(section &&) noexcept = default;
 
   /// 重写拷贝构造函数, 深拷贝
-  section(const section &other)
-      : data_(other.data_), comments_(other.comments_ ? std::unique_ptr<comment_container>(new comment_container(*other.comments_)) : nullptr)
+  section(const section &other) :
+    data_(other.data_),
+    comments_(other.comments_ ? std::unique_ptr<comment_container>(new comment_container(*other.comments_)) : nullptr)
   {
   }
   // 友元 swap函数(非成员函数)
