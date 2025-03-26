@@ -1,9 +1,16 @@
 BasedOnStyle: Google  # 继承 Google 风格
-ColumnLimit: 160      # 单行最大字符数160
-AllowShortFunctionsOnASingleLine: Empty # 允许短函数一行显示, Empty（允许空函数）
-ReflowComments: true        # 自动调整 `/** ... */` 的换行格式
-BreakBeforeBraces: Custom   # 使用自定义大括号规则
+ColumnLimit: 130      # 单行最大字符数130
+IndentWidth: 2        # 缩进宽度2
+UseTab: Never         # 使用空格缩进
+TabWidth: 2           # Tab 宽度2
+ReflowComments: true  # 自动调整 `/** ... */` 的换行格式
+AllowShortFunctionsOnASingleLine: Empty   # 允许短函数一行显示, Empty（允许空函数）
+BreakConstructorInitializers: AfterColon  # 构造函数初始化列表换行
+ConstructorInitializerIndentWidth: 2      # 构造函数初始化列表缩进
+ConstructorInitializerAllOnOneLineOrOnePerLine: true # 构造函数初始化列表一行或者一行一个
+ContinuationIndentWidth: 2  # 换行缩进宽度2
 
+BreakBeforeBraces: Custom   # 使用自定义大括号规则
 BraceWrapping:
   AfterClass: true       # ✅ 类的大括号换行
   AfterFunction: true    # ✅ 函数的大括号换行
