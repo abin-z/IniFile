@@ -1,0 +1,25 @@
+BasedOnStyle: Google  # 继承 Google 风格
+ColumnLimit: 160      # 单行最大字符数160
+AllowShortFunctionsOnASingleLine: Empty # 允许短函数一行显示, Empty（允许空函数）
+ReflowComments: true        # 自动调整 `/** ... */` 的换行格式
+BreakBeforeBraces: Custom   # 使用自定义大括号规则
+
+BraceWrapping:
+  AfterClass: true       # ✅ 类的大括号换行
+  AfterFunction: true    # ✅ 函数的大括号换行
+  AfterStruct: true      # ✅ struct 的大括号换行
+  AfterNamespace: true   # ✅ 命名空间的大括号换行
+  AfterEnum: true        # ✅ 枚举的大括号换行
+  AfterControlStatement: true  # ✅ if/for/while 换行
+  BeforeElse: true       # ✅  else 换行
+  IndentBraces: false    # ❌ 大括号不额外缩进
+
+##############################################################
+# 如果你对某段代码的格式 非常满意，不希望 clang-format 修改它。
+# 请使用 clang-format off/on 忽略代码块的功能
+#
+# // clang-format off
+# 满意的代码片段, 不需要clang-format 修改它。
+# // clang-format on
+#
+##############################################################
