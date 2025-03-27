@@ -88,15 +88,15 @@ inline void remove_trailing_cr(std::string &line)
 }
 
 /**
- * @brief 通用转换模板，未特化的 convert 结构体
- * 由于 SFINAE（替换失败不算错误）原则，未特化的 convert 不能实例化
+ * @brief 通用转换模板,未特化的 convert 结构体
+ * 由于 SFINAE(替换失败不算错误)原则,未特化的 convert 不能实例化
  */
 template <typename T, typename Enable = void>
 struct convert;
 
 /**
  * @brief convert<bool> 特化版本
- * 提供 `decode` 和 `encode` 方法，支持 `bool` 与 `std::string` 之间的转换
+ * 提供 `decode` 和 `encode` 方法,支持 `bool` 与 `std::string` 之间的转换
  */
 template <>
 struct convert<bool>
@@ -115,7 +115,7 @@ struct convert<bool>
   {
     std::string str(value);  // 复制字符串, 避免修改原始数据
     std::transform(str.begin(), str.end(), str.begin(), [](unsigned char c) { return std::tolower(c); });
-    // 除了 "false"、"0" 和空串，其他都应该为 true
+    // 除了 "false"、"0" 和空串,其他都应该为 true
     result = !(str == "false" || str == "0" || str.empty());
   }
 
@@ -223,7 +223,7 @@ struct convert<char *>
   }
 };
 
-// 处理 `char[N]` 类型（即固定大小的字符数组）
+// 处理 `char[N]` 类型(即固定大小的字符数组)
 template <std::size_t N>
 struct convert<char[N]>
 {
@@ -234,9 +234,9 @@ struct convert<char[N]>
 };
 
 /**
- * @brief char系列类型特征：所有字符类型（包括 const 和引用的 char 类型）
- * 该特征判断类型是否为 char 系列类型（包括 `char`、`signed char`、`unsigned char`、`wchar_t`、`char8_t`、`char16_t` 和 `char32_t`）。
- * 它会移除 `const` 和 `reference` 修饰符，以确保正确判断字符类型。
+ * @brief char系列类型特征：所有字符类型(包括 const 和引用的 char 类型)
+ * 该特征判断类型是否为 char 系列类型(包括 `char`、`signed char`、`unsigned char`、`wchar_t`、`char8_t`、`char16_t` 和 `char32_t`).
+ * 它会移除 `const` 和 `reference` 修饰符,以确保正确判断字符类型.
  */
 template <typename T>
 struct is_char_type
@@ -254,15 +254,15 @@ struct is_char_type
 };
 
 /**
- * @brief convert 模板特化：处理所有整数类型（不包括字符类型 `char`、`signed char`、`unsigned char`、`wchar_t`、`char16_t`、`char32_t` 等）
+ * @brief convert 模板特化：处理所有整数类型(不包括字符类型 `char`、`signed char`、`unsigned char`、`wchar_t`、`char16_t`、`char32_t` 等)
  *
- * 该模板特化适用于所有 `std::is_integral<T>::value` 为 `true` 的类型，但排除了以下字符类型：
+ * 该模板特化适用于所有 `std::is_integral<T>::value` 为 `true` 的类型,但排除了以下字符类型：
  * - `char`、`signed char`、`unsigned char`
- * - `wchar_t`（宽字符类型）
- * - `char16_t`、`char32_t`（UTF-16 和 UTF-32 编码字符类型）
- * - 在 C++20 及以上版本中，排除 `char8_t`（用于 UTF-8 编码的字符类型）。
+ * - `wchar_t`(宽字符类型)
+ * - `char16_t`、`char32_t`(UTF-16 和 UTF-32 编码字符类型)
+ * - 在 C++20 及以上版本中,排除 `char8_t`(用于 UTF-8 编码的字符类型).
  *
- * 该特化确保只有整型类型（例如 `int`、`long` 等）能够匹配，而字符类型将被排除。
+ * 该特化确保只有整型类型(例如 `int`、`long` 等)能够匹配,而字符类型将被排除.
  */
 template <typename T>
 struct convert<T, typename std::enable_if<std::is_integral<T>::value && !is_char_type<T>::value>::type>
@@ -272,9 +272,9 @@ struct convert<T, typename std::enable_if<std::is_integral<T>::value && !is_char
    * @param value 输入的字符串
    * @param result 转换后的整数
    *
-   * - 处理空字符串，默认返回 `0`
+   * - 处理空字符串,默认返回 `0`
    * - 使用 `std::strtoll()` / `std::strtoull()` 进行转换
-   * - 检查 `errno == ERANGE`，防止溢出
+   * - 检查 `errno == ERANGE`,防止溢出
    * - 确保转换值在 `T` 的范围内
    * - 检查 `endPtr` 以确保完整转换
    */
@@ -329,8 +329,8 @@ struct convert<T, typename std::enable_if<std::is_integral<T>::value && !is_char
 /**
  * @brief convert 模板特化：处理浮点数类型 (`float`, `double`, `long double`)
  *
- * 该模板特化适用于所有 `std::is_floating_point<T>::value` 为 `true` 的类型，
- * 即 `float`、`double` 和 `long double`。
+ * 该模板特化适用于所有 `std::is_floating_point<T>::value` 为 `true` 的类型,
+ * 即 `float`、`double` 和 `long double`.
  */
 template <typename T>
 struct convert<T, typename std::enable_if<std::is_floating_point<T>::value>::type>
@@ -340,9 +340,9 @@ struct convert<T, typename std::enable_if<std::is_floating_point<T>::value>::typ
    * @param value 输入的字符串
    * @param result 转换后的浮点数
    *
-   * - 处理空字符串，默认返回 `0.0`
-   * - 使用 `std::strtold()` 进行转换，以支持 `long double` 的精度
-   * - 检查 `errno == ERANGE`，防止溢出
+   * - 处理空字符串,默认返回 `0.0`
+   * - 使用 `std::strtold()` 进行转换,以支持 `long double` 的精度
+   * - 检查 `errno == ERANGE`,防止溢出
    * - 确保转换值在 `T` 的范围内
    * - 检查 `endPtr` 以确保完整转换
    */
@@ -376,7 +376,7 @@ struct convert<T, typename std::enable_if<std::is_floating_point<T>::value>::typ
    * @param result 转换后的字符串
    *
    * - 直接调用 `std::to_string()` 进行转换
-   * - `std::to_string()` 可能会影响精度，对于高精度需求可使用 `std::stringstream`
+   * - `std::to_string()` 可能会影响精度,对于高精度需求可使用 `std::stringstream`
    */
   void encode(const T value, std::string &result)
   {
@@ -409,28 +409,28 @@ class field
 
  public:
   using comment_container = std::vector<std::string>;  // 注释容器
-  /// 默认构造函数，使用编译器生成的默认实现。
+  /// 默认构造函数,使用编译器生成的默认实现.
   field() = default;
 
-  /// 参数化构造函数，通过给定的字符串初始化 value_。
+  /// 参数化构造函数,通过给定的字符串初始化 value_.
   field(const std::string &value) : value_(value) {}
 
-  /// 默认析构函数，使用编译器生成的默认实现。
+  /// 默认析构函数,使用编译器生成的默认实现.
   ~field() = default;
 
-  /// 默认移动构造函数，按值移动另一个 field 对象。
+  /// 默认移动构造函数,按值移动另一个 field 对象.
   field(field &&other) noexcept = default;
 
-  /// 默认移动赋值运算符，按值移动另一个 field 对象。
+  /// 默认移动赋值运算符,按值移动另一个 field 对象.
   field &operator=(field &&rhs) noexcept = default;
 
-  /// 重写拷贝构造函数，深拷贝 other 对象。
+  /// 重写拷贝构造函数,深拷贝 other 对象.
   field(const field &other) :
     value_(other.value_),
     comments_(other.comments_ ? std::unique_ptr<comment_container>(new comment_container(*other.comments_)) : nullptr)
   {
   }
-  // 友元 swap（非成员函数）
+  // 友元 swap(非成员函数)
   friend void swap(field &lhs, field &rhs) noexcept
   {
     using std::swap;
@@ -450,7 +450,7 @@ class field
   template <typename T>
   field(const T &other)
   {
-    detail::convert<T> conv;     // 创建一个转换器对象，处理 T 类型到字符串的转换
+    detail::convert<T> conv;     // 创建一个转换器对象,处理 T 类型到字符串的转换
     conv.encode(other, value_);  // 将传入的值编码成字符串并存储到 value_ 中
   }
 
@@ -461,9 +461,9 @@ class field
   template <typename T>
   field &operator=(const T &rhs)
   {
-    detail::convert<T> conv;   // 创建一个转换器对象，处理 T 类型到字符串的转换
+    detail::convert<T> conv;   // 创建一个转换器对象,处理 T 类型到字符串的转换
     conv.encode(rhs, value_);  // 将右侧值编码成字符串并存储到 value_ 中
-    return *this;              // 返回当前对象的引用，支持链式赋值
+    return *this;              // 返回当前对象的引用,支持链式赋值
   }
 
   /// @brief Converts an ini field to target type T. If the conversion fails, exception will be thrown.
@@ -480,7 +480,8 @@ class field
     return result;                // 返回转换结果
   }
 
-  /// @brief Type conversion operator: allows field objects to be converted to the target type T. If the conversion fails, exception will be thrown.
+  /// @brief Type conversion operator: allows field objects to be converted to the target type T. 
+  //         If the conversion fails, exception will be thrown.
   /// @tparam T Target type to be converted
   /// @return The value of the target type after conversion
   /// @throws `std::invalid_argument` If the field cannot be converted to type T.
@@ -497,7 +498,7 @@ class field
   template <typename T>
   void set(const T &value)
   {
-    detail::convert<T> conv;  // 使用一个转换器（假设为 detail::convert<T>）将给定的值编码为字符串。
+    detail::convert<T> conv;  // 使用一个转换器(假设为 detail::convert<T>)将给定的值编码为字符串.
     conv.encode(value, value_);
   }
 
@@ -514,7 +515,7 @@ class field
     while (std::getline(stream, line))
     {
       detail::remove_trailing_cr(line);                                          // 处理 Windows 换行符 "\r\n"
-      comments_->emplace_back(detail::format_comment(std::move(line), symbol));  // line 被移动后不会再使用，但会在循环的下一次迭代中被重新赋值。
+      comments_->emplace_back(detail::format_comment(std::move(line), symbol));  // line 被移动后不会再使用,但会在循环的下一次迭代中被重新赋值.
     }
   }
 
@@ -529,7 +530,7 @@ class field
     while (std::getline(stream, line))
     {
       detail::remove_trailing_cr(line);                                          // 处理 Windows 换行符 "\r\n"
-      comments_->emplace_back(detail::format_comment(std::move(line), symbol));  // line 被移动后不会再使用，但会在循环的下一次迭代中被重新赋值。
+      comments_->emplace_back(detail::format_comment(std::move(line), symbol));  // line 被移动后不会再使用,但会在循环的下一次迭代中被重新赋值.
     }
   }
 
@@ -564,7 +565,7 @@ class field
   }
 
  private:
-  std::string value_;  // 存储字符串值，用于存储读取的 INI 文件字段值
+  std::string value_;  // 存储字符串值,用于存储读取的 INI 文件字段值
   // 当前key-value的注释容器, 采用懒加载策略(默认为nullptr), 深拷贝机制.
   std::unique_ptr<comment_container> comments_;  // 使用unique_ptr主要考虑内存占用更小. <如果在c++17标准下使用std::option更优>
 };
@@ -788,7 +789,7 @@ class section
     while (std::getline(stream, line))
     {
       detail::remove_trailing_cr(line);                                          // 处理 Windows 换行符 "\r\n"
-      comments_->emplace_back(detail::format_comment(std::move(line), symbol));  // line 被移动后不会再使用，但会在循环的下一次迭代中被重新赋值。
+      comments_->emplace_back(detail::format_comment(std::move(line), symbol));  // line 被移动后不会再使用,但会在循环的下一次迭代中被重新赋值.
     }
   }
 
@@ -803,7 +804,7 @@ class section
     while (std::getline(stream, line))
     {
       detail::remove_trailing_cr(line);                                          // 处理 Windows 换行符 "\r\n"
-      comments_->emplace_back(detail::format_comment(std::move(line), symbol));  // line 被移动后不会再使用，但会在循环的下一次迭代中被重新赋值。
+      comments_->emplace_back(detail::format_comment(std::move(line), symbol));  // line 被移动后不会再使用,但会在循环的下一次迭代中被重新赋值.
     }
   }
 
@@ -1081,7 +1082,7 @@ class inifile
   {
     bool first_section = true;
 
-    // 先处理空 section（无 section 的键值对）
+    // 先处理空 section(无 section 的键值对)
     auto it = data_.find("");
     if (it != data_.end())
     {
@@ -1137,7 +1138,7 @@ class inifile
     if (!is) return false;
 
     read(is);
-    // 仅当 fail() 不是由于 EOF 造成的，并且没有发生 bad()，才认为读取成功
+    // 仅当 fail() 不是由于 EOF 造成的,并且没有发生 bad(),才认为读取成功
     return !(is.fail() && !is.eof()) && !is.bad();
   }
 
