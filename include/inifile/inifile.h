@@ -235,8 +235,8 @@ struct convert<char[N]>
 
 /**
  * @brief char系列类型特征：所有字符类型(包括 const 和引用的 char 类型)
- * 该特征判断类型是否为 char 系列类型(包括 `char`、`signed char`、`unsigned char`、`wchar_t`、`char8_t`、`char16_t` 和 `char32_t`).
- * 它会移除 `const` 和 `reference` 修饰符,以确保正确判断字符类型.
+ * 该特征判断类型是否为 char 系列类型(包括 `char`、`signed char`、`unsigned char`、`wchar_t`、`char8_t`、`char16_t` 和
+ * `char32_t`). 它会移除 `const` 和 `reference` 修饰符,以确保正确判断字符类型.
  */
 template <typename T>
 struct is_char_type
@@ -254,7 +254,8 @@ struct is_char_type
 };
 
 /**
- * @brief convert 模板特化：处理所有整数类型(不包括字符类型 `char`、`signed char`、`unsigned char`、`wchar_t`、`char16_t`、`char32_t` 等)
+ * @brief convert 模板特化：处理所有整数类型(不包括字符类型 `char`、`signed char`、`unsigned char`、
+ * `wchar_t`、`char16_t`、`char32_t` 等)
  *
  * 该模板特化适用于所有 `std::is_integral<T>::value` 为 `true` 的类型,但排除了以下字符类型：
  * - `char`、`signed char`、`unsigned char`
@@ -480,7 +481,7 @@ class field
     return result;                // 返回转换结果
   }
 
-  /// @brief Type conversion operator: allows field objects to be converted to the target type T. 
+  /// @brief Type conversion operator: allows field objects to be converted to the target type T.
   //         If the conversion fails, exception will be thrown.
   /// @tparam T Target type to be converted
   /// @return The value of the target type after conversion
@@ -514,8 +515,9 @@ class field
     std::string line;
     while (std::getline(stream, line))
     {
-      detail::remove_trailing_cr(line);                                          // 处理 Windows 换行符 "\r\n"
-      comments_->emplace_back(detail::format_comment(std::move(line), symbol));  // line 被移动后不会再使用,但会在循环的下一次迭代中被重新赋值.
+      detail::remove_trailing_cr(line);  // 处理 Windows 换行符 "\r\n"
+      // line 被移动后不会再使用,但会在循环的下一次迭代中被重新赋值.
+      comments_->emplace_back(detail::format_comment(std::move(line), symbol));
     }
   }
 
@@ -529,8 +531,9 @@ class field
     std::string line;
     while (std::getline(stream, line))
     {
-      detail::remove_trailing_cr(line);                                          // 处理 Windows 换行符 "\r\n"
-      comments_->emplace_back(detail::format_comment(std::move(line), symbol));  // line 被移动后不会再使用,但会在循环的下一次迭代中被重新赋值.
+      detail::remove_trailing_cr(line);  // 处理 Windows 换行符 "\r\n"
+      // line 被移动后不会再使用,但会在循环的下一次迭代中被重新赋值.
+      comments_->emplace_back(detail::format_comment(std::move(line), symbol));
     }
   }
 
@@ -663,7 +666,8 @@ class section
     return data_.find(key) != data_.end();
   }
 
-  /// @brief Returns a reference to the field value of the specified key. If the key does not exist, an `std::out_of_range` exception will be thrown.
+  /// @brief Returns a reference to the field value of the specified key.
+  ///        If the key does not exist, an `std::out_of_range` exception will be thrown.
   /// @param key key - an exception will be thrown if the key does not exist
   /// @return field value reference
   /// @throws `std::out_of_range` if key does not exist
@@ -788,8 +792,9 @@ class section
     std::string line;
     while (std::getline(stream, line))
     {
-      detail::remove_trailing_cr(line);                                          // 处理 Windows 换行符 "\r\n"
-      comments_->emplace_back(detail::format_comment(std::move(line), symbol));  // line 被移动后不会再使用,但会在循环的下一次迭代中被重新赋值.
+      detail::remove_trailing_cr(line);  // 处理 Windows 换行符 "\r\n"
+      // line 被移动后不会再使用,但会在循环的下一次迭代中被重新赋值.
+      comments_->emplace_back(detail::format_comment(std::move(line), symbol));
     }
   }
 
@@ -803,8 +808,9 @@ class section
     std::string line;
     while (std::getline(stream, line))
     {
-      detail::remove_trailing_cr(line);                                          // 处理 Windows 换行符 "\r\n"
-      comments_->emplace_back(detail::format_comment(std::move(line), symbol));  // line 被移动后不会再使用,但会在循环的下一次迭代中被重新赋值.
+      detail::remove_trailing_cr(line);  // 处理 Windows 换行符 "\r\n"
+      // line 被移动后不会再使用,但会在循环的下一次迭代中被重新赋值.
+      comments_->emplace_back(detail::format_comment(std::move(line), symbol));
     }
   }
 
@@ -907,7 +913,8 @@ class inifile
     return false;
   }
 
-  /// @brief Returns a reference to the specified section. If section does not exist, an exception of type `std::out_of_range` will be thrown.
+  /// @brief Returns a reference to the specified section.
+  ///        If section does not exist, an exception of type `std::out_of_range` will be thrown.
   /// @param section section-name - an exception will be thrown if the section does not exist
   /// @return section reference
   /// @throws `std::out_of_range` if section does not exist
@@ -1069,7 +1076,8 @@ class inifile
           data_[current_section][key] = value;  // 允许section为空字符串
           if (!comments.empty())                // 添加注释
           {
-            data_[current_section][key].set_comment(std::move(comments));  // set_comment后应该调用comments.clear()的, 但使用std::move后就不需要了
+            // set_comment后应该调用comments.clear()的, 但使用std::move后就不需要了
+            data_[current_section][key].set_comment(std::move(comments));
           }
         }
       }
