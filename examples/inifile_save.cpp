@@ -2,7 +2,7 @@
 
 int main()
 {
-  constexpr char path[] = "./config.ini"; // path to ini file
+  constexpr char path[] = "./config.ini";  // path to ini file
 
   ini::inifile inif;
 

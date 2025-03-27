@@ -15,9 +15,9 @@ void save_func()
   inif["section"]["key2"] = "value";
 
   // Add comments if necessary
-  inif["section"].set_comment("This is a section comment.");                     // set section comment, Overwrite Mode
-  inif["section"]["key1"].set_comment("This is a key-value pairs comment", '#'); // set key=value pairs comment
-  
+  inif["section"].set_comment("This is a section comment.");                      // set section comment, Overwrite Mode
+  inif["section"]["key1"].set_comment("This is a key-value pairs comment", '#');  // set key=value pairs comment
+
   bool isok = inif.save(path);
 }
 
@@ -33,14 +33,14 @@ void load_func()
 
 void read_func()
 {
-  std::istringstream is(str); // Other istreams are also possible
+  std::istringstream is(str);  // Other istreams are also possible
   ini::inifile inif;
   inif.read(is);
 }
 
 void write_func()
 {
-  std::ostringstream os; // Other istreams are also possible
+  std::ostringstream os;  // Other istreams are also possible
   ini::inifile inif;
   inif["section"]["key"] = "value";
   inif.write(os);
