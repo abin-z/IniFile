@@ -8,6 +8,7 @@
  *   - Multiple data source handling: support input/output from files `std::string` and `std::istream`.
  *   - Automatic Type Conversion: Seamlessly handles various data types.
  *   - Support Comment: Supports `[section]` and `key=value` line comments (`;` or `#`) (end-of-line comments are not supported)
+ *   - Custom type conversion: After customization, support automatic conversion for user-defined types
  *
  * @author: abin
  * @date: 2025-02-23
