@@ -37,6 +37,11 @@
 #include <string_view>
 #endif
 
+// Provides custom type converters, users can customize type conversion
+#ifndef INIFILE_TYPE_CONVERTER
+#define INIFILE_TYPE_CONVERTER ini::detail::convert
+#endif
+
 namespace ini
 {
 
