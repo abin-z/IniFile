@@ -40,25 +40,6 @@
 namespace ini
 {
 
-/// @brief Trims whitespace from both ends of the given string.
-/// @param str The input string to be trimmed.
-/// @return A new string with leading and trailing whitespace removed.
-inline std::string trim(std::string str)
-{
-  detail::trim(str);
-  return str;
-}
-
-/// @brief Splits a string into a vector of substrings based on a delimiter.
-/// @param str The input string to be split.
-/// @param delimiter The character used to split the string.
-/// @param skip_empty If true, empty substrings are ignored; otherwise, they are included.
-/// @return A vector of substrings obtained by splitting the input string.
-inline std::vector<std::string> split(const std::string &str, char delimiter, bool skip_empty = false)
-{
-  return detail::split(str, delimiter, skip_empty);
-}
-
 namespace detail
 {
 /** whitespace characters. */
@@ -1228,6 +1209,25 @@ class inifile
  private:
   DataContainer data_;  // section_name - key_value
 };
+
+/// @brief Trims whitespace from both ends of the given string.
+/// @param str The input string to be trimmed.
+/// @return A new string with leading and trailing whitespace removed.
+inline std::string trim(std::string str)
+{
+  detail::trim(str);
+  return str;
+}
+
+/// @brief Splits a string into a vector of substrings based on a delimiter.
+/// @param str The input string to be split.
+/// @param delimiter The character used to split the string.
+/// @param skip_empty If true, empty substrings are ignored; otherwise, they are included.
+/// @return A vector of substrings obtained by splitting the input string.
+inline std::vector<std::string> split(const std::string &str, char delimiter, bool skip_empty = false)
+{
+  return detail::split(str, delimiter, skip_empty);
+}
 
 }  // namespace ini
 
