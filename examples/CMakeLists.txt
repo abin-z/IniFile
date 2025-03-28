@@ -15,3 +15,6 @@ target_link_libraries(inifile_basic PRIVATE inifile)
 
 add_executable(inifile_custom inifile_custom.cpp)
 target_link_libraries(inifile_custom PRIVATE inifile)
+
+add_executable(inifile_custom2 inifile_custom2.cpp)
+target_link_libraries(inifile_custom2 PRIVATE inifile)
