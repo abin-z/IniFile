@@ -24,6 +24,7 @@ struct INIFILE_TYPE_CONVERTER<Person>
   void encode(const Person &obj, std::string &value)
   {
     const char delimiter = ',';
+    // Format: id,age,name; Note: Please do not include line breaks in the value string
     value = std::to_string(obj.id) + delimiter + std::to_string(obj.age) + delimiter + obj.name;
   }
 
