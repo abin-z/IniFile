@@ -266,23 +266,33 @@ struct convert<char[N]>
   }
 };
 
+// 类型别名
+template <typename T>
+using remove_reference_t = typename std::remove_reference<T>::type;
+template <typename T>
+using remove_const_t = typename std::remove_const<T>::type;
+template <typename T>
+using remove_volatile_t = typename std::remove_volatile<T>::type;
+
+/// @brief remove_ref_const_volatile_t: 移除引用(& 或 &&)、const 和 volatile 修饰符
+template <typename T>
+using remove_ref_const_volatile_t = remove_volatile_t<remove_const_t<remove_reference_t<T>>>;
+
 /**
  * @brief char系列类型特征：所有字符类型(包括 const 和引用的 char 类型)
  * 该特征判断类型是否为 char 系列类型(包括 `char`、`signed char`、`unsigned char`、`wchar_t`、`char8_t`、`char16_t` 和
- * `char32_t`). 它会移除 `const` 和 `reference` 修饰符,以确保正确判断字符类型.
+ * `char32_t`). 它会移除 `const` 和 `reference` 以及 `volatile` 修饰符,以确保正确判断字符类型.
  */
 template <typename T>
-struct is_char_type
-  : std::integral_constant<
-      bool, std::is_same<typename std::remove_reference<typename std::remove_const<T>::type>::type, char>::value ||
-              std::is_same<typename std::remove_reference<typename std::remove_const<T>::type>::type, signed char>::value ||
-              std::is_same<typename std::remove_reference<typename std::remove_const<T>::type>::type, unsigned char>::value ||
-              std::is_same<typename std::remove_reference<typename std::remove_const<T>::type>::type, wchar_t>::value ||
+struct is_char_type : std::integral_constant<bool, std::is_same<remove_ref_const_volatile_t<T>, char>::value ||
+                                                     std::is_same<remove_ref_const_volatile_t<T>, signed char>::value ||
+                                                     std::is_same<remove_ref_const_volatile_t<T>, unsigned char>::value ||
+                                                     std::is_same<remove_ref_const_volatile_t<T>, wchar_t>::value ||
 #if defined(__cpp_char8_t)  // 仅在 C++20 及更高版本支持 char8_t
-              std::is_same<typename std::remove_reference<typename std::remove_const<T>::type>::type, char8_t>::value ||
+                                                     std::is_same<remove_ref_const_volatile_t<T>, char8_t>::value ||
 #endif
-              std::is_same<typename std::remove_reference<typename std::remove_const<T>::type>::type, char16_t>::value ||
-              std::is_same<typename std::remove_reference<typename std::remove_const<T>::type>::type, char32_t>::value>
+                                                     std::is_same<remove_ref_const_volatile_t<T>, char16_t>::value ||
+                                                     std::is_same<remove_ref_const_volatile_t<T>, char32_t>::value>
 {
 };
 
