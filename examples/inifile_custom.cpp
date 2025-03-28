@@ -1,39 +1,40 @@
 #include <inifile/inifile.h>
 
-/// @brief 自定义类型Person
+/// @brief User-defined classes
 struct Person
 {
+  Person() = default;  // Must have a default constructor
+  Person(int id, int age, const std::string &name) : id(id), age(age), name(name) {}
+
   int id = 0;
   int age = 0;
   std::string name;
-
-  std::string to_string() const
-  {
-    std::ostringstream oss;
-    oss << "Person{id=" << id << ", age=" << age << ", name=\"" << name << "\"}";
-    return oss.str();
-  }
 };
 
-/// @brief 自定义类型转换(转换Person)
+void print_person(const Person &p)
+{
+  std::cout << "Person{id=" << p.id << ", age=" << p.age << ", name=\"" << p.name << "\"}" << std::endl;
+}
+
+/// @brief Custom type conversion (Use INIFILE_TYPE_CONVERTER to specialize Person)
 template <>
 struct INIFILE_TYPE_CONVERTER<Person>
 {
-  // 将Person对象 "编码"为 value字符串
+  // "Encode" the Person object into a value string
   void encode(const Person &obj, std::string &value)
   {
     const char delimiter = ',';
     value = std::to_string(obj.id) + delimiter + std::to_string(obj.age) + delimiter + obj.name;
   }
 
-  // 将value字符串 "解码"为 Person对象
+  // "Decode" the value string into a Person object
   void decode(const std::string &value, Person &obj)
   {
     const char delimiter = ',';
     std::vector<std::string> info = ini::split(value, delimiter);
     if (info.size() >= 3)
     {
-      obj.id = std::stoi(info[0]);
+      obj.id = std::stoi(info[0]);  // Exception handling can be added
       obj.age = std::stoi(info[1]);
       obj.name = info[2];
     }
@@ -47,7 +48,7 @@ struct INIFILE_TYPE_CONVERTER<Person>
 int main()
 {
   ini::inifile inif;
-  Person p = Person{123, 24, "abin"};
+  Person p = Person{123456, 24, "abin"};
 
   // set person object
   inif["section"]["key"] = p;
@@ -55,5 +56,5 @@ int main()
   // get person object
   Person pp = inif["section"]["key"];
 
-  std::cout << "Person pp: " << pp.to_string() << std::endl;
+  print_person(pp);
 }
