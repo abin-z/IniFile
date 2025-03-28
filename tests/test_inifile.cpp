@@ -12,6 +12,95 @@ TEST_CASE("basic test")
 #endif
 }
 
+TEST_CASE("trim function", "[trim]")
+{
+  using namespace ini;
+
+  SECTION("Trim removes leading and trailing spaces")
+  {
+    REQUIRE(trim("  hello  ") == "hello");
+    REQUIRE(trim("\t hello \n") == "hello");
+    REQUIRE(trim("  test string  ") == "test string");
+  }
+
+  SECTION("Trim handles various whitespace characters")
+  {
+    REQUIRE(trim("\n\nhello\t ") == "hello");
+    REQUIRE(trim("  \r\n  text  \t") == "text");
+  }
+
+  SECTION("Trim handles empty and all-whitespace strings")
+  {
+    REQUIRE(trim("") == "");
+    REQUIRE(trim("      ") == "");
+    REQUIRE(trim("\t\n  \t") == "");
+  }
+
+  SECTION("Trim has no effect on already trimmed strings")
+  {
+    REQUIRE(trim("hello") == "hello");
+    REQUIRE(trim("trimmed") == "trimmed");
+  }
+
+  SECTION("Trim handles strings with only one character")
+  {
+    REQUIRE(trim("a") == "a");
+    REQUIRE(trim(" ") == "");
+    REQUIRE(trim("\n") == "");
+  }
+}
+
+TEST_CASE("split function", "[split]")
+{
+  using namespace ini;
+
+  SECTION("Split normal string")
+  {
+    REQUIRE(split("a,b,c", ',') == std::vector<std::string>{"a", "b", "c"});
+    REQUIRE(split("hello world example", ' ') == std::vector<std::string>{"hello", "world", "example"});
+  }
+
+  SECTION("Split with consecutive delimiters (skip_empty = false)")
+  {
+    REQUIRE(split("a,,b,c", ',') == std::vector<std::string>{"a", "", "b", "c"});
+    REQUIRE(split("one:::two:three", ':') == std::vector<std::string>{"one", "", "", "two", "three"});
+  }
+
+  SECTION("Split with consecutive delimiters (skip_empty = true)")
+  {
+    REQUIRE(split("a,,b,c", ',', true) == std::vector<std::string>{"a", "b", "c"});
+    REQUIRE(split("one:::two:three", ':', true) == std::vector<std::string>{"one", "two", "three"});
+  }
+
+  SECTION("Split handles edge cases")
+  {
+    REQUIRE(split("", ',') == std::vector<std::string>{""});
+    REQUIRE(split(",", ',') == std::vector<std::string>{"", ""});
+    REQUIRE(split(",", ',', true) == std::vector<std::string>{});   // 跳过空字符串
+    REQUIRE(split(",,", ',', true) == std::vector<std::string>{});  // 全部跳过
+    REQUIRE(split("singleword", ',') == std::vector<std::string>{"singleword"});
+  }
+
+  SECTION("Split when delimiter is at the start or end")
+  {
+    REQUIRE(split(",abc,def,", ',') == std::vector<std::string>{"", "abc", "def", ""});
+    REQUIRE(split(",abc,def,", ',', true) == std::vector<std::string>{"abc", "def"});
+  }
+
+  SECTION("Split when there are no delimiters")
+  {
+    REQUIRE(split("singleword", ',') == std::vector<std::string>{"singleword"});
+    REQUIRE(split("  trim this  ", ' ') == std::vector<std::string>{"", "", "trim", "this", "", ""});
+    REQUIRE(split("  trim this  ", ' ', true) == std::vector<std::string>{"trim", "this"});
+  }
+
+  SECTION("Split with different delimiters")
+  {
+    REQUIRE(split("apple|banana|cherry", '|') == std::vector<std::string>{"apple", "banana", "cherry"});
+    REQUIRE(split("key=value=pair", '=') == std::vector<std::string>{"key", "value", "pair"});
+  }
+}
+
 TEST_CASE("type convert test01", "[inifile]")
 {
   ini::inifile file;
