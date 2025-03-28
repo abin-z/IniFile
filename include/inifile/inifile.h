@@ -40,12 +40,32 @@
 namespace ini
 {
 
+/// @brief Trims whitespace from both ends of the given string.
+/// @param str The input string to be trimmed.
+/// @return A new string with leading and trailing whitespace removed.
+inline std::string trim(std::string str)
+{
+  detail::trim(str);
+  return str;
+}
+
+/// @brief Splits a string into a vector of substrings based on a delimiter.
+/// @param str The input string to be split.
+/// @param delimiter The character used to split the string.
+/// @param skip_empty If true, empty substrings are ignored; otherwise, they are included.
+/// @return A vector of substrings obtained by splitting the input string.
+inline std::vector<std::string> split(const std::string &str, char delimiter, bool skip_empty = false)
+{
+  return detail::split(str, delimiter, skip_empty);
+}
+
 namespace detail
 {
 /** whitespace characters. */
 static constexpr char whitespaces[] = " \t\n\r\f\v";
 
-// 除去str两端空白字符
+/// @brief 除去str两端空白字符
+/// @param str
 inline void trim(std::string &str)
 {
   auto lastpos = str.find_last_not_of(whitespaces);
@@ -56,6 +76,33 @@ inline void trim(std::string &str)
   }
   str.erase(lastpos + 1);
   str.erase(0, str.find_first_not_of(whitespaces));
+}
+
+/// @brief 字符串切割功能
+/// @param str 待处理字符串
+/// @param delimiter 分割字符
+/// @param skip_empty 是否忽略空字符串
+/// @return 分割后的内容
+std::vector<std::string> split(const std::string &str, char delimiter, bool skip_empty = false)
+{
+  std::vector<std::string> tokens;
+  std::string::size_type start = 0, pos = 0;
+  while ((pos = str.find(delimiter, start)) != std::string::npos)
+  {
+    std::string token = str.substr(start, pos - start);
+    if (!skip_empty || !token.empty())
+    {
+      tokens.emplace_back(std::move(token));
+    }
+    start = pos + 1;
+  }
+  // 处理最后一部分
+  std::string last_token = str.substr(start);
+  if (!skip_empty || !last_token.empty())
+  {
+    tokens.emplace_back(std::move(last_token));
+  }
+  return tokens;
 }
 
 /// @brief 格式化注释字符串
