@@ -296,10 +296,6 @@ int main()
 
 3. **定义`decode`函数**, 作用是定义如何将ini存储字符串转为自定义类型;
 
-> > 为了方便编写decode函数本库提供了`ini::split()`和`ini::trim()`工具函数
-> >
-> > 注意: 步骤2中格式化后的ini存储字符串不能包含换行符号
-
 ```cpp
 /// 特化类型转换模板
 template <>
@@ -316,7 +312,11 @@ struct INIFILE_TYPE_CONVERTER<CustomClass> // 用户自定义类型 CustomClass
 }
 ```
 
-案例1: 下面是将一个用户自定义类`Person`对象转为ini字段案例, [点击查看详情](./examples/inifile_custom.cpp)
+> 注意: 步骤2中`encode`函数格式化后的ini存储字符串**不能包含换行符号**
+>
+> 为了方便编写步骤3中`decode`函数本库提供了`ini::split()`和`ini::trim()`工具函数 
+
+**案例1**: 下面是将一个用户自定义类`Person`对象转为ini字段案例, [点击查看详情](./examples/inifile_custom.cpp)
 
 ```cpp
 /// @brief User-defined classes
@@ -362,7 +362,7 @@ int main()
 }
 ```
 
-案例2: 可以嵌套调用`INIFILE_TYPE_CONVERTER<T>`, 实现STL容器自动转换, 能实现以下直接对容器赋值或取值的效果, 具体实现请[点击查看详情](./examples/inifile_custom2.cpp)
+**案例2**: 可以嵌套调用`INIFILE_TYPE_CONVERTER<T>`, 实现STL容器自动转换, 能实现以下直接对容器赋值或取值的效果, 具体实现请[点击查看详情](./examples/inifile_custom2.cpp)
 
 ```cpp
 // Define vectors of different types
