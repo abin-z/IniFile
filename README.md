@@ -15,6 +15,7 @@ This is a lightweight, cross-platform, efficient and **header-only** INI configu
 - **Multiple Data Sources**: Supports parsing INI data from files, `std::string` or `std::istream`, and writing to them.
 - **Automatic Type Conversion**: Supports multiple data types and can automatically handle type conversion (elegant API interface).
 - **Support comment function**: Support ini line comments (`;` or `#`), you can add line comments for `[section]` and `key=value` (does not support end-of-line comments).
+- **Custom type conversion**: You can customize type conversion, inifile will automatically convert according to the definition you wrote (reduce duplication)
 
 Ideal for C++ projects that require **parsing, editing, and storing** INI configuration files. The following is the basic ini format:
 
@@ -183,6 +184,45 @@ int main()
 }
 ```
 
+#### Comment function
+
+This library supports setting line-level comments for `[section]` and `key=value` (end-of-line comments are not supported), and the comment symbols can be `;` and `#`; it can also retain the comment content from the data source.
+
+```cpp
+#include "inifile.h"
+int main()
+{
+  ini::inifile inif;
+  // Set value
+  inif["section"]["key0"] = true;
+  inif["section"]["key1"] = 3.141592;
+  inif["section"]["key2"] = "value";
+
+  // Add comments if necessary
+  inif["section"].set_comment("This is a section comment.");                     // set section comment, Overwrite Mode
+  inif["section"]["key1"].set_comment("This is a key-value pairs comment", '#'); // set key=value pairs comment
+
+  inif["section"].clear_comment();                                     // clear section comments
+  inif["section"].add_comment("section comment01");                    // add section comment, Append Mode
+  inif["section"].add_comment("section comment02\nsection comment03"); // Multi-line comments are allowed, lines separated by `\n`
+  
+  bool isok = inif.save("config.ini");
+}
+```
+
+The contents of `config.ini` should be:
+
+```ini
+; section comment01
+; section comment02
+; section comment03
+[section]
+key0=true
+# This is a key-value pairs comment
+key1=3.141592
+key2=value
+```
+
 #### About automatic type conversion
 
 Automatic type conversion works on `ini::field` objects, allowing `ini::field` <=> `other type` to be converted to and from each other; but be careful:  **An exception will be thrown if the conversion fails**.
@@ -238,43 +278,99 @@ Supported types for automatic conversions:
 - `const char *`
 - `std::string_view` (C++17)
 
-#### Comment function
+#### Custom type conversion
 
-This library supports setting line-level comments for `[section]` and `key=value` (end-of-line comments are not supported), and the comment symbols can be `;` and `#`; it can also retain the comment content from the data source.
+> Q: Can user-defined types be automatically converted like the basic data types mentioned above?
+>
+> A: Yes, you can. You only need to follow the following rules to customize the type conversion so that inifile can automatically handle user-defined types.
+
+You can provide a special template class for automatic type conversion for user-defined types, which allows the inifile library to automatically convert according to the rules you define, so that it can store custom classes in ini fields, which can greatly reduce code duplication. The following are custom rules and templates:
+
+1. Use the `INIFILE_TYPE_CONVERTER` macro to **specialize** the custom type (Must have a default constructor);
+2. **Define `encode` function**, which is used to define how to convert custom types into ini storage strings (the storage string cannot contain newlines);
+3. **Define `decode` function**, which is used to define how to convert the ini storage string into a custom type;
 
 ```cpp
-#include "inifile.h"
-int main()
+/// Specialized type conversion template
+template <>
+struct INIFILE_TYPE_CONVERTER<CustomClass> // User-defined type `CustomClass`
 {
-  ini::inifile inif;
-  // Set value
-  inif["section"]["key0"] = true;
-  inif["section"]["key1"] = 3.141592;
-  inif["section"]["key2"] = "value";
-
-  // Add comments if necessary
-  inif["section"].set_comment("This is a section comment.");                     // set section comment, Overwrite Mode
-  inif["section"]["key1"].set_comment("This is a key-value pairs comment", '#'); // set key=value pairs comment
-
-  inif["section"].clear_comment();                                     // clear section comments
-  inif["section"].add_comment("section comment01");                    // add section comment, Append Mode
-  inif["section"].add_comment("section comment02\nsection comment03"); // Multi-line comments are allowed, lines separated by `\n`
-  
-  bool isok = inif.save("config.ini");
+  void encode(const CustomClass &obj, std::string &value)
+  {
+    // Convert the CustomClass object `obj` to ini storage string `value`
+  }
+  void decode(const std::string &value, CustomClass &obj)
+  {
+    // Convert the ini storage string `value` to a CustomClass object `obj`
+  }
 }
 ```
 
-The contents of `config.ini` should be:
+> In order to facilitate the writing of the `decode` function in step 3, this library provides the `ini::split()` and `ini::trim()` tool functions
 
-```ini
-; section comment01
-; section comment02
-; section comment03
-[section]
-key0=true
-# This is a key-value pairs comment
-key1=3.141592
-key2=value
+**Example 1**: The following is an example of converting a user-defined class `Person` object to an ini field.   [Click to view details](./examples/inifile_custom.cpp)
+
+```cpp
+/// @brief User-defined classes
+struct Person
+{
+  Person() = default;  // Must have a default constructor
+  Person(int id, int age, const std::string &name) : id(id), age(age), name(name) {}
+
+  int id = 0;
+  int age = 0;
+  std::string name;
+};
+/// @brief Custom type conversion (Use INIFILE_TYPE_CONVERTER to specialize Person)
+template <>
+struct INIFILE_TYPE_CONVERTER<Person>
+{
+  // "Encode" the Person object into a value string
+  void encode(const Person &obj, std::string &value)
+  {
+    const char delimiter = ',';
+    // Format: id,age,name; Note: Please do not include line breaks in the value string
+    value = std::to_string(obj.id) + delimiter + std::to_string(obj.age) + delimiter + obj.name;
+  }
+
+  // "Decode" the value string into a Person object
+  void decode(const std::string &value, Person &obj)
+  {
+    const char delimiter = ',';
+    std::vector<std::string> info = ini::split(value, delimiter);
+    // Exception handling can be added
+    obj.id = std::stoi(info[0]);
+    obj.age = std::stoi(info[1]);
+    obj.name = info[2];
+  }
+};
+
+int main()
+{
+  ini::inifile inif;
+  Person p = Person{123456, 18, "abin"};
+  inif["section"]["key"] = p;  			// set person object
+  Person pp = inif["section"]["key"];  	// get person object
+}
+```
+
+**Example 2**: You can nest calls to `INIFILE_TYPE_CONVERTER<T>` to achieve automatic conversion of STL containers, which can achieve the following effects of directly assigning or getting values from containers. For the specific implementation, please [Click to view details](./examples/inifile_custom2.cpp)
+
+```cpp
+// Define vectors of different types
+std::vector<int> vec1 = {1, 2, 3, 4, 5};
+std::vector<double> vec2 = {1.1111, 2.2222, 3.3333, 4.4444, 5.5555};
+std::vector<std::string> vec3 = {"aaa", "bbb", "ccc", "ddd", "eee"};
+
+// Set different types of vectors in the INI file object
+inif["section"]["key1"] = vec1;
+inif["section"]["key2"] = vec2;
+inif["section"]["key3"] = vec3;
+
+// Get different vectors from INI file object
+std::vector<int> v1 = inif["section"]["key1"];
+std::vector<double> v2 = inif["section"]["key2"];
+std::vector<std::string> v3 = inif["section"]["key3"];
 ```
 
 #### Other utility functions

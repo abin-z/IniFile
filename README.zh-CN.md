@@ -297,24 +297,24 @@ int main()
 3. **定义`decode`函数**, 作用是定义如何将ini存储字符串转为自定义类型;
 
 ```cpp
-/// 特化类型转换模板
+/// Specialized type conversion template
 template <>
-struct INIFILE_TYPE_CONVERTER<CustomClass> // 用户自定义类型 CustomClass
+struct INIFILE_TYPE_CONVERTER<CustomClass> // User-defined type `CustomClass`
 {
   void encode(const CustomClass &obj, std::string &value)
   {
-    // 编写如何将自定义类对象 obj -> ini存储字符value
+    // Convert the CustomClass object `obj` to ini storage string `value`
   }
   void decode(const std::string &value, CustomClass &obj)
   {
-    // 编写如何将ini存储字符value -> 自定义类对象 obj
+    // Convert the ini storage string `value` to a CustomClass object `obj`
   }
 }
 ```
 
 > 为了方便编写步骤3中`decode`函数本库提供了`ini::split()`和`ini::trim()`工具函数 
 
-**案例1**: 下面是将一个用户自定义类`Person`对象转为ini字段案例, [点击查看详情](./examples/inifile_custom.cpp)
+**案例1**: 下面是将一个用户自定义类`Person`对象转为ini字段案例. [点击查看详情](./examples/inifile_custom.cpp)
 
 ```cpp
 /// @brief User-defined classes
