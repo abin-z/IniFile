@@ -36,7 +36,7 @@ struct INIFILE_TYPE_CONVERTER<std::vector<T>>
 
 /// @brief Print the contents of a vector to the console.
 template <typename T>
-void print_container(const std::vector<T> &vec)
+void print_vector(const std::vector<T> &vec)
 {
   std::cout << "[";
   for (size_t i = 0; i < vec.size(); ++i)
@@ -70,9 +70,9 @@ int main()
   std::vector<std::string> v3 = inif["section"]["key3"];
 
   // Print the vectors to the console
-  print_container(v1);
-  print_container(v2);
-  print_container(v3);
+  print_vector(v1);
+  print_vector(v2);
+  print_vector(v3);
 
   // Print the entire INI file content as a string
   std::cout << "ini info:\n" << inif.to_string() << std::endl;

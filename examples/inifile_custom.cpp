@@ -51,11 +51,8 @@ int main()
   ini::inifile inif;
   Person p = Person{123456, 24, "abin"};
 
-  // set person object
-  inif["section"]["key"] = p;
-
-  // get person object
-  Person pp = inif["section"]["key"];
+  inif["section"]["key"] = p;          // set person object
+  Person pp = inif["section"]["key"];  // get person object
 
   print_person(pp);
 }
