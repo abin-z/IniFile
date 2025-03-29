@@ -314,7 +314,7 @@ struct INIFILE_TYPE_CONVERTER<CustomClass> // 用户自定义类型 CustomClass
 }
 ```
 
-案例1: 下面是将一个用户自定义类`Person`对象转为ini字段案例, [点击查看详情](examples\inifile_custom.cpp)
+案例1: 下面是将一个用户自定义类`Person`对象转为ini字段案例, [点击查看详情](./examples/inifile_custom.cpp)
 
 ```cpp
 /// @brief User-defined classes
@@ -360,7 +360,7 @@ int main()
 }
 ```
 
-案例2: 可以嵌套调用`INIFILE_TYPE_CONVERTER<T>`, 实现STL容器自动转换, 能实现以下直接对容器赋值或取值的效果, 具体实现请[点击查看详情](examples\inifile_custom2.cpp)
+案例2: 可以嵌套调用`INIFILE_TYPE_CONVERTER<T>`, 实现STL容器自动转换, 能实现以下直接对容器赋值或取值的效果, 具体实现请[点击查看详情](./examples/inifile_custom2.cpp)
 
 ```cpp
 // Define vectors of different types
