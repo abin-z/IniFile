@@ -292,7 +292,7 @@ int main()
 
 1. 使用`INIFILE_TYPE_CONVERTER`宏**特化**自定义的类型(必须提供默认构造函数);
 
-2. **定义`encode`函数**, 作用是定义如何将自定义类型转为ini存储字符串;
+2. **定义`encode`函数**, 作用是定义如何将自定义类型转为ini存储字符串(存储字符串不能包含换行符);
 
 3. **定义`decode`函数**, 作用是定义如何将ini存储字符串转为自定义类型;
 
@@ -303,17 +303,15 @@ struct INIFILE_TYPE_CONVERTER<CustomClass> // 用户自定义类型 CustomClass
 {
   void encode(const CustomClass &obj, std::string &value)
   {
-    // 如何将自定义类对象 obj -> ini存储字符value
+    // 编写如何将自定义类对象 obj -> ini存储字符value
   }
   void decode(const std::string &value, CustomClass &obj)
   {
-    // 如何将ini存储字符value -> 自定义类对象 obj
+    // 编写如何将ini存储字符value -> 自定义类对象 obj
   }
 }
 ```
 
-> 注意: 步骤2中`encode`函数格式化后的ini存储字符串**不能包含换行符号**
->
 > 为了方便编写步骤3中`decode`函数本库提供了`ini::split()`和`ini::trim()`工具函数 
 
 **案例1**: 下面是将一个用户自定义类`Person`对象转为ini字段案例, [点击查看详情](./examples/inifile_custom.cpp)
