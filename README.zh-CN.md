@@ -12,7 +12,8 @@
 - **全面支持**：可读取、修改、写入 INI 数据至文件
 - **多种数据源**：支持从文件，`std::string` 或 `std::istream` 解析 INI 数据，并写入其中
 - **自动类型转换**：支持多种数据类型，能自动处理类型转换(优雅的api接口)
-- **支持注释功能**: 支持ini行注释(`;`或者`#`), 可以为`[section]`和`key=value`添加行注释(不支持行尾注释)
+- **支持注释功能**:  支持ini行注释(`;`或者`#`), 可以为`[section]`和`key=value`添加行注释(不支持行尾注释)
+- **自定义类型转换**: 可以自定义类型转换, inifile将根据你写的定义进行自动转换(减少重复)
 
 适用于对 INI 配置有 **解析、编辑、存储** 需求的 C++ 项目。以下是基础的ini格式:
 
@@ -46,7 +47,7 @@ key = value
 
 4. 在源代码中添加`#include <inifile/inifile.h>`即可使用
 
-## 🛠️ 基础使用案例
+### 🛠️ 基础使用案例
 
 下面提供简单的使用案例, 更多详细的案例请查看[`./examples/`](./examples/)文件夹下的案例
 
@@ -187,6 +188,45 @@ int main()
 }
 ```
 
+#### 注释功能
+
+本库支持设置`[section]`和`key=value`的行级注释(不支持行尾注释), 注释符号可选`;`和`#`两种; 也能从数据源中保留注释内容.
+
+```cpp
+#include "inifile.h"
+int main()
+{
+  ini::inifile inif;
+  // Set value
+  inif["section"]["key0"] = true;
+  inif["section"]["key1"] = 3.141592;
+  inif["section"]["key2"] = "value";
+
+  // Add comments if necessary
+  inif["section"].set_comment("This is a section comment.");                     // set section comment, Overwrite Mode
+  inif["section"]["key1"].set_comment("This is a key-value pairs comment", '#'); // set key=value pairs comment
+
+  inif["section"].clear_comment();                                     // clear section comments
+  inif["section"].add_comment("section comment01");                    // add section comment, Append Mode
+  inif["section"].add_comment("section comment02\nsection comment03"); // Multi-line comments are allowed, lines separated by `\n`
+  
+  bool isok = inif.save("config.ini");
+}
+```
+
+`config.ini`的内容应该为:
+
+```ini
+; section comment01
+; section comment02
+; section comment03
+[section]
+key0=true
+# This is a key-value pairs comment
+key1=3.141592
+key2=value
+```
+
 #### 关于自动类型转换
 
 自动类型转换作用在`ini::field`对象上, 允许`ini::field` <=> `other type`互相转换; 但是需要注意: **若转换失败会抛出异常.**
@@ -242,43 +282,101 @@ int main()
 - `const char *`
 - `std::string_view` (C++17)
 
-#### 注释功能
+#### 自定义类型转换
 
-本库支持设置`[section]`和`key=value`的行级注释(不支持行尾注释), 注释符号可选`;`和`#`两种; 也能从数据源中保留注释内容.
+> Q: 用户自定义类型可以像上面提到的基本数据类型一样自动转换吗? 
+>
+> A: 也是可以的, 只需要按以下规则自定义类型转换就能让inifile自动处理用户自定义类型.
+
+你可以为用户自定义类型提供自定义类型转换, 它能让inifile库根据你定义的规则进行自动转换, 使其可以将自定义类存储在ini字段中, 这样可以大幅减少代码的重复. 以下是自定义规则和模板:
+
+1. 使用`INIFILE_TYPE_CONVERTER`宏**特化**自定义的类型(必须提供默认构造函数);
+
+2. **定义`encode`函数**, 作用是定义如何将自定义类型转为ini存储字符串;
+
+3. **定义`decode`函数**, 作用是定义如何将ini存储字符串转为自定义类型;
+
+> 注意: 步骤2中格式化后的ini存储字符串不能包含换行符号
 
 ```cpp
-#include "inifile.h"
-int main()
+/// 特化类型转换模板
+template <>
+struct INIFILE_TYPE_CONVERTER<CustomClass> // 用户自定义类型 CustomClass
 {
-  ini::inifile inif;
-  // Set value
-  inif["section"]["key0"] = true;
-  inif["section"]["key1"] = 3.141592;
-  inif["section"]["key2"] = "value";
-
-  // Add comments if necessary
-  inif["section"].set_comment("This is a section comment.");                     // set section comment, Overwrite Mode
-  inif["section"]["key1"].set_comment("This is a key-value pairs comment", '#'); // set key=value pairs comment
-
-  inif["section"].clear_comment();                                     // clear section comments
-  inif["section"].add_comment("section comment01");                    // add section comment, Append Mode
-  inif["section"].add_comment("section comment02\nsection comment03"); // Multi-line comments are allowed, lines separated by `\n`
-  
-  bool isok = inif.save("config.ini");
+  void encode(const CustomClass &obj, std::string &value)
+  {
+    // 如何将自定义类对象 obj -> ini存储字符value
+  }
+  void decode(const std::string &value, CustomClass &obj)
+  {
+    // 如何将ini存储字符value -> 自定义类对象 obj
+  }
 }
 ```
 
-`config.ini`的内容应该为:
+案例1: 下面是将一个用户自定义类`Person`对象转为ini字段案例, [点击查看详情](examples\inifile_custom.cpp)
 
-```ini
-; section comment01
-; section comment02
-; section comment03
-[section]
-key0=true
-# This is a key-value pairs comment
-key1=3.141592
-key2=value
+```cpp
+/// @brief User-defined classes
+struct Person
+{
+  Person() = default;  // Must have a default constructor
+  Person(int id, int age, const std::string &name) : id(id), age(age), name(name) {}
+
+  int id = 0;
+  int age = 0;
+  std::string name;
+};
+/// @brief Custom type conversion (Use INIFILE_TYPE_CONVERTER to specialize Person)
+template <>
+struct INIFILE_TYPE_CONVERTER<Person>
+{
+  // "Encode" the Person object into a value string
+  void encode(const Person &obj, std::string &value)
+  {
+    const char delimiter = ',';
+    // Format: id,age,name; Note: Please do not include line breaks in the value string
+    value = std::to_string(obj.id) + delimiter + std::to_string(obj.age) + delimiter + obj.name;
+  }
+
+  // "Decode" the value string into a Person object
+  void decode(const std::string &value, Person &obj)
+  {
+    const char delimiter = ',';
+    std::vector<std::string> info = ini::split(value, delimiter);
+    // Exception handling can be added
+    obj.id = std::stoi(info[0]);
+    obj.age = std::stoi(info[1]);
+    obj.name = info[2];
+  }
+};
+
+int main()
+{
+  ini::inifile inif;
+  Person p = Person{123456, 18, "abin"};
+  inif["section"]["key"] = p;  			// set person object
+  Person pp = inif["section"]["key"];  	// get person object
+}
+```
+
+案例2: 可以嵌套调用`INIFILE_TYPE_CONVERTER<T>`, 实现STL容器自动转换, 能实现以下直接对容器赋值或取值的效果, 具体实现请[点击查看详情](examples\inifile_custom2.cpp)
+
+```cpp
+// Define vectors of different types
+std::vector<int> vec1 = {1, 2, 3, 4, 5};
+std::vector<double> vec2 = {1.1111, 2.2222, 3.3333, 4.4444, 5.5555};
+std::vector<std::string> vec3 = {"aaa", "bbb", "ccc", "ddd", "eee"};
+
+// Set different types of vectors in the INI file object
+inif["section"]["key1"] = vec1;
+inif["section"]["key2"] = vec2;
+inif["section"]["key3"] = vec3;
+
+// Get different vectors from INI file object
+std::vector<int> v1 = inif["section"]["key1"];
+std::vector<double> v2 = inif["section"]["key2"];
+std::vector<std::string> v3 = inif["section"]["key3"];
 ```
 
 #### 其他工具函数
