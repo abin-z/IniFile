@@ -296,7 +296,9 @@ int main()
 
 3. **定义`decode`函数**, 作用是定义如何将ini存储字符串转为自定义类型;
 
-> 注意: 步骤2中格式化后的ini存储字符串不能包含换行符号
+> > 为了方便编写decode函数本库提供了`ini::split()`和`ini::trim()`工具函数
+> >
+> > 注意: 步骤2中格式化后的ini存储字符串不能包含换行符号
 
 ```cpp
 /// 特化类型转换模板
@@ -381,7 +383,7 @@ std::vector<std::string> v3 = inif["section"]["key3"];
 
 #### 其他工具函数
 
-提供其他多种工具函数, 判断是否为空`empty()`, 查询总个数`size()`, 查询key的个数`count()`,  是否包含元素`contains()`,  查找元素`find()`, 移除元素`remove()` 和 `erase()`,  清除所有元素`clear()`,  迭代器访问:`begin()`, `end()`, `cbegin()`, `cend()`, 支持范围`for`循环.  具体详情请查看常用 API 说明. 
+提供其他多种工具函数,  判断是否为空`empty()`, 查询总个数`size()`, 查询key的个数`count()`,  是否包含元素`contains()`,  查找元素`find()`, 移除元素`remove()` 和 `erase()`,  清除所有元素`clear()`,  迭代器访问:`begin()`, `end()`, `cbegin()`, `cend()`, 支持范围`for`循环.  具体详情请查看常用 API 说明. 
 
 下面提供一个迭代器访问ini信息:
 
