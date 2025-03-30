@@ -299,7 +299,7 @@ int main()
 ```cpp
 /// Specialized type conversion template
 template <>
-struct INIFILE_TYPE_CONVERTER<CustomClass> // User-defined type `CustomClass`
+struct INIFILE_TYPE_CONVERTER<CustomClass>  // User-defined type `CustomClass`
 {
   void encode(const CustomClass &obj, std::string &value)
   {
