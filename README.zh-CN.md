@@ -1,6 +1,6 @@
 ##  🌟 轻量级ini文件解析库
 
-![iniparser](https://img.shields.io/badge/INI_Parser-8A2BE2) ![headeronly](https://img.shields.io/badge/Header_Only-green) ![moderncpp](https://img.shields.io/badge/Modern_C%2B%2B-218c73) ![licenseMIT](https://img.shields.io/badge/License-MIT-green) ![version](https://img.shields.io/badge/version-0.9.3-green)
+[![iniparser](https://img.shields.io/badge/INI_Parser-8A2BE2)](https://github.com/abin-z/IniFile) ![headeronly](https://img.shields.io/badge/Header_Only-green) ![moderncpp](https://img.shields.io/badge/Modern_C%2B%2B-218c73) [![licenseMIT](https://img.shields.io/badge/License-MIT-green)](https://github.com/abin-z/IniFile/blob/main/LICENSE) [![version](https://img.shields.io/badge/version-0.9.3-green)](https://github.com/abin-z/IniFile/releases)
 
 🌍 Languages/语言:  [English](README.md)  |  [简体中文](README.zh-CN.md)
 
