@@ -1,5 +1,7 @@
 ## 🌟 Lightweight INI File Parsing Library
 
+![iniparser](https://img.shields.io/badge/INI_Parser-8A2BE2) ![headeronly](https://img.shields.io/badge/Header_Only-black) ![moderncpp](https://img.shields.io/badge/Modern_C%2B%2B-218c73) ![licenseMIT](https://img.shields.io/badge/License-MIT-green) ![version](https://img.shields.io/badge/version-0.9.3-green)
+
 🌍 Languages/语言:  [English](README.md)  |  [简体中文](README.zh-CN.md)
 
 ### 📌 Project Overview

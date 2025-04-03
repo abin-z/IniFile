@@ -1,6 +1,6 @@
 ##  🌟 轻量级ini文件解析库
 
-![Static Badge](https://img.shields.io/badge/Ini_Parser-8A2BE2)![Static Badge](https://img.shields.io/badge/Header_Only-8A2BE2)![Static Badge](https://img.shields.io/badge/License-MIT-green) ![Static Badge](https://img.shields.io/badge/version-0.9.3-green)
+![iniparser](https://img.shields.io/badge/INI_Parser-8A2BE2) ![headeronly](https://img.shields.io/badge/Header_Only-black) ![moderncpp](https://img.shields.io/badge/Modern_C%2B%2B-218c73) ![licenseMIT](https://img.shields.io/badge/License-MIT-green) ![version](https://img.shields.io/badge/version-0.9.3-green)
 
 🌍 Languages/语言:  [English](README.md)  |  [简体中文](README.zh-CN.md)
 
