@@ -424,6 +424,9 @@ int main()
 
 #### ini::field类API说明
 
+<details>
+  <summary>展开查看ini::field类API说明</summary>
+
 以下函数类型转换失败或者值溢出将抛异常
 
 | 函数名        | 函数签名                                                     | 功能描述                          |
@@ -437,7 +440,12 @@ int main()
 | add_comment   | `void add_comment(const std::string &str, char symbol = ';')` | 添加key-value的注释, 追加模式     |
 | clear_comment | `void clear_comment()`                                       | 清除key-value的注释               |
 
+</details>
+
 #### ini::section类API说明
+
+<details>
+  <summary>展开查看ini::section类API说明</summary>
 
 | 函数名        | 函数签名                                                     | 功能描述                                                     |
 | ------------- | ------------------------------------------------------------ | ------------------------------------------------------------ |
@@ -459,7 +467,12 @@ int main()
 | add_comment   | `void add_comment(const std::string &str, char symbol = ';')` | 添加section的注释, 追加模式, 注释字符串允许换行`\n`          |
 | clear_comment | `void clear_comment()`                                       | 清除section的注释                                            |
 
+</details>
+
 #### ini::inifile类API说明
+
+<details>
+  <summary>展开查看ini::inifile类API说明</summary>
 
 | 函数名      | 函数签名                                                     | 功能描述                                                     |
 | ----------- | ------------------------------------------------------------ | ------------------------------------------------------------ |
@@ -484,6 +497,8 @@ int main()
 | to_string   | `std::string to_string() const`                              | 将inifile对象转为对应字符串                                  |
 | load        | `bool load(const std::string &filename)`                     | 从ini文件中加载ini信息, 返回是否成功                         |
 | save        | `bool save(const std::string &filename)`                     | 将ini信息保存到ini文件, 返回是否成功                         |
+
+</details>
 
 ### 💡 贡献指南
 
