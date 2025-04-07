@@ -416,6 +416,9 @@ int main()
 
 #### ini::field API Description
 
+<details>
+  <summary>click to expand</summary>
+
 The following functions will throw an exception if the type conversion fails or the value overflows:
 
 | function name | function signature                                           | function description                                         |
@@ -429,7 +432,12 @@ The following functions will throw an exception if the type conversion fails or 
 | add_comment   | `void add_comment(const std::string &str, char symbol = ';')` | Add key-value comments, append mode                          |
 | clear_comment | `void clear_comment()`                                       | Clear the comments of key-value                              |
 
+</details>
+
 #### ini::section API Description
+
+<details>
+  <summary>click to expand</summary>
 
 | function name | function signature                                           | function description                                         |
 | ------------- | ------------------------------------------------------------ | ------------------------------------------------------------ |
@@ -451,7 +459,12 @@ The following functions will throw an exception if the type conversion fails or 
 | add_comment   | `void add_comment(const std::string &str, char symbol = ';')` | Add section comments, append mode, comment string allows line breaks `\n` |
 | clear_comment | `void clear_comment()`                                       | Clear section comments                                       |
 
+</details>
+
 #### ini::inifile API Description
+
+<details>
+  <summary>click to expand</summary>
 
 | function name | function signature                                           | function description                                         |
 | ------------- | ------------------------------------------------------------ | ------------------------------------------------------------ |
@@ -476,6 +489,8 @@ The following functions will throw an exception if the type conversion fails or 
 | to_string     | `std::string to_string() const`                              | Converts the inifile object to the corresponding string      |
 | load          | `bool load(const std::string &filename)`                     | Load ini information from ini file, return whether it was successful or not |
 | save          | `bool save(const std::string &filename)`                     | Save ini information to an ini file, return whether it was successful or not |
+
+</details>
 
 ### 💡 Contribution Guidelines
 
