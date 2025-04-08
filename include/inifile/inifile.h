@@ -446,6 +446,28 @@ struct convert<std::string_view>
   }
 };
 #endif
+
+/// @brief 大小写不敏感的哈希函数
+struct CaseInsensitiveHash
+{
+  std::size_t operator()(std::string s) const  // copy by value
+  {
+    std::transform(s.begin(), s.end(), s.begin(), [](unsigned char c) { return std::tolower(c); });
+    return std::hash<std::string>{}(s);
+  }
+};
+
+/// @brief 大小写不敏感的比较函数
+struct CaseInsensitiveEqual
+{
+  bool operator()(const std::string &lhs, const std::string &rhs) const
+  {
+    return lhs.size() == rhs.size() && std::equal(lhs.begin(), lhs.end(), rhs.begin(), [](unsigned char a, unsigned char b) {
+             return std::tolower(a) == std::tolower(b);
+           });
+  }
+};
+
 }  // namespace detail
 
 /// @brief ini field value
