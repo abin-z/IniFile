@@ -470,10 +470,17 @@ struct CaseInsensitiveEqual
 
 }  // namespace detail
 
+// 先声明模板类 basic_inifile
+template <typename, typename>
+class basic_inifile;
+
 /// @brief ini field value
 class field
 {
-  friend class inifile;
+  // 友元类,允许 basic_inifile 访问 field 的私有成员
+  template <typename, typename>
+  friend class basic_inifile;
+
   friend std::ostream &operator<<(std::ostream &os, const field &data);
 
  public:
@@ -646,48 +653,51 @@ inline std::ostream &operator<<(std::ostream &os, const field &data)
   return os << data.value_;
 }
 
-/// @brief ini section class
-class section
+/// @brief ini basic_section class
+template <typename Hash = std::hash<std::string>, typename Equal = std::equal_to<std::string>>
+class basic_section
 {
-  friend class inifile;
-  using DataContainer = std::unordered_map<std::string, field>;
+  // 友元类,允许 basic_inifile 访问 basic_section 的私有成员
+  template <typename, typename>
+  friend class basic_inifile;
+
+  using comment_container = field::comment_container;                         // 注释容器
+  using DataContainer = std::unordered_map<std::string, field, Hash, Equal>;  // 数据容器类型
 
  public:
-  using comment_container = field::comment_container;  // 注释容器
+  using key_type = typename DataContainer::key_type;
+  using mapped_type = typename DataContainer::mapped_type;
+  using value_type = typename DataContainer::value_type;
+  using size_type = typename DataContainer::size_type;
+  using difference_type = typename DataContainer::difference_type;
 
-  using key_type = DataContainer::key_type;
-  using mapped_type = DataContainer::mapped_type;
-  using value_type = DataContainer::value_type;
-  using size_type = DataContainer::size_type;
-  using difference_type = DataContainer::difference_type;
-
-  using iterator = DataContainer::iterator;
-  using const_iterator = DataContainer::const_iterator;
+  using iterator = typename DataContainer::iterator;
+  using const_iterator = typename DataContainer::const_iterator;
 
   // 默认构造
-  section() = default;
+  basic_section() = default;
   // 默认析构函数
-  ~section() = default;
+  ~basic_section() = default;
   // 默认移动构造函数
-  section(section &&) noexcept = default;
+  basic_section(basic_section &&) noexcept = default;
   // 默认移动赋值函数
-  section &operator=(section &&) noexcept = default;
+  basic_section &operator=(basic_section &&) noexcept = default;
 
   /// 重写拷贝构造函数, 深拷贝
-  section(const section &other) :
+  basic_section(const basic_section &other) :
     data_(other.data_),
     comments_(other.comments_ ? std::unique_ptr<comment_container>(new comment_container(*other.comments_)) : nullptr)
   {
   }
   // 友元 swap函数(非成员函数)
-  friend void swap(section &lhs, section &rhs) noexcept
+  friend void swap(basic_section &lhs, basic_section &rhs) noexcept
   {
     using std::swap;
     swap(lhs.data_, rhs.data_);
     swap(lhs.comments_, rhs.comments_);
   }
   /// 重写拷贝赋值函数(copy and swap方式)
-  section &operator=(section rhs) noexcept
+  basic_section &operator=(basic_section rhs) noexcept
   {
     swap(*this, rhs);  // copy and swap
     return *this;
@@ -920,19 +930,22 @@ class section
 };
 
 /// @brief ini file class
-class inifile
+template <typename Hash = std::hash<std::string>, typename Equal = std::equal_to<std::string>>
+class basic_inifile
 {
-  using DataContainer = std::unordered_map<std::string, section>;
+  using section = basic_section<Hash, Equal>;                                   // 在 basic_inifile 内部定义 section 别名
+  using comment_container = typename section::comment_container;                // 注释容器类型
+  using DataContainer = std::unordered_map<std::string, section, Hash, Equal>;  // 数据容器类型
 
  public:
-  using key_type = DataContainer::key_type;
-  using mapped_type = DataContainer::mapped_type;
-  using value_type = DataContainer::value_type;
-  using size_type = DataContainer::size_type;
-  using difference_type = DataContainer::difference_type;
+  using key_type = typename DataContainer::key_type;
+  using mapped_type = typename DataContainer::mapped_type;
+  using value_type = typename DataContainer::value_type;
+  using size_type = typename DataContainer::size_type;
+  using difference_type = typename DataContainer::difference_type;
 
-  using iterator = DataContainer::iterator;
-  using const_iterator = DataContainer::const_iterator;
+  using iterator = typename DataContainer::iterator;
+  using const_iterator = typename DataContainer::const_iterator;
 
   /// @brief Get or insert a field. If section_name does not exist, insert a default constructed section object
   /// @param sec section name
@@ -1105,7 +1118,7 @@ class inifile
   {
     data_.clear();
     std::string line, current_section;
-    section::comment_container comments;  // 注释容器
+    comment_container comments;  // 注释容器
     while (std::getline(is, line))
     {
       detail::trim(line);
@@ -1235,7 +1248,7 @@ class inifile
   /// @brief 写注释内容
   /// @param os 输出流
   /// @param comments 注释容器指针
-  void write_comment(std::ostream &os, const std::unique_ptr<section::comment_container> &comments) const
+  void write_comment(std::ostream &os, const std::unique_ptr<comment_container> &comments) const
   {
     if (comments && !comments->empty())
     {
@@ -1268,6 +1281,15 @@ inline std::vector<std::string> split(const std::string &str, char delimiter, bo
 {
   return detail::split(str, delimiter, skip_empty);
 }
+
+/// @brief section class
+using section = basic_section<>;
+/// @brief inifile class
+using inifile = basic_inifile<>;
+/// @brief case_insensitive_section class
+using case_insensitive_section = basic_section<detail::CaseInsensitiveHash, detail::CaseInsensitiveEqual>;
+/// @brief case_insensitive_inifile class
+using case_insensitive_inifile = basic_inifile<detail::CaseInsensitiveHash, detail::CaseInsensitiveEqual>;
 
 }  // namespace ini
 
