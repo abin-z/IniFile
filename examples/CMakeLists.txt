@@ -18,3 +18,6 @@ target_link_libraries(inifile_custom PRIVATE inifile)
 
 add_executable(inifile_custom2 inifile_custom2.cpp)
 target_link_libraries(inifile_custom2 PRIVATE inifile)
+
+add_executable(inifile_case_insensitive inifile_case_insensitive.cpp)
+target_link_libraries(inifile_case_insensitive PRIVATE inifile)
