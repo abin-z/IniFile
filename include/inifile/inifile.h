@@ -1,7 +1,7 @@
 /**************************************************************************************************************
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  * @file: inifile.h
- * @version: v0.9.3
+ * @version: v0.9.4
  * @description: Easy-to-use ini file parsing library that supports parsing, modifying and saving ini files.
  * - Features :
  *   - Lightweight & Easy-to-Use: A header-only INI parser with no external dependencies (C++11 only).
@@ -11,6 +11,7 @@
  *   - Automatic Type Conversion: Seamlessly handles various data types.
  *   - Support Comment: Supports `[section]` and `key=value` line comments (`;` or `#`) (end-of-line comments are not supported)
  *   - Custom type conversion: After customization, support automatic conversion for user-defined types
+ *   - Support case insensitivity: Provides optional case insensitivity (for `section` and `key`)
  *
  * @author: abin
  * @date: 2025-02-23
