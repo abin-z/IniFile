@@ -646,7 +646,7 @@ inline std::ostream &operator<<(std::ostream &os, const field &data)
   return os << data.value_;
 }
 
-/// @brief ini section
+/// @brief ini section class
 class section
 {
   friend class inifile;
