@@ -450,7 +450,7 @@ struct convert<std::string_view>
 /// @brief 大小写不敏感的哈希函数
 struct CaseInsensitiveHash
 {
-  std::size_t operator()(std::string s) const  // copy by value
+  std::size_t operator()(std::string s) const  // pass by value
   {
     std::transform(s.begin(), s.end(), s.begin(), [](unsigned char c) { return std::tolower(c); });
     return std::hash<std::string>{}(s);
