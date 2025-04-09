@@ -563,3 +563,25 @@ TEST_CASE("case insensitive test07", "[inifile][case_insensitive]")
     }
   }
 }
+
+TEST_CASE("case insensitive test08", "[inifile][case_insensitive]")
+{
+  ini::case_insensitive_inifile inif;
+  // 添加一些中文的测试
+  inif["中文节"]["中文键"] = "中文值";
+
+  // 测试中文的大小写不敏感性（实际上中文没有大小写，但测试是否受影响）
+  CHECK(inif.contains("中文节") == true);
+  CHECK(inif.contains("中文节", "中文键") == true);
+  CHECK(inif["中文节"]["中文键"].as<std::string>() == "中文值");
+
+  // 修改中文值
+  inif["中文节"]["中文键"] = "新的中文值";
+  CHECK(inif["中文节"]["中文键"].as<std::string>() == "新的中文值");
+
+  // 测试不存在的中文键
+  CHECK(inif.contains("中文节", "不存在的键") == false);
+
+  // 测试中文默认值
+  CHECK(inif.get("中文节", "不存在的键", "默认值").as<std::string>() == "默认值");
+}
