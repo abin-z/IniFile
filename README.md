@@ -18,6 +18,7 @@ This is a lightweight, cross-platform, efficient and **header-only** INI configu
 - **Automatic Type Conversion**: Supports multiple data types and can automatically handle type conversion (elegant API interface).
 - **Support comment function**: Support ini line comments (`;` or `#`), you can add line comments for `[section]` and `key=value` (does not support end-of-line comments).
 - **Custom type conversion**: You can customize type conversion, inifile will automatically convert according to the definition you wrote (reduce duplication)
+- **Support case insensitivity**: Provides optional case insensitivity (for `section` and `key`)
 
 Ideal for C++ projects that require **parsing, editing, and storing** INI configuration files. The following is the basic ini format:
 
