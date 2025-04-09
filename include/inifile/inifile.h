@@ -935,45 +935,45 @@ class inifile
   using const_iterator = DataContainer::const_iterator;
 
   /// @brief Get or insert a field. If section_name does not exist, insert a default constructed section object
-  /// @param section section name
+  /// @param sec section name
   /// @return Returns the section reference corresponding to the key
-  section &operator[](const std::string &section)
+  section &operator[](const std::string &sec)
   {
-    return data_[section];
+    return data_[sec];
   }
-  section &operator[](std::string &&section)
+  section &operator[](std::string &&sec)
   {
-    return data_[std::move(section)];
+    return data_[std::move(sec)];
   }
 
   /// @brief Set section key-value
   /// @tparam T Field value type
-  /// @param section Section name
+  /// @param sec Section name
   /// @param key Key
   /// @param value Field value
   template <typename T>
-  void set(const std::string &section, const std::string &key, T &&value)
+  void set(const std::string &sec, const std::string &key, T &&value)
   {
-    data_[section][key] = std::forward<T>(value);
+    data_[sec][key] = std::forward<T>(value);
   }
 
   /// @brief Check if the specified section exists
-  /// @param section section name
+  /// @param sec section name
   /// @return Return true if it exists, otherwise return false
-  bool contains(std::string section) const
+  bool contains(std::string sec) const
   {
-    detail::trim(section);
-    return data_.find(section) != data_.end();
+    detail::trim(sec);
+    return data_.find(sec) != data_.end();
   }
 
   /// @brief Check if the specified key exists in the specified section
-  /// @param section section name
+  /// @param sec section name
   /// @param key key
   /// @return Return true if it exists, otherwise return false
-  bool contains(std::string section, std::string key) const
+  bool contains(std::string sec, std::string key) const
   {
-    detail::trim(section);
-    auto sec_it = data_.find(section);
+    detail::trim(sec);
+    auto sec_it = data_.find(sec);
     if (sec_it != data_.end())
     {
       return sec_it->second.contains(std::move(key));
@@ -983,19 +983,19 @@ class inifile
 
   /// @brief Returns a reference to the specified section.
   ///        If section does not exist, an exception of type `std::out_of_range` will be thrown.
-  /// @param section section-name - an exception will be thrown if the section does not exist
+  /// @param sec section-name - an exception will be thrown if the section does not exist
   /// @return section reference
   /// @throws `std::out_of_range` if section does not exist
-  section &at(std::string section)
+  section &at(std::string sec)
   {
-    detail::trim(section);
-    return data_.at(section);
+    detail::trim(sec);
+    return data_.at(sec);
   }
   // const overloading function
-  const section &at(std::string section) const
+  const section &at(std::string sec) const
   {
-    detail::trim(section);
-    return data_.at(section);
+    detail::trim(sec);
+    return data_.at(sec);
   }
 
   /// @brief Returns the field value of the specified section and the specified key
