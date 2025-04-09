@@ -433,3 +433,133 @@ TEST_CASE("member func test11", "[inifile]")
   bool ret = inif2.find("section") != inif2.end();
   CHECK(ret == true);
 }
+
+TEST_CASE("case insensitive test01", "[inifile][case_insensitive]")
+{
+  ini::case_insensitive_inifile inif;
+  inif["Section"]["Key"] = "Value";
+
+  // Test case-insensitive section and key access
+  CHECK(inif.contains("section") == true);
+  CHECK(inif.contains("SECTION") == true);
+  CHECK(inif.contains("Section") == true);
+  CHECK(inif.contains("section", "key") == true);
+  CHECK(inif.contains("SECTION", "KEY") == true);
+  CHECK(inif.contains("Section", "Key") == true);
+
+  // Test retrieval of values
+  CHECK(inif["section"]["key"].as<std::string>() == "Value");
+  CHECK(inif["SECTION"]["KEY"].as<std::string>() == "Value");
+  CHECK(inif["Section"]["Key"].as<std::string>() == "Value");
+
+  // Test modification of values
+  inif["section"]["key"] = "NewValue";
+  CHECK(inif["SECTION"]["KEY"].as<std::string>() == "NewValue");
+}
+
+TEST_CASE("case insensitive test02", "[inifile][case_insensitive]")
+{
+  ini::case_insensitive_inifile inif;
+  inif["Section"]["Key"] = 42;
+
+  // Test case-insensitive numeric value retrieval
+  CHECK(inif["section"]["key"].as<int>() == 42);
+  CHECK(inif["SECTION"]["KEY"].as<int>() == 42);
+  CHECK(inif["Section"]["Key"].as<int>() == 42);
+
+  // Test case-insensitive existence checks
+  CHECK(inif.contains("section", "key") == true);
+  CHECK(inif.contains("SECTION", "KEY") == true);
+  CHECK(inif.contains("Section", "Key") == true);
+
+  // Test case-insensitive non-existent keys
+  CHECK(inif.contains("section", "nonexistent") == false);
+  CHECK(inif.contains("SECTION", "NONEXISTENT") == false);
+}
+
+TEST_CASE("case insensitive test03", "[inifile][case_insensitive]")
+{
+  ini::case_insensitive_inifile inif;
+  inif["Section"]["Key"] = "Value";
+
+  // Test case-insensitive find
+  auto it = inif.find("section");
+  bool isfind = it != inif.end();
+  CHECK(isfind == true);
+  CHECK(it->first == "Section");
+  CHECK(it->second.contains("key") == true);
+
+  auto key_it = it->second.find("key");
+  bool isfind_key = key_it != it->second.end();
+  CHECK(isfind_key == true);
+  CHECK(key_it->first == "Key");
+  CHECK(key_it->second.as<std::string>() == "Value");
+
+  // Test case-insensitive count
+  CHECK(inif.count("section") == 1);
+  CHECK(inif.count("SECTION") == 1);
+}
+
+TEST_CASE("case insensitive test04", "[inifile][case_insensitive]")
+{
+  ini::case_insensitive_inifile inif;
+  inif["Section"]["Key"] = "Value";
+
+  // Test case-insensitive clear and size
+  CHECK(inif.size() == 1);
+  inif.clear();
+  CHECK(inif.size() == 0);
+  CHECK(inif.contains("section") == false);
+}
+
+TEST_CASE("case insensitive test05", "[inifile][case_insensitive]")
+{
+  ini::case_insensitive_inifile inif;
+  inif["Section"]["Key"] = "Value";
+
+  // Test case-insensitive default value retrieval
+  CHECK(inif.get("section", "key", "Default").as<std::string>() == "Value");
+  CHECK(inif.get("SECTION", "KEY", "Default").as<std::string>() == "Value");
+  CHECK(inif.get("section", "nonexistent", "Default").as<std::string>() == "Default");
+}
+
+TEST_CASE("case insensitive test06", "[inifile][case_insensitive]")
+{
+  ini::case_insensitive_inifile inif;
+  inif["Section"]["Key"] = "Value";
+
+  // Test case-insensitive removal
+  CHECK(inif.contains("section", "key") == true);
+  inif["section"].erase("key");
+  CHECK(inif.contains("section", "key") == false);
+
+  CHECK(inif.contains("section") == true);
+  inif.erase("section");
+  CHECK(inif.contains("section") == false);
+}
+
+TEST_CASE("case insensitive test07", "[inifile][case_insensitive]")
+{
+  ini::case_insensitive_inifile inif;
+  inif["Section"]["Key"] = "Value";
+  inif["AnotherSection"]["AnotherKey"] = "AnotherValue";
+
+  // Test case-insensitive iteration
+  for (const auto &section : inif)
+  {
+    CHECK((section.first == "Section" || section.first == "AnotherSection"));
+    for (const auto &key : section.second)
+    {
+      if (section.first == "Section")
+      {
+        CHECK(key.first == "Key");
+        CHECK(key.second.as<std::string>() == "Value");
+      }
+      else if (section.first == "AnotherSection")
+      {
+        CHECK(key.first == "AnotherKey");
+        CHECK(key.second.as<std::string>() == "AnotherValue");
+      }
+    }
+  }
+}
