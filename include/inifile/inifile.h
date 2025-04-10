@@ -6,6 +6,7 @@
  * - Features :
  *   - Lightweight & Easy-to-Use: A header-only INI parser with no external dependencies (C++11 only).
  *   - Read, Modify & Write: Easily handle INI configuration files.
+ *   - Cross-platform: Supports Linux, Windows, MacOS and other systems.
  *   - Intuitive API: Simple and clear interface for reading, modifying, and writing INI files.
  *   - Multiple data source handling: support input/output from files `std::string` and `std::istream`.
  *   - Automatic Type Conversion: Seamlessly handles various data types.
