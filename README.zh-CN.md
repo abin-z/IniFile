@@ -232,7 +232,7 @@ key2=value
 
 #### 大小写不敏感功能
 
-本库支持`section`和`key`的大小写不敏感功能, 使用`ini::case_insensitive_inifile`即可, 具体案例请[点击查看](./examples\inifile_case_insensitive.cpp)
+本库支持`section`和`key`的大小写不敏感功能, 使用`ini::case_insensitive_inifile`即可, 具体案例请[点击查看](./examples/inifile_case_insensitive.cpp)
 
 ```cpp
 #include <inifile/inifile.h>

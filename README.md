@@ -228,7 +228,7 @@ key2=value
 
 #### Case insensitivity feature
 
-This library supports case insensitivity for `section` and `key`, use **`ini::case_insensitive_inifile`**, examples please [Click to view details](./examples\inifile_case_insensitive.cpp)
+This library supports case insensitivity for `section` and `key`, use **`ini::case_insensitive_inifile`**, please [Click to view details](./examples/inifile_case_insensitive.cpp)
 
 ```cpp
 #include <inifile/inifile.h>
