@@ -1,6 +1,6 @@
 ##  🌟 轻量级ini文件解析库
 
-[![iniparser](https://img.shields.io/badge/INI_Parser-8A2BE2)](https://github.com/abin-z/IniFile) [![headeronly](https://img.shields.io/badge/Header_Only-green)](https://github.com/abin-z/IniFile/blob/main/include/inifile/inifile.h) [![moderncpp](https://img.shields.io/badge/Modern_C%2B%2B-218c73)](https://learn.microsoft.com/en-us/cpp/cpp/welcome-back-to-cpp-modern-cpp?view=msvc-170) [![licenseMIT](https://img.shields.io/badge/License-MIT-green)](https://github.com/abin-z/IniFile/blob/main/LICENSE) [![version](https://img.shields.io/badge/version-0.9.3-green)](https://github.com/abin-z/IniFile/releases)
+[![iniparser](https://img.shields.io/badge/INI_Parser-8A2BE2)](https://github.com/abin-z/IniFile) [![headeronly](https://img.shields.io/badge/Header_Only-green)](https://github.com/abin-z/IniFile/blob/main/include/inifile/inifile.h) [![moderncpp](https://img.shields.io/badge/Modern_C%2B%2B-218c73)](https://learn.microsoft.com/en-us/cpp/cpp/welcome-back-to-cpp-modern-cpp?view=msvc-170) [![licenseMIT](https://img.shields.io/badge/License-MIT-green)](https://github.com/abin-z/IniFile/blob/main/LICENSE) [![version](https://img.shields.io/badge/version-0.9.4-green)](https://github.com/abin-z/IniFile/releases)
 
 🌍 Languages/语言:  [English](README.md)  |  [简体中文](README.zh-CN.md)
 
@@ -11,7 +11,7 @@
 - **轻量级 & 无依赖**：仅依赖 C++11 标准库，无需额外依赖项
 - **易于集成**：Header-only 设计，开箱即用，足够简单
 - **直观 API**：提供清晰友好的接口，简化 INI 文件操作
-- **全面支持**：可读取、修改、写入 INI 数据至文件
+- **跨平台支持**：支持Linux, Windows, MacOS等系统, 以及主流编译器
 - **多种数据源**：支持从文件，`std::string` 或 `std::istream` 解析 INI 数据，并写入其中
 - **自动类型转换**：支持多种数据类型，能自动处理类型转换(优雅的api接口)
 - **支持注释功能**:  支持ini行注释(`;`或者`#`), 可以为`[section]`和`key=value`添加行注释(不支持行尾注释)
@@ -230,6 +230,38 @@ key1=3.141592
 key2=value
 ```
 
+#### 大小写不敏感功能
+
+本库支持`section`和`key`的大小写不敏感功能, 使用`ini::case_insensitive_inifile`即可, 具体案例请[点击查看](./examples\inifile_case_insensitive.cpp)
+
+```cpp
+#include <inifile/inifile.h>
+int main()
+{
+  const char *str = R"(
+    [Section]
+    KEY=Value
+    Flag=123
+    hello=world
+  )";
+  
+  ini::case_insensitive_inifile inif;  // Create a case-insensitive INI file object
+  inif.from_string(str);               // Read INI data from string
+
+  // Test case-insensitive section and key access
+  std::cout << "inif.contains(\"Section\") = " << inif.contains("Section") << std::endl;  // true
+  std::cout << "inif.contains(\"SECTION\") = " << inif.contains("SECTION") << std::endl;  // true
+  std::cout << "inif.contains(\"SeCtIoN\") = " << inif.contains("SeCtIoN") << std::endl;  // true
+
+  std::cout << "inif.at(\"section\").contains(\"key\") = " << inif.at("section").contains("key") << std::endl;
+  std::cout << "inif.at(\"section\").contains(\"Key\") = " << inif.at("section").contains("Key") << std::endl;
+  std::cout << "inif.at(\"SECTION\").contains(\"KEY\") = " << inif.at("SECTION").contains("KEY") << std::endl;
+  std::cout << "inif.at(\"SECTION\").contains(\"flag\") = " << inif.at("SECTION").contains("flag") << std::endl;
+  std::cout << "inif.at(\"SECTION\").contains(\"FLAG\") = " << inif.at("SECTION").contains("FLAG") << std::endl;
+  return 0;
+}
+```
+
 #### 关于自动类型转换
 
 自动类型转换作用在`ini::field`对象上, 允许`ini::field` <=> `other type`互相转换; 但是需要注意: **若转换失败会抛出异常.**
@@ -417,11 +449,13 @@ int main()
 
 #### class 类型说明
 
-| class名称    | 描述                                                         |
-| ------------ | ------------------------------------------------------------ |
-| ini::inifile | 对应整个ini数据, 包含了所有的section                         |
-| ini::section | 对应整个section内容, 里面包含了本section所有的key-value值    |
-| ini::field   | 对应ini文件中的 value 字段, 支持多种数据类型,  支持自动类型转换 |
+| class名称                     | 描述                                                         |
+| ----------------------------- | ------------------------------------------------------------ |
+| ini::inifile                  | 对应整个ini数据, 包含了所有的section                         |
+| ini::section                  | 对应整个section内容, 里面包含了本section所有的key-value值    |
+| ini::case_insensitive_inifile | 对`section`和`key`大小写不敏感, 其他功能和`ini::inifile`一致 |
+| ini::case_insensitive_section | 对`key`大小写不敏感, 其他功能和`ini::section`一致            |
+| ini::field                    | 对应ini文件中的 value 字段, 支持多种数据类型,  支持自动类型转换 |
 
 #### ini::field类API说明
 

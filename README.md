@@ -1,6 +1,6 @@
 ## 🌟 Lightweight INI File Parsing Library
 
-[![iniparser](https://img.shields.io/badge/INI_Parser-8A2BE2)](https://github.com/abin-z/IniFile) [![headeronly](https://img.shields.io/badge/Header_Only-green)](https://github.com/abin-z/IniFile/blob/main/include/inifile/inifile.h) [![moderncpp](https://img.shields.io/badge/Modern_C%2B%2B-218c73)](https://learn.microsoft.com/en-us/cpp/cpp/welcome-back-to-cpp-modern-cpp?view=msvc-170) [![licenseMIT](https://img.shields.io/badge/License-MIT-green)](https://github.com/abin-z/IniFile/blob/main/LICENSE) [![version](https://img.shields.io/badge/version-0.9.3-green)](https://github.com/abin-z/IniFile/releases)
+[![iniparser](https://img.shields.io/badge/INI_Parser-8A2BE2)](https://github.com/abin-z/IniFile) [![headeronly](https://img.shields.io/badge/Header_Only-green)](https://github.com/abin-z/IniFile/blob/main/include/inifile/inifile.h) [![moderncpp](https://img.shields.io/badge/Modern_C%2B%2B-218c73)](https://learn.microsoft.com/en-us/cpp/cpp/welcome-back-to-cpp-modern-cpp?view=msvc-170) [![licenseMIT](https://img.shields.io/badge/License-MIT-green)](https://github.com/abin-z/IniFile/blob/main/LICENSE) [![version](https://img.shields.io/badge/version-0.9.4-green)](https://github.com/abin-z/IniFile/releases)
 
 🌍 Languages/语言:  [English](README.md)  |  [简体中文](README.zh-CN.md)
 
@@ -13,7 +13,7 @@ This is a lightweight, cross-platform, efficient and **header-only** INI configu
 - **Lightweight & Dependency-Free**: Only relies on the C++11 standard library, no additional dependencies required.
 - **Easy Integration**: Header-only design, out of the box, simple enough.
 - **Intuitive API**: Provides a clear and user-friendly interface to simplify INI file operations.
-- **Comprehensive Support**: Allows reading, modifying, and writing INI data to files.
+- **Cross-platform**: Supports Linux, Windows, MacOS and other systems, as well as mainstream compilers
 - **Multiple Data Sources**: Supports parsing INI data from files, `std::string` or `std::istream`, and writing to them.
 - **Automatic Type Conversion**: Supports multiple data types and can automatically handle type conversion (elegant API interface).
 - **Support comment function**: Support ini line comments (`;` or `#`), you can add line comments for `[section]` and `key=value` (does not support end-of-line comments).
@@ -187,7 +187,7 @@ int main()
 }
 ```
 
-#### Comment function
+#### Comment feature
 
 This library supports setting line-level comments for `[section]` and `key=value` (end-of-line comments are not supported), and the comment symbols can be `;` and `#`; it can also retain the comment content from the data source.
 
@@ -224,6 +224,38 @@ key0=true
 # This is a key-value pairs comment
 key1=3.141592
 key2=value
+```
+
+#### Case insensitivity feature
+
+This library supports case insensitivity for `section` and `key`, use **`ini::case_insensitive_inifile`**, examples please [Click to view details](./examples\inifile_case_insensitive.cpp)
+
+```cpp
+#include <inifile/inifile.h>
+int main()
+{
+  const char *str = R"(
+    [Section]
+    KEY=Value
+    Flag=123
+    hello=world
+  )";
+  
+  ini::case_insensitive_inifile inif;  // Create a case-insensitive INI file object
+  inif.from_string(str);               // Read INI data from string
+
+  // Test case-insensitive section and key access
+  std::cout << "inif.contains(\"Section\") = " << inif.contains("Section") << std::endl;  // true
+  std::cout << "inif.contains(\"SECTION\") = " << inif.contains("SECTION") << std::endl;  // true
+  std::cout << "inif.contains(\"SeCtIoN\") = " << inif.contains("SeCtIoN") << std::endl;  // true
+
+  std::cout << "inif.at(\"section\").contains(\"key\") = " << inif.at("section").contains("key") << std::endl;
+  std::cout << "inif.at(\"section\").contains(\"Key\") = " << inif.at("section").contains("Key") << std::endl;
+  std::cout << "inif.at(\"SECTION\").contains(\"KEY\") = " << inif.at("SECTION").contains("KEY") << std::endl;
+  std::cout << "inif.at(\"SECTION\").contains(\"flag\") = " << inif.at("SECTION").contains("flag") << std::endl;
+  std::cout << "inif.at(\"SECTION\").contains(\"FLAG\") = " << inif.at("SECTION").contains("FLAG") << std::endl;
+  return 0;
+}
 ```
 
 #### About automatic type conversion
@@ -409,11 +441,13 @@ int main()
 
 #### class Description
 
-| class name   | description                                                  |
-| ------------ | ------------------------------------------------------------ |
-| ini::inifile | Corresponds to the entire ini data, including all sections   |
-| ini::section | corresponds to the content of the entire section, which contains all the key-value values of the section. |
-| ini::field   | corresponds to the value field in the ini data, supports multiple data types, supports automatic type conversion |
+| class name                    | description                                                  |
+| ----------------------------- | ------------------------------------------------------------ |
+| ini::inifile                  | Corresponds to the entire ini data, including all sections.  |
+| ini::section                  | corresponds to the content of the entire section, which contains all the key-value values of the section. |
+| ini::case_insensitive_inifile | The `section` and `key` are case-insensitive; all other features are the same as `ini::inifile`. |
+| ini::case_insensitive_section | The `key` are case-insensitive; all other features are the same as `ini::section`. |
+| ini::field                    | corresponds to the value field in the ini data, supports multiple data types, supports automatic type conversion. |
 
 #### ini::field API Description
 
