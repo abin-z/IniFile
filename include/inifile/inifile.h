@@ -25,6 +25,7 @@
 #define INI_FILE_H_
 
 #include <algorithm>
+#include <cctype>
 #include <cerrno>
 #include <cstdlib>
 #include <fstream>
