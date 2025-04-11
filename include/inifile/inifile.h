@@ -326,7 +326,7 @@ struct convert<T, typename std::enable_if<std::is_integral<T>::value && !is_char
    * - 使用 `std::strtoll()` / `std::strtoull()` 进行转换
    * - 检查 `errno == ERANGE`,防止溢出
    * - 确保转换值在 `T` 的范围内
-   * - 检查 `endPtr` 以确保完整转换
+   * - 检查 `end_ptr` 以确保完整转换
    */
   void decode(const std::string &value, T &result)
   {
@@ -335,12 +335,12 @@ struct convert<T, typename std::enable_if<std::is_integral<T>::value && !is_char
       throw std::invalid_argument("<inifile> Cannot convert empty string to integer.");
     }
 
-    char *endPtr = nullptr;
+    char *end_ptr = nullptr;
     errno = 0;  // 清除错误状态
 
     if (std::is_signed<T>::value)
     {
-      long long temp = std::strtoll(value.c_str(), &endPtr, 10);
+      long long temp = std::strtoll(value.c_str(), &end_ptr, 10);
       if (errno == ERANGE || temp < std::numeric_limits<T>::min() || temp > std::numeric_limits<T>::max())
       {
         throw std::out_of_range("<inifile> Integer conversion out of range.");
@@ -349,7 +349,7 @@ struct convert<T, typename std::enable_if<std::is_integral<T>::value && !is_char
     }
     else
     {
-      unsigned long long temp = std::strtoull(value.c_str(), &endPtr, 10);
+      unsigned long long temp = std::strtoull(value.c_str(), &end_ptr, 10);
       if (errno == ERANGE || temp > std::numeric_limits<T>::max())
       {
         throw std::out_of_range("<inifile> Unsigned integer conversion out of range.");
@@ -357,7 +357,7 @@ struct convert<T, typename std::enable_if<std::is_integral<T>::value && !is_char
       result = static_cast<T>(temp);
     }
 
-    if (endPtr == value.c_str() || *endPtr != '\0')  // 检查是否转换完整
+    if (end_ptr == value.c_str() || *end_ptr != '\0')  // 检查是否转换完整
     {
       throw std::invalid_argument("<inifile> Invalid integer format: " + value);
     }
@@ -394,7 +394,7 @@ struct convert<T, typename std::enable_if<std::is_floating_point<T>::value>::typ
    * - 使用 `std::strtold()` 进行转换,以支持 `long double` 的精度
    * - 检查 `errno == ERANGE`,防止溢出
    * - 确保转换值在 `T` 的范围内
-   * - 检查 `endPtr` 以确保完整转换
+   * - 检查 `end_ptr` 以确保完整转换
    */
   void decode(const std::string &value, T &result)
   {
@@ -403,9 +403,9 @@ struct convert<T, typename std::enable_if<std::is_floating_point<T>::value>::typ
       throw std::invalid_argument("<inifile> Cannot convert empty string to floating point.");
     }
 
-    char *endPtr = nullptr;
+    char *end_ptr = nullptr;
     errno = 0;
-    long double temp = std::strtold(value.c_str(), &endPtr);
+    long double temp = std::strtold(value.c_str(), &end_ptr);
 
     if (errno == ERANGE || temp < std::numeric_limits<T>::lowest() || temp > std::numeric_limits<T>::max())
     {
@@ -414,7 +414,7 @@ struct convert<T, typename std::enable_if<std::is_floating_point<T>::value>::typ
 
     result = static_cast<T>(temp);
 
-    if (endPtr == value.c_str() || *endPtr != '\0')  // 检查是否转换完整
+    if (end_ptr == value.c_str() || *end_ptr != '\0')  // 检查是否转换完整
     {
       throw std::invalid_argument("<inifile> Invalid floating point format: " + value);
     }
@@ -451,7 +451,7 @@ struct convert<std::string_view>
 #endif
 
 /// @brief 大小写不敏感的哈希函数
-struct CaseInsensitiveHash
+struct case_insensitive_hash
 {
   std::size_t operator()(std::string s) const  // pass by value
   {
@@ -461,7 +461,7 @@ struct CaseInsensitiveHash
 };
 
 /// @brief 大小写不敏感的比较函数
-struct CaseInsensitiveEqual
+struct case_insensitive_equal
 {
   bool operator()(const std::string &lhs, const std::string &rhs) const
   {
@@ -664,18 +664,18 @@ class basic_section
   template <typename, typename>
   friend class basic_inifile;
 
-  using comment_container = field::comment_container;                         // 注释容器
-  using DataContainer = std::unordered_map<std::string, field, Hash, Equal>;  // 数据容器类型
+  using comment_container = field::comment_container;                          // 注释容器
+  using data_container = std::unordered_map<std::string, field, Hash, Equal>;  // 数据容器类型
 
  public:
-  using key_type = typename DataContainer::key_type;
-  using mapped_type = typename DataContainer::mapped_type;
-  using value_type = typename DataContainer::value_type;
-  using size_type = typename DataContainer::size_type;
-  using difference_type = typename DataContainer::difference_type;
+  using key_type = typename data_container::key_type;
+  using mapped_type = typename data_container::mapped_type;
+  using value_type = typename data_container::value_type;
+  using size_type = typename data_container::size_type;
+  using difference_type = typename data_container::difference_type;
 
-  using iterator = typename DataContainer::iterator;
-  using const_iterator = typename DataContainer::const_iterator;
+  using iterator = typename data_container::iterator;
+  using const_iterator = typename data_container::const_iterator;
 
   // 默认构造
   basic_section() = default;
@@ -927,7 +927,7 @@ class basic_section
   }
 
  private:
-  DataContainer data_;  // key-value pairs
+  data_container data_;  // key-value pairs
   // 当前section的注释容器, 采用懒加载策略(默认为nullptr), 深拷贝机制.
   std::unique_ptr<comment_container> comments_;  // 使用unique_ptr主要考虑内存占用更小, c++17使用std::option会更好
 };
@@ -936,19 +936,19 @@ class basic_section
 template <typename Hash = std::hash<std::string>, typename Equal = std::equal_to<std::string>>
 class basic_inifile
 {
-  using section = basic_section<Hash, Equal>;                                   // 在 basic_inifile 内部定义 section 别名
-  using comment_container = typename section::comment_container;                // 注释容器类型
-  using DataContainer = std::unordered_map<std::string, section, Hash, Equal>;  // 数据容器类型
+  using section = basic_section<Hash, Equal>;                                    // 在 basic_inifile 内部定义 section 别名
+  using comment_container = typename section::comment_container;                 // 注释容器类型
+  using data_container = std::unordered_map<std::string, section, Hash, Equal>;  // 数据容器类型
 
  public:
-  using key_type = typename DataContainer::key_type;
-  using mapped_type = typename DataContainer::mapped_type;
-  using value_type = typename DataContainer::value_type;
-  using size_type = typename DataContainer::size_type;
-  using difference_type = typename DataContainer::difference_type;
+  using key_type = typename data_container::key_type;
+  using mapped_type = typename data_container::mapped_type;
+  using value_type = typename data_container::value_type;
+  using size_type = typename data_container::size_type;
+  using difference_type = typename data_container::difference_type;
 
-  using iterator = typename DataContainer::iterator;
-  using const_iterator = typename DataContainer::const_iterator;
+  using iterator = typename data_container::iterator;
+  using const_iterator = typename data_container::const_iterator;
 
   /// @brief Get or insert a field. If section_name does not exist, insert a default constructed section object
   /// @param sec section name
@@ -1263,7 +1263,7 @@ class basic_inifile
   }
 
  private:
-  DataContainer data_;  // section_name - key_value
+  data_container data_;  // section_name - key_value
 };
 
 /// @brief Trims whitespace from both ends of the given string.
@@ -1290,9 +1290,9 @@ using section = basic_section<>;
 /// @brief inifile class
 using inifile = basic_inifile<>;
 /// @brief case_insensitive_section class
-using case_insensitive_section = basic_section<detail::CaseInsensitiveHash, detail::CaseInsensitiveEqual>;
+using case_insensitive_section = basic_section<detail::case_insensitive_hash, detail::case_insensitive_equal>;
 /// @brief case_insensitive_inifile class
-using case_insensitive_inifile = basic_inifile<detail::CaseInsensitiveHash, detail::CaseInsensitiveEqual>;
+using case_insensitive_inifile = basic_inifile<detail::case_insensitive_hash, detail::case_insensitive_equal>;
 
 }  // namespace ini
 
