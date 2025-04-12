@@ -32,7 +32,7 @@ key = value
 
 ### 📦 Usage
 
-**Method 1: Header-Only**
+**Method 1: Header-only**
 
 1. Copy the [`inifile.h`](./include/inifile/inifile.h) header file to your project folder.
 2. Include it in your source code using `#include "inifile.h"`.
