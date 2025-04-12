@@ -32,12 +32,12 @@ key = value
 
 ### 📦 Usage
 
-**Header-Only Approach**
+**Method 1: Header-Only**
 
 1. Copy the [`inifile.h`](./include/inifile/inifile.h) header file to your project folder.
 2. Include it in your source code using `#include "inifile.h"`.
 
-**CMake Approach**
+**Method 2: Using CMake**
 
 1. Create an `inifile` folder in your project (name can be customized).
 
@@ -184,6 +184,7 @@ int main()
   std::string ss3 = inif["section"].get("key5", "default"); // Specify default values
     
   double dd0 = inif.at("section").at("key");
+  std::cout << "section-key:" << inif["section"]["key"].as<double>() << std::endl;
 }
 ```
 
@@ -330,7 +331,7 @@ You can provide a special template class for automatic type conversion for user-
 template <>
 struct INIFILE_TYPE_CONVERTER<CustomClass>  // User-defined type `CustomClass`
 {
-  void encode(const CustomClass &obj, std::string &value)
+  void encode(const CustomClass &obj, std::string &value)  //pass by reference
   {
     // Convert the CustomClass object `obj` to ini storage string `value`
   }

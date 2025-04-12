@@ -30,13 +30,13 @@ key = value
 
 ### 📦 使用方式
 
-**header-only方式**
+**方式1: Header-Only**
 
 1. 直接将[`inifile.h`](./include/inifile/inifile.h)头文件复制到您的项目文件夹中
 
 2. 然后在源代码文件中直接`#include "inifile.h"`即可使用
 
-**cmake方式**
+**方式2: 使用CMake**
 
 1. 在项目中创建一个`inifile`文件夹(名称随意)
 
@@ -163,7 +163,7 @@ int main()
 
 说明: 获取值的时候需要注意以下两点:
 
-- 给定的section-key是否存在, 当section-key不存在时调用不同的函数会有不同的策略处理;
+- 给定的section-key是否存在, 当section-key不存在时调用不同的函数会有不同的处理策略;
   - 使用`operator[]`返回**引用**, 若给定section或key不存在则**会插入**空的field值, 并设置field为空字符串. (行为类似`std::map`的`[]`)
   - 使用`get()`函数返回**值**, 若给定的section或key不存在**不会插入**field, 而是返回一个默认的空field值(可以指定默认值).
   - 使用`at()`函数返回**引用**, 若给定的section或key不存在则**抛出异常** : `std::out_of_range`
@@ -188,6 +188,7 @@ int main()
   std::string ss3 = inif["section"].get("key5", "default"); // Specify default values
     
   double dd0 = inif.at("section").at("key");
+  std::cout << "section-key:" << inif["section"]["key"].as<double>() << std::endl;
 }
 ```
 
@@ -336,7 +337,7 @@ int main()
 template <>
 struct INIFILE_TYPE_CONVERTER<CustomClass>  // User-defined type `CustomClass`
 {
-  void encode(const CustomClass &obj, std::string &value)
+  void encode(const CustomClass &obj, std::string &value)  //pass by reference
   {
     // Convert the CustomClass object `obj` to ini storage string `value`
   }
