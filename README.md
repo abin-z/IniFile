@@ -331,7 +331,7 @@ You can provide a special template class for automatic type conversion for user-
 template <>
 struct INIFILE_TYPE_CONVERTER<CustomClass>  // User-defined type `CustomClass`
 {
-  void encode(const CustomClass &obj, std::string &value)  //pass by reference
+  void encode(const CustomClass &obj, std::string &value)  // pass by reference
   {
     // Convert the CustomClass object `obj` to ini storage string `value`
   }
