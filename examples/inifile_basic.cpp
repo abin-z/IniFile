@@ -70,4 +70,5 @@ int main()
 
   to_string_func();
   from_string_func();
+  std::cout << "inifile_basic finish." << std::endl;
 }
