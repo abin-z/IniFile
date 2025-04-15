@@ -400,8 +400,8 @@ int main()
 
 ```cpp
 // Define vectors of different types
-std::vector<int> vec1 = {1, 2, 3, 4, 5};
-std::vector<double> vec2 = {1.1111, 2.2222, 3.3333, 4.4444, 5.5555};
+std::vector<int>         vec1 = {1, 2, 3, 4, 5};
+std::vector<double>      vec2 = {1.1111, 2.2222, 3.3333, 4.4444, 5.5555};
 std::vector<std::string> vec3 = {"aaa", "bbb", "ccc", "ddd", "eee"};
 
 // Set different types of vectors in the INI file object
