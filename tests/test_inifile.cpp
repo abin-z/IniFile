@@ -1,7 +1,14 @@
 #define CATCH_CONFIG_MAIN
 #include <inifile/inifile.h>
 
+#include <array>
 #include <catch.hpp>
+#include <deque>
+#include <list>
+#include <set>
+#include <string>
+#include <vector>
+#include <forward_list>
 
 TEST_CASE("basic test")
 {
@@ -627,4 +634,143 @@ TEST_CASE("case insensitive test08", "[inifile][case_insensitive]")
 
   // 测试中文默认值
   CHECK(inif.get("中文节", "不存在的键", "默认值").as<std::string>() == "默认值");
+}
+
+
+struct Point {
+  int x, y;
+  friend std::ostream& operator<<(std::ostream& os, const Point& p) {
+    return os << "(" << p.x << "," << p.y << ")";
+  }
+};
+
+TEST_CASE("join function", "[join]")
+{
+  using namespace ini;
+  using namespace std;
+
+  SECTION("Join vector of int")
+  {
+    vector<int> vec = {1, 2, 3};
+    REQUIRE(join(vec, ",") == "1,2,3");
+    REQUIRE(join(vec, '-') == "1-2-3");
+  }
+
+  SECTION("Join list of float")
+  {
+    list<float> lst = {1.1f, 2.2f, 3.3f};
+    REQUIRE(join(lst, ", ") == "1.1, 2.2, 3.3");
+  }
+
+  SECTION("Join set of double")
+  {
+    set<double> s = {3.14, 2.71};
+    REQUIRE(join(s, " | ") == "2.71 | 3.14");  // 注意 set 是有序的
+  }
+
+  SECTION("Join vector of strings")
+  {
+    vector<string> words = {"hello", "world", "!"};
+    REQUIRE(join(words, " ") == "hello world !");
+    REQUIRE(join(words, '_') == "hello_world_!");
+  }
+
+  SECTION("Join array of integers")
+  {
+    array<int, 4> arr = {10, 20, 30, 40};
+    REQUIRE(join(arr, ",") == "10,20,30,40");
+  }
+
+  SECTION("Join deque of strings")
+  {
+    deque<string> dq = {"first", "second"};
+    REQUIRE(join(dq, ":") == "first:second");
+  }
+
+  SECTION("Join vector of single element")
+  {
+    vector<int> one = {42};
+    REQUIRE(join(one, ',') == "42");
+  }
+
+  SECTION("Join empty container")
+  {
+    vector<string> empty;
+    REQUIRE(join(empty, ",") == "");
+  }
+
+  SECTION("Join vector of Chinese strings")
+  {
+    vector<string> chinese = {"你好", "世界", "！"};
+    REQUIRE(join(chinese, "-") == "你好-世界-！");
+  }
+
+  SECTION("Join vector of mixed-length strings")
+  {
+    vector<string> mixed = {"short", "", "longer text", "123"};
+    REQUIRE(join(mixed, "|") == "short||longer text|123");
+  }
+
+  SECTION("Join set of chars")
+  {
+    set<char> chars = {'a', 'b', 'c'};
+    REQUIRE(join(chars, ',') == "a,b,c");
+  }
+
+  SECTION("Join array of doubles")
+  {
+    array<double, 3> arr = {0.1, 2.5, 3.14159};
+    REQUIRE(join(arr, ";") == "0.1;2.5;3.14159");
+  }
+
+  SECTION("Join vector of bool")
+  {
+    vector<bool> flags = {true, false, true};
+    REQUIRE(join(flags, ',') == "1,0,1");  // vector<bool> 特殊处理为位
+  }
+
+  SECTION("Join forward_list of integers")
+  {
+    forward_list<int> fl = {5, 10, 15};
+    REQUIRE(join(fl, "->") == "5->10->15");
+  }
+
+  SECTION("Join multiset of strings")
+  {
+    multiset<string> ms = {"apple", "banana", "apple"};
+    REQUIRE(join(ms, ",") == "apple,apple,banana");  // multiset 自动排序 + 重复
+  }
+
+  // SECTION("Join vector of nullptrs") Error in join function: Container elements cannot be of pointer type
+  // {
+  //   vector<const char*> ptrs = {"test", "text", nullptr};
+  //   std::ostringstream expected;
+  //   expected << ptrs[0] << "," << ptrs[1] << "," << ptrs[2];  // 输出地址或null
+  //   REQUIRE(join(ptrs, ',') == expected.str());
+  // }
+
+  SECTION("Join vector of user-defined type")
+  {
+    vector<Point> points = {{1, 2}, {3, 4}, {5, 6}};
+    REQUIRE(join(points, ';') == "(1,2);(3,4);(5,6)");
+  }
+
+  SECTION("Join with empty string separator")
+  {
+    vector<int> nums = {1, 2, 3};
+    REQUIRE(join(nums, "") == "123");
+  }
+
+  SECTION("Join of single string element with empty separator")
+  {
+    vector<string> s = {"abc"};
+    REQUIRE(join(s, "") == "abc");
+  }
+
+  SECTION("Join list of large numbers")
+  {
+    list<long long> big = {1'000'000'000LL, 9'223'372'036'854'775'807LL};
+    REQUIRE(join(big, ",") == "1000000000,9223372036854775807");
+  }
+
 }

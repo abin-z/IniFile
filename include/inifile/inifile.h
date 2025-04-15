@@ -97,6 +97,33 @@ std::vector<std::string> split(const std::string &str, const std::string &delimi
   return tokens;
 }
 
+/// @brief 将容器中的元素连接为一个字符串,元素之间以指定分隔符分隔.空容器返回空字符串.
+///        注意:容器的元素类型不能是指针类型.
+/// @tparam Iterable 支持 std::begin() / std::end() 的序列式容器类型(如 vector、list、set 等)
+/// @param iterable 要拼接的容器
+/// @param separator 用于连接每个元素之间的分隔字符串
+/// @return 拼接后的字符串结果
+template <typename Iterable>
+std::string join(const Iterable &iterable, const std::string &separator)
+{
+  // 静态断言:如果容器元素类型是指针类型,抛出编译时错误
+  static_assert(!std::is_pointer<typename Iterable::value_type>::value,
+                "Error in join function: Container elements cannot be of pointer type");
+  std::ostringstream oss;
+  auto it = std::begin(iterable);
+  auto end = std::end(iterable);
+  // 处理第一个元素
+  if (it != end)
+  {
+    oss << *it++;  // 第一个元素,随后递增迭代器
+  }
+  while (it != end)
+  {
+    oss << separator << *it++;  // 添加分割符和后续元素,随后递增迭代器
+  }
+  return oss.str();
+}
+
 /// @brief 格式化注释字符串
 /// @param comment 注释内容(值传递方式)
 /// @param symbol 注释前缀符号
@@ -161,7 +188,7 @@ struct convert<bool>
   /**
    * @brief 将 bool 值转换为 std::string
    * @param value 布尔值
-   * @param result 输出字符串："true" 或 "false"
+   * @param result 输出字符串:"true" 或 "false"
    */
   void encode(const bool value, std::string &result)
   {
@@ -285,7 +312,7 @@ template <typename T>
 using remove_ref_const_volatile_t = remove_volatile_t<remove_const_t<remove_reference_t<T>>>;
 
 /**
- * @brief char系列类型特征：所有字符类型(包括 const 和引用的 char 类型)
+ * @brief char系列类型特征:所有字符类型(包括 const 和引用的 char 类型)
  * 该特征判断类型是否为 char 系列类型(包括 `char`、`signed char`、`unsigned char`、`wchar_t`、`char8_t`、`char16_t` 和
  * `char32_t`). 它会移除 `const` 和 `reference` 以及 `volatile` 修饰符,以确保正确判断字符类型.
  */
@@ -303,10 +330,10 @@ struct is_char_type : std::integral_constant<bool, std::is_same<remove_ref_const
 };
 
 /**
- * @brief convert 模板特化：处理所有整数类型(不包括字符类型 `char`、`signed char`、`unsigned char`、
+ * @brief convert 模板特化:处理所有整数类型(不包括字符类型 `char`、`signed char`、`unsigned char`、
  * `wchar_t`、`char16_t`、`char32_t` 等)
  *
- * 该模板特化适用于所有 `std::is_integral<T>::value` 为 `true` 的类型,但排除了以下字符类型：
+ * 该模板特化适用于所有 `std::is_integral<T>::value` 为 `true` 的类型,但排除了以下字符类型:
  * - `char`、`signed char`、`unsigned char`
  * - `wchar_t`(宽字符类型)
  * - `char16_t`、`char32_t`(UTF-16 和 UTF-32 编码字符类型)
@@ -377,7 +404,7 @@ struct convert<T, typename std::enable_if<std::is_integral<T>::value && !is_char
 };
 
 /**
- * @brief convert 模板特化：处理浮点数类型 (`float`, `double`, `long double`)
+ * @brief convert 模板特化:处理浮点数类型 (`float`, `double`, `long double`)
  *
  * 该模板特化适用于所有 `std::is_floating_point<T>::value` 为 `true` 的类型,
  * 即 `float`、`double` 和 `long double`.
@@ -1293,6 +1320,30 @@ inline std::vector<std::string> split(const std::string &str, char delimiter, bo
 inline std::vector<std::string> split(const std::string &str, const std::string &delimiter, bool skip_empty = false)
 {
   return detail::split(str, delimiter, skip_empty);
+}
+
+/// @brief Joins elements of a sequence container (e.g., vector, list, set, array, deque) into a string, separated by a character.
+///        Note: The elements of the container must not be of pointer type.
+/// @tparam Iterable Sequence container type (e.g., vector, list, set, array, deque) that supports std::begin() and std::end().
+/// @param iterable The container whose elements are joined.
+/// @param separator The character separating each element in the result.
+/// @return A string with all elements separated by the given character.
+template <typename Iterable>
+std::string join(const Iterable &iterable, char separator)
+{
+  return detail::join(iterable, std::string(1, separator));
+}
+
+/// @brief Joins elements of a sequence container (e.g., vector, list, set, array, deque) into a string, separated by a string.
+///        Note: The elements of the container must not be of pointer type.
+/// @tparam Iterable Sequence container type (e.g., vector, list, set, array, deque) that supports std::begin() and std::end().
+/// @param iterable The container whose elements are joined.
+/// @param separator The string separating each element in the result.
+/// @return A string with all elements separated by the given string.
+template <typename Iterable>
+std::string join(const Iterable &iterable, const std::string &separator)
+{
+  return detail::join(iterable, separator);
 }
 
 /// @brief section class
