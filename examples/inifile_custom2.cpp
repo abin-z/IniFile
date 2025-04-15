@@ -55,8 +55,8 @@ int main()
   ini::inifile inif;  // Create an INI file object
 
   // Define vectors of different types
-  std::vector<int> vec1 = {1, 2, 3, 4, 5};
-  std::vector<double> vec2 = {1.1111, 2.2222, 3.3333, 4.4444, 5.5555};
+  std::vector<int>         vec1 = {1, 2, 3, 4, 5};
+  std::vector<double>      vec2 = {1.1111, 2.2222, 3.3333, 4.4444, 5.5555};
   std::vector<std::string> vec3 = {"aaa", "bbb", "ccc", "ddd", "eee"};
 
   // Set different types of vectors in the INI file object
@@ -65,8 +65,8 @@ int main()
   inif["section"]["key3"] = vec3;
 
   // Get different vectors from INI file object
-  std::vector<int> v1 = inif["section"]["key1"];
-  std::vector<double> v2 = inif["section"]["key2"];
+  std::vector<int>         v1 = inif["section"]["key1"];
+  std::vector<double>      v2 = inif["section"]["key2"];
   std::vector<std::string> v3 = inif["section"]["key3"];
 
   // Print the vectors to the console

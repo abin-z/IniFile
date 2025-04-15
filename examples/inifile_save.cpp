@@ -7,11 +7,11 @@ int main()
   ini::inifile inif;
 
   inif["section"]["string"] = "value";
-  inif["section"]["int"] = 123;
-  inif["section"]["float"] = 3.14f;
+  inif["section"]["int"]    = 123;
+  inif["section"]["float"]  = 3.14f;
   inif["section"]["double"] = 3.141592;
-  inif["section"]["char"] = 'c';
-  inif["section"]["bool"] = true;
+  inif["section"]["char"]   = 'c';
+  inif["section"]["bool"]   = true;
 
   inif["section1"]["string"].set("hello");
   inif["section1"]["int"].set(1);

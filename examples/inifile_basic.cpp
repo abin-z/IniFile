@@ -26,8 +26,8 @@ void load_func()
   ini::inifile inif;
   // Call the load method to load the ini file and return whether the loading was successful
   bool isok = inif.load(path);
-  bool b = inif["section"]["key0"];
-  double d = inif["section"]["key1"];
+  bool        b = inif["section"]["key0"];
+  double      d = inif["section"]["key1"];
   std::string s = inif["section"]["key2"];
 }
 

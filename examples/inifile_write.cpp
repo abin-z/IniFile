@@ -5,11 +5,11 @@ int main()
   ini::inifile inif;
 
   inif["section1"]["string"] = "value";
-  inif["section1"]["int"] = 123;
-  inif["section1"]["float"] = 3.14f;
+  inif["section1"]["int"]    = 123;
+  inif["section1"]["float"]  = 3.14f;
   inif["section1"]["double"] = 3.141592;
-  inif["section1"]["char"] = 'c';
-  inif["section1"]["bool"] = true;
+  inif["section1"]["char"]   = 'c';
+  inif["section1"]["bool"]   = true;
   inif["section1"].set_comment("Comments on section1");
 
   inif.set("section2", "int", 99);
