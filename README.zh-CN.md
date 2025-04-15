@@ -348,7 +348,7 @@ struct INIFILE_TYPE_CONVERTER<CustomClass>  // User-defined type `CustomClass`
 }
 ```
 
-> 为了方便编写步骤3中`decode`函数本库提供了`ini::split()`和`ini::trim()`工具函数 
+> 为了方便编写 `encode` 和 `decode` 函数, 本库提供了 `ini::join`, `ini::split()` 和 `ini::trim()` 工具函数 
 
 **案例1**: 下面是将一个用户自定义类`Person`对象转为ini字段案例. [点击查看详情](./examples/inifile_custom.cpp)
 

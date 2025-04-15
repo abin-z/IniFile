@@ -342,7 +342,7 @@ struct INIFILE_TYPE_CONVERTER<CustomClass>  // User-defined type `CustomClass`
 }
 ```
 
-> In order to facilitate the writing of the `decode` function in step 3, this library provides the `ini::split()` and `ini::trim()` tool functions
+> To facilitate writing `encode` and `decode` functions, this library provides `ini::join`, `ini::split()` and `ini::trim()` utility functions
 
 **Example 1**: The following is an example of converting a user-defined class `Person` object to an ini field.   [Click to view details](./examples/inifile_custom.cpp)
 
