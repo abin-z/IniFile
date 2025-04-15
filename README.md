@@ -81,8 +81,8 @@ int main()
   ini::inifile inif;
   // Load the ini file, return whether the loading was successful or not.
   bool isok = inif.load(path);
-  bool b = inif["section"]["key0"];
-  double d = inif["section"]["key1"];
+  bool        b = inif["section"]["key0"];
+  double      d = inif["section"]["key1"];
   std::string s = inif["section"]["key2"];
 }
 ```
@@ -275,10 +275,10 @@ int main()
   ini::field f4 = "abc";
   
   /// ini::field -> other type
-  bool b = f;
-  int i = f1;
-  double d = f2;
-  char c = f3;
+  bool        b = f;
+  int         i = f1;
+  double      d = f2;
+  char        c = f3;
   std::string s = f4;
   
   ini::inifile inif;
@@ -404,8 +404,8 @@ inif["section"]["key2"] = vec2;
 inif["section"]["key3"] = vec3;
 
 // Get different vectors from INI file object
-std::vector<int> v1 = inif["section"]["key1"];
-std::vector<double> v2 = inif["section"]["key2"];
+std::vector<int>         v1 = inif["section"]["key1"];
+std::vector<double>      v2 = inif["section"]["key2"];
 std::vector<std::string> v3 = inif["section"]["key3"];
 ```
 
