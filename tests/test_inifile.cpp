@@ -1,6 +1,7 @@
 #define CATCH_CONFIG_MAIN
-#include <catch.hpp>
 #include <inifile/inifile.h>
+
+#include <catch.hpp>
 
 TEST_CASE("basic test")
 {
@@ -99,6 +100,89 @@ TEST_CASE("split function", "[split]")
     REQUIRE(split("apple|banana|cherry", '|') == std::vector<std::string>{"apple", "banana", "cherry"});
     REQUIRE(split("key=value=pair", '=') == std::vector<std::string>{"key", "value", "pair"});
   }
+
+  SECTION("Split with Unicode-like delimiter")
+  {
+    REQUIRE(split("红-绿-蓝", '-') == std::vector<std::string>{"红", "绿", "蓝"});
+    REQUIRE(split("路径#文件#类型", '#') == std::vector<std::string>{"路径", "文件", "类型"});
+  }
+}
+
+TEST_CASE("split function with string delimiter", "[split][string-delim]")
+{
+  using namespace ini;
+
+  SECTION("Split with string delimiter - basic cases")
+  {
+    REQUIRE(split("a::b::c", "::") == std::vector<std::string>{"a", "b", "c"});
+    REQUIRE(split("one--two--three", "--") == std::vector<std::string>{"one", "two", "three"});
+  }
+
+  SECTION("Split with string delimiter - consecutive delimiters")
+  {
+    REQUIRE(split("a::::b::c", "::") == std::vector<std::string>{"a", "", "b", "c"});
+    REQUIRE(split("x##y####z", "##") == std::vector<std::string>{"x", "y", "", "z"});
+  }
+
+  SECTION("Split with string delimiter - skip_empty = true")
+  {
+    REQUIRE(split("a::::b::c", "::", true) == std::vector<std::string>{"a", "b", "c"});
+    REQUIRE(split("x##y####z", "##", true) == std::vector<std::string>{"x", "y", "z"});
+  }
+
+  SECTION("Split with string delimiter - edge cases")
+  {
+    REQUIRE(split("", "::") == std::vector<std::string>{""});
+    REQUIRE(split("::", "::") == std::vector<std::string>{"", ""});
+    REQUIRE(split("::", "::", true) == std::vector<std::string>{});
+    REQUIRE(split("no-delimiter", "::") == std::vector<std::string>{"no-delimiter"});
+  }
+
+  SECTION("Split with string delimiter at start or end")
+  {
+    REQUIRE(split("::a::b::", "::") == std::vector<std::string>{"", "a", "b", ""});
+    REQUIRE(split("::a::b::", "::", true) == std::vector<std::string>{"a", "b"});
+  }
+
+  SECTION("Split with non-overlapping multi-char delimiters")
+  {
+    REQUIRE(split("a<>b<>c<>d", "<>") == std::vector<std::string>{"a", "b", "c", "d"});
+    REQUIRE(split("123==456==789", "==") == std::vector<std::string>{"123", "456", "789"});
+  }
+
+  SECTION("Split with overlapping delimiter characters")
+  {
+    REQUIRE(split("aaaa", "aa") == std::vector<std::string>{"", "", ""});
+    REQUIRE(split("aaaa", "aa", true) == std::vector<std::string>{});
+  }
+
+  SECTION("Split with long delimiter and longer content")
+  {
+    std::string delim = "==SPLIT==";
+    std::string input = "part1==SPLIT==part2==SPLIT==part3";
+    REQUIRE(split(input, delim) == std::vector<std::string>{"part1", "part2", "part3"});
+  }
+
+  SECTION("Split with long delimiter, empty parts")
+  {
+    std::string delim = "--DELIM--";
+    std::string input = "--DELIM--a--DELIM----DELIM--b--DELIM--";
+    REQUIRE(split(input, delim) == std::vector<std::string>{"", "a", "", "b", ""});
+    REQUIRE(split(input, delim, true) == std::vector<std::string>{"a", "b"});
+  }
+
+  SECTION("Split string of only delimiters")
+  {
+    REQUIRE(split("::", "::") == std::vector<std::string>{"", ""});
+    REQUIRE(split("::::", "::") == std::vector<std::string>{"", "", ""});
+    REQUIRE(split("::::", "::", true) == std::vector<std::string>{});
+  }
+
+  SECTION("Split with Unicode-like delimiter")
+  {
+    REQUIRE(split("红-绿-蓝", "-") == std::vector<std::string>{"红", "绿", "蓝"});
+    REQUIRE(split("路径##文件##类型", "##") == std::vector<std::string>{"路径", "文件", "类型"});
+  }
 }
 
 TEST_CASE("type convert test01", "[inifile]")
@@ -135,21 +219,8 @@ TEST_CASE("type convert test02", "[inifile]")
   REQUIRE(uc == 'A');
 }
 
-TEMPLATE_TEST_CASE("Different types", "[template]",
-                   char,
-                   unsigned char,
-                   signed char,
-                   short,
-                   int,
-                   long,
-                   long long,
-                   unsigned short,
-                   unsigned int,
-                   unsigned long,
-                   unsigned long long,
-                   float,
-                   double,
-                   long double)
+TEMPLATE_TEST_CASE("Different types", "[template]", char, unsigned char, signed char, short, int, long, long long, unsigned short,
+                   unsigned int, unsigned long, unsigned long long, float, double, long double)
 {
   TestType x = 1;
   ini::inifile file;
@@ -158,18 +229,8 @@ TEMPLATE_TEST_CASE("Different types", "[template]",
   REQUIRE(x == result);
 }
 
-TEMPLATE_TEST_CASE("Different types int", "[template]",
-                   char,
-                   unsigned char,
-                   signed char,
-                   short,
-                   int,
-                   long,
-                   long long,
-                   unsigned short,
-                   unsigned int,
-                   unsigned long,
-                   unsigned long long)
+TEMPLATE_TEST_CASE("Different types int", "[template]", char, unsigned char, signed char, short, int, long, long long,
+                   unsigned short, unsigned int, unsigned long, unsigned long long)
 {
   TestType x = 0;
   ini::inifile file;
@@ -183,47 +244,43 @@ TEMPLATE_TEST_CASE("Different types int", "[template]",
   REQUIRE(xx == result_xx);
 }
 
-TEMPLATE_TEST_CASE("Different types float", "[template]",
-                   float,
-                   double,
-                   long double)
+TEMPLATE_TEST_CASE("Different types float", "[template]", float, double, long double)
 {
   TestType x = 3.141592;
   ini::inifile file;
   file["section"]["key"] = x;
   TestType result = file["section"]["key"];
-  REQUIRE(Approx(result).epsilon(10e-6) == x); // 允许误差
+  REQUIRE(Approx(result).epsilon(10e-6) == x);  // 允许误差
 }
 
 TEST_CASE("test out of range", "[inifile]")
 {
-  REQUIRE_THROWS_AS([]
-                    {
-                      ini::inifile file;
-                      file["section"]["key"] = std::numeric_limits<unsigned int>::max();
-                      uint32_t ui = file["section"]["key"];
-                      int si = file["section"]["key"]; // out_of_range
-                    }(),
-                    std::out_of_range);
+  REQUIRE_THROWS_AS(
+    [] {
+      ini::inifile file;
+      file["section"]["key"] = std::numeric_limits<unsigned int>::max();
+      uint32_t ui = file["section"]["key"];
+      int si = file["section"]["key"];  // out_of_range
+    }(),
+    std::out_of_range);
 
-  REQUIRE_THROWS_AS([]
-                    {
-                      ini::inifile file;
-                      file["section"]["key"] = std::numeric_limits<long double>::max();
-                      long double v1 = file["section"]["key"];
-                      float v2 = file["section"]["key"]; // out_of_range
-                    }(),
-                    std::out_of_range);
+  REQUIRE_THROWS_AS(
+    [] {
+      ini::inifile file;
+      file["section"]["key"] = std::numeric_limits<long double>::max();
+      long double v1 = file["section"]["key"];
+      float v2 = file["section"]["key"];  // out_of_range
+    }(),
+    std::out_of_range);
 
-  REQUIRE_NOTHROW([]
-                  {
-                    ini::inifile file;
-                    file["section"]["key"] = std::numeric_limits<unsigned int>::max();
+  REQUIRE_NOTHROW([] {
+    ini::inifile file;
+    file["section"]["key"] = std::numeric_limits<unsigned int>::max();
 
-                    uint32_t ui = file["section"]["key"];  // 读取 uint32_t
-                    int64_t si1 = file["section"]["key"];  // 读取 int64_t
-                    uint64_t si2 = file["section"]["key"]; // 读取 uint64_t
-                  }());
+    uint32_t ui = file["section"]["key"];   // 读取 uint32_t
+    int64_t si1 = file["section"]["key"];   // 读取 int64_t
+    uint64_t si2 = file["section"]["key"];  // 读取 uint64_t
+  }());
 }
 
 TEST_CASE("member func test01", "[inifile]")
@@ -248,14 +305,10 @@ TEST_CASE("member func test02", "[inifile]")
   REQUIRE(file["section"].size() == 1);
   REQUIRE(file["section01"].size() == 0);
   REQUIRE(file.size() == 2);
-  REQUIRE_THROWS_AS([&file]
-                    { file.at("section_no"); }(), std::out_of_range);
-  REQUIRE_THROWS_AS([&file]
-                    { file.at("section").at("key_no"); }(), std::out_of_range);
-  REQUIRE_NOTHROW([&file]
-                  { auto ret = file.at("section").at("key"); }());
-  REQUIRE_NOTHROW([&file]
-                  { auto ret = file.at("section01"); }());
+  REQUIRE_THROWS_AS([&file] { file.at("section_no"); }(), std::out_of_range);
+  REQUIRE_THROWS_AS([&file] { file.at("section").at("key_no"); }(), std::out_of_range);
+  REQUIRE_NOTHROW([&file] { auto ret = file.at("section").at("key"); }());
+  REQUIRE_NOTHROW([&file] { auto ret = file.at("section01"); }());
   REQUIRE_FALSE(file.contains("section01") != true);
   REQUIRE(file.contains("section_no") == false);
   REQUIRE(file.contains("section_no") == false);
@@ -266,106 +319,96 @@ TEST_CASE("member func test03", "[inifile]")
 {
   ini::inifile file;
   file["section"]["key"] = 3.14;
-  REQUIRE_NOTHROW([&file]
-                  { auto ret = file.get("section", "key_no"); }());
-  REQUIRE_NOTHROW([&file]
-                  { auto ret = file.at("section").get("key_no"); }());
+  REQUIRE_NOTHROW([&file] { auto ret = file.get("section", "key_no"); }());
+  REQUIRE_NOTHROW([&file] { auto ret = file.at("section").get("key_no"); }());
 
-  REQUIRE_NOTHROW([&file]
-                  { auto ret = file.get("section", "key_no", "default"); }());
-  REQUIRE_NOTHROW([&file]
-                  { auto ret = file.at("section").get("key_no", 55); }());
+  REQUIRE_NOTHROW([&file] { auto ret = file.get("section", "key_no", "default"); }());
+  REQUIRE_NOTHROW([&file] { auto ret = file.at("section").get("key_no", 55); }());
 
-  REQUIRE_THROWS_AS([&file]
-                    { file.at("section_no"); }(), std::out_of_range);
-  REQUIRE_THROWS_AS([&file]
-                    { file.at("section_no").at("key"); }(), std::out_of_range);
-  REQUIRE_THROWS_AS([&file]
-                    { file.at("section").at("key_no"); }(), std::out_of_range);
+  REQUIRE_THROWS_AS([&file] { file.at("section_no"); }(), std::out_of_range);
+  REQUIRE_THROWS_AS([&file] { file.at("section_no").at("key"); }(), std::out_of_range);
+  REQUIRE_THROWS_AS([&file] { file.at("section").at("key_no"); }(), std::out_of_range);
 }
 
 TEST_CASE("member func test04", "[inifile]")
 {
   ini::inifile file;
-  REQUIRE_NOTHROW([&file]
-                  { auto ret = file.get("section", "key_no", "default"); }());
-  REQUIRE_NOTHROW([&file]
-                  { auto ret = file.get("section", "key_no", 55).as<float>(); }());
+  REQUIRE_NOTHROW([&file] { auto ret = file.get("section", "key_no", "default"); }());
+  REQUIRE_NOTHROW([&file] { auto ret = file.get("section", "key_no", 55).as<float>(); }());
 
-  REQUIRE_THROWS_AS([&file]
-                    { auto ret = file.get("section", "key_no", "default").as<int>(); }(), std::invalid_argument);
+  REQUIRE_THROWS_AS([&file] { auto ret = file.get("section", "key_no", "default").as<int>(); }(), std::invalid_argument);
 }
 
 TEST_CASE("member func test05", "[inifile]")
 {
   ini::inifile file;
-  REQUIRE_NOTHROW([&file]
-                  { auto ret0 = file["section"].get("key_no");
-                    auto ret1 = file["section"].get("key_no", "default"); }());
+  REQUIRE_NOTHROW([&file] {
+    auto ret0 = file["section"].get("key_no");
+    auto ret1 = file["section"].get("key_no", "default");
+  }());
 
-  REQUIRE_THROWS_AS([&file]
-                    { auto ret = file.get("section", "key_no", "default").as<double>(); }(), std::invalid_argument);
+  REQUIRE_THROWS_AS([&file] { auto ret = file.get("section", "key_no", "default").as<double>(); }(), std::invalid_argument);
 }
 
 TEST_CASE("member func test06", "[inifile]")
 {
-  REQUIRE_NOTHROW([]
-                  { 
-                    ini::field f;
-                    ini::field f1(1);
-                    ini::field f2(true);
-                    ini::field f3(3.14);
-                    ini::field f4('c');
-                    ini::field f5("abc");
-                    ini::field f6(3.14f);
-                    ini::field f7(999999999ll);
-                    ini::field f8 = "hello";
-                    f8 = 3.14; }());
+  REQUIRE_NOTHROW([] {
+    ini::field f;
+    ini::field f1(1);
+    ini::field f2(true);
+    ini::field f3(3.14);
+    ini::field f4('c');
+    ini::field f5("abc");
+    ini::field f6(3.14f);
+    ini::field f7(999999999ll);
+    ini::field f8 = "hello";
+    f8 = 3.14;
+  }());
 }
 
 TEST_CASE("member func test07", "[inifile]")
 {
-  REQUIRE_NOTHROW([]
-                  { 
-                    // 其他类型 -> ini::field
-                    ini::field f(true);
-                    ini::field f1(10);
-                    ini::field f2 = 3.14;
-                    ini::field f3 = 'c';
-                    ini::field f4 = "abc";
-                      
-                    // ini::field -> 其他类型
-                    bool b = f;
-                    int i = f1;
-                    double d = f2;
-                    char c = f3;
-                    std::string s = f4; 
+  REQUIRE_NOTHROW([] {
+    // 其他类型 -> ini::field
+    ini::field f(true);
+    ini::field f1(10);
+    ini::field f2 = 3.14;
+    ini::field f3 = 'c';
+    ini::field f4 = "abc";
 
-                    ini::inifile inif;
-                    inif["section"]["key"] = true; // bool -> ini::field
-                    
-                    /// Get direct type(ini::field)
-                    auto val = inif["section"]["key"]; // val type is ini::field
-                    ini::field val2 = inif["section"]["key"]; 
-                    
-                    /// explicit type conversion
-                    bool bb = inif["section"]["key"].as<bool>();
-                      
-                    /// automatic type conversion
-                    bool bb2 = inif["section"]["key"]; }());
+    // ini::field -> 其他类型
+    bool b = f;
+    int i = f1;
+    double d = f2;
+    char c = f3;
+    std::string s = f4;
+
+    ini::inifile inif;
+    inif["section"]["key"] = true;  // bool -> ini::field
+
+    /// Get direct type(ini::field)
+    auto val = inif["section"]["key"];  // val type is ini::field
+    ini::field val2 = inif["section"]["key"];
+
+    /// explicit type conversion
+    bool bb = inif["section"]["key"].as<bool>();
+
+    /// automatic type conversion
+    bool bb2 = inif["section"]["key"];
+  }());
 }
 
 TEST_CASE("member func test08", "[inifile]")
 {
-  REQUIRE_NOTHROW([]
-                  { 
-                    ini::inifile inif;
-                    inif["only_section"];
-                    inif["section"]["only_key"];
-                    inif[""][""];
-                    inif[""]["key"];
-                    inif["section0"][""];
-                    inif.save("./test.ini"); }());
+  REQUIRE_NOTHROW([] {
+    ini::inifile inif;
+    inif["only_section"];
+    inif["section"]["only_key"];
+    inif[""][""];
+    inif[""]["key"];
+    inif["section0"][""];
+    inif.save("./test.ini");
+  }());
 }
 
 TEST_CASE("member func test09", "[inifile]")
@@ -389,7 +432,7 @@ TEST_CASE("member func test09", "[inifile]")
   CHECK(inif["section_no"].contains("key_no") == false);
 
   inif[""]["num"] = 12345;
-  CHECK(inif[""].contains("num") == true); // 允许key为空字符串
+  CHECK(inif[""].contains("num") == true);  // 允许key为空字符串
 }
 
 TEST_CASE("member func test10", "[inifile]")

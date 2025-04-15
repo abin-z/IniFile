@@ -72,10 +72,10 @@ inline void trim(std::string &str)
 
 /// @brief 字符串切割功能
 /// @param str 待处理字符串
-/// @param delimiter 分割字符
+/// @param delimiter 分割字符串(支持多字符)
 /// @param skip_empty 是否忽略空字符串
 /// @return 分割后的内容
-std::vector<std::string> split(const std::string &str, char delimiter, bool skip_empty = false)
+std::vector<std::string> split(const std::string &str, const std::string &delimiter, bool skip_empty = false)
 {
   std::vector<std::string> tokens;
   std::string::size_type start = 0, pos = 0;
@@ -86,7 +86,7 @@ std::vector<std::string> split(const std::string &str, char delimiter, bool skip
     {
       tokens.emplace_back(std::move(token));
     }
-    start = pos + 1;
+    start = pos + delimiter.length();
   }
   // 处理最后一部分
   std::string last_token = str.substr(start);
@@ -1281,6 +1281,16 @@ inline std::string trim(std::string str)
 /// @param skip_empty If true, empty substrings are ignored; otherwise, they are included.
 /// @return A vector of substrings obtained by splitting the input string.
 inline std::vector<std::string> split(const std::string &str, char delimiter, bool skip_empty = false)
+{
+  return detail::split(str, std::string(1, delimiter), skip_empty);
+}
+
+/// @brief Splits a string into a vector of substrings based on a string delimiter.
+/// @param str The input string to be split.
+/// @param delimiter The substring used to split the string (can be multiple characters).
+/// @param skip_empty If true, empty substrings are ignored; otherwise, they are included.
+/// @return A vector of substrings obtained by splitting the input string.
+inline std::vector<std::string> split(const std::string &str, const std::string &delimiter, bool skip_empty = false)
 {
   return detail::split(str, delimiter, skip_empty);
 }
