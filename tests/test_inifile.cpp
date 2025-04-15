@@ -769,8 +769,10 @@ TEST_CASE("join function", "[join]")
 
   SECTION("Join list of large numbers")
   {
-    list<long long> big = {1'000'000'000LL, 9'223'372'036'854'775'807LL};
+    list<long long> big = {
+      1000000000LL,          // 1_000_000_000
+      9223372036854775807LL  // 9_223_372_036_854_775_807
+    };
     REQUIRE(join(big, ",") == "1000000000,9223372036854775807");
   }
-
 }
