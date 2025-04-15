@@ -1329,7 +1329,7 @@ inline std::vector<std::string> split(const std::string &str, const std::string 
 /// @param separator The character separating each element in the result.
 /// @return A string with all elements separated by the given character.
 template <typename Iterable>
-std::string join(const Iterable &iterable, char separator)
+inline std::string join(const Iterable &iterable, char separator)
 {
   return detail::join(iterable, std::string(1, separator));
 }
@@ -1341,7 +1341,7 @@ std::string join(const Iterable &iterable, char separator)
 /// @param separator The string separating each element in the result.
 /// @return A string with all elements separated by the given string.
 template <typename Iterable>
-std::string join(const Iterable &iterable, const std::string &separator)
+inline std::string join(const Iterable &iterable, const std::string &separator)
 {
   return detail::join(iterable, separator);
 }
