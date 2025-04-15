@@ -1,7 +1,7 @@
 /**************************************************************************************************************
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  * @file: inifile.h
- * @version: v0.9.4
+ * @version: v0.9.5
  * @description: Easy-to-use ini file parsing library that supports parsing, modifying and saving ini files.
  * - Features :
  *   - Lightweight & Easy-to-Use: A header-only INI parser with no external dependencies (C++11 only).
