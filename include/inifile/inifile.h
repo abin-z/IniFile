@@ -359,50 +359,33 @@ struct convert<char[N]>
   }
 };
 
-// 类型别名
-template <typename T>
-using remove_reference_t = typename std::remove_reference<T>::type;
-template <typename T>
-using remove_const_t = typename std::remove_const<T>::type;
-template <typename T>
-using remove_volatile_t = typename std::remove_volatile<T>::type;
+//////////////////////////////////////////////////////////////////////////////////////////////////////
+// ~~~~~~~~~~~~~~~~~~~ is_to_stringable<T>::value 表示可以被std::to_string()处理的类型~~~~~~~~~~~~~~~~~~~
+// 模拟 C++14 中的 std::void_t
+template <typename...>
+using void_t = void;
 
-/// @brief remove_ref_const_volatile_t: 移除引用(& 或 &&)、const 和 volatile 修饰符
-template <typename T>
-using remove_ref_const_volatile_t = remove_volatile_t<remove_const_t<remove_reference_t<T>>>;
-
-/**
- * @brief char系列类型特征:所有字符类型(包括 const 和引用的 char 类型)
- * 该特征判断类型是否为 char 系列类型(包括 `char`、`signed char`、`unsigned char`、`wchar_t`、`char8_t`、`char16_t` 和
- * `char32_t`). 它会移除 `const` 和 `reference` 以及 `volatile` 修饰符,以确保正确判断字符类型.
- */
-template <typename T>
-struct is_char_type : std::integral_constant<bool, std::is_same<remove_ref_const_volatile_t<T>, char>::value ||
-                                                     std::is_same<remove_ref_const_volatile_t<T>, signed char>::value ||
-                                                     std::is_same<remove_ref_const_volatile_t<T>, unsigned char>::value ||
-                                                     std::is_same<remove_ref_const_volatile_t<T>, wchar_t>::value ||
-#if defined(__cpp_char8_t)  // 仅在 C++20 及更高版本支持 char8_t
-                                                     std::is_same<remove_ref_const_volatile_t<T>, char8_t>::value ||
-#endif
-                                                     std::is_same<remove_ref_const_volatile_t<T>, char16_t>::value ||
-                                                     std::is_same<remove_ref_const_volatile_t<T>, char32_t>::value>
+/// @brief is_to_stringable: 检查类型 T 是否支持 std::to_string()
+template <typename T, typename = void>
+struct is_to_stringable : std::false_type
 {
 };
+// 如果 T 支持 std::to_string，则 is_to_stringable<T> 为 true
+template <typename T>
+struct is_to_stringable<T, void_t<decltype(std::to_string(std::declval<T>()))>> : std::true_type
+{
+};
+//////////////////////////////////////////////////////////////////////////////////////////////////////
 
 /**
  * @brief convert 模板特化:处理所有整数类型(不包括字符类型 `char`、`signed char`、`unsigned char`、
- * `wchar_t`、`char16_t`、`char32_t` 等)
+ * `wchar_t`、`char8_t`、`char16_t`、`char32_t` 等)
  *
- * 该模板特化适用于所有 `std::is_integral<T>::value` 为 `true` 的类型,但排除了以下字符类型:
- * - `char`、`signed char`、`unsigned char`
- * - `wchar_t`(宽字符类型)
- * - `char16_t`、`char32_t`(UTF-16 和 UTF-32 编码字符类型)
- * - 在 C++20 及以上版本中,排除 `char8_t`(用于 UTF-8 编码的字符类型).
- *
+ * 该模板特化适用于所有满足 `std::is_integral<T>::value` 为 `true` 且可以被 `std::to_string()` 处理的类型.
  * 该特化确保只有整型类型(例如 `int`、`long` 等)能够匹配,而字符类型将被排除.
  */
 template <typename T>
-struct convert<T, typename std::enable_if<std::is_integral<T>::value && !is_char_type<T>::value>::type>
+struct convert<T, typename std::enable_if<std::is_integral<T>::value && is_to_stringable<T>::value>::type>
 {
   /**
    * @brief 将字符串转换为整数
