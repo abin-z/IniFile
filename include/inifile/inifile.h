@@ -30,6 +30,7 @@
 #include <cstdlib>
 #include <fstream>
 #include <iostream>
+#include <iterator>
 #include <limits>
 #include <memory>
 #include <sstream>
@@ -37,6 +38,7 @@
 #include <string>
 #include <type_traits>
 #include <unordered_map>
+#include <utility>
 #include <vector>
 
 #ifdef __cpp_lib_string_view  // If we have std::string_view
@@ -97,6 +99,60 @@ std::vector<std::string> split(const std::string &str, const std::string &delimi
   return tokens;
 }
 
+// 1. 检查类型 T 是否支持 std::begin() 和 std::end()
+template <typename T>
+class has_begin_end
+{
+ private:
+  // 内部辅助模板，尝试调用 std::begin() 和 std::end() 来检查类型 T 是否支持它们
+  // 这个测试会先尝试通过 std::begin 和 std::end 获取迭代器
+  // 如果这两个函数存在，并且能正常编译，最后会返回 std::true_type
+  template <typename U>
+  static auto test(int) -> decltype(std::begin(std::declval<U &>()),  // 检查是否支持 std::begin
+                                    std::end(std::declval<U &>()),    // 检查是否支持 std::end
+                                    std::true_type{}                  // 如果能编译成功，返回 std::true_type
+  );
+
+  // 如果不支持 std::begin() 或 std::end()，会匹配到这个重载，返回 std::false_type
+  template <typename>
+  static std::false_type test(...);
+
+ public:
+  // 静态常量值，使用 decltype 和 test<T>(0) 调用来决定类型 T 是否支持 begin() 和 end()
+  static constexpr bool value = decltype(test<T>(0))::value;
+};
+
+// 2. 检查容器是否是 map 类型（如 std::map 或 std::unordered_map）
+template <typename T>
+class is_map
+{
+ private:
+  template <typename U>
+  static auto test(int) ->
+    typename std::is_same<typename U::value_type, std::pair<const typename U::key_type, typename U::mapped_type>>::type;
+
+  template <typename>
+  static std::false_type test(...);
+
+ public:
+  static constexpr bool value = decltype(test<T>(0))::value;
+};
+
+// 3. 检查元素类型是否支持 ostream 输出操作 <<
+template <typename T>
+class is_ostreamable
+{
+ private:
+  template <typename U>
+  static auto test(int) -> decltype(std::declval<std::ostream &>() << std::declval<const U &>(), std::true_type{});
+
+  template <typename>
+  static std::false_type test(...);
+
+ public:
+  static constexpr bool value = decltype(test<T>(0))::value;
+};
+
 /// @brief 将容器中的元素连接为一个字符串,元素之间以指定分隔符分隔.空容器返回空字符串.
 ///        注意:容器的元素类型不能是指针类型.
 /// @tparam Iterable 支持 std::begin() / std::end() 的序列式容器类型(如 vector、list、set 等)
@@ -106,9 +162,13 @@ std::vector<std::string> split(const std::string &str, const std::string &delimi
 template <typename Iterable>
 std::string join(const Iterable &iterable, const std::string &separator)
 {
-  // 静态断言:如果容器元素类型是指针类型,抛出编译时错误
-  static_assert(!std::is_pointer<typename Iterable::value_type>::value,
-                "Error in join function: Container elements cannot be of pointer type");
+  // 静态断言:确保 iterable 支持 begin() 和 end()，元素类型不是指针，容器不是 map 类型，并且元素类型可通过 << 输出到 std::ostream
+  using value_type = typename Iterable::value_type;
+  static_assert(has_begin_end<Iterable>::value, "join() error: The type must support std::begin() and std::end()");
+  static_assert(!std::is_pointer<value_type>::value, "join() error: Container elements cannot be of pointer type");
+  static_assert(!is_map<Iterable>::value, "join() error: Map types (e.g. std::map) are not supported");
+  static_assert(is_ostreamable<value_type>::value, "join() error: Elements must be streamable to std::ostream (<<)");
+
   std::ostringstream oss;
   auto it = std::begin(iterable);
   auto end = std::end(iterable);
