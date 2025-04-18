@@ -10,7 +10,8 @@
  *   - Intuitive API: Simple and clear interface for reading, modifying, and writing INI files.
  *   - Multiple data source handling: support input/output from files `std::string` and `std::istream`.
  *   - Automatic Type Conversion: Seamlessly handles various data types.
- *   - Support Comment: Supports `[section]` and `key=value` line comments (`;` or `#`) (end-of-line comments are not supported)
+ *   - Support Comment: Supports `[section]` and `key=value` line comments (`;` or `#`)
+ *     (but end-of-line comments are not supported)
  *   - Custom type conversion: After customization, support automatic conversion for user-defined types
  *   - Support case insensitivity: Provides optional case insensitivity (for `section` and `key`)
  *
@@ -104,21 +105,21 @@ template <typename T>
 class has_begin_end
 {
  private:
-  // 内部辅助模板，尝试调用 std::begin() 和 std::end() 来检查类型 T 是否支持它们
+  // 内部辅助模板, 尝试调用 std::begin() 和 std::end() 来检查类型 T 是否支持它们
   // 这个测试会先尝试通过 std::begin 和 std::end 获取迭代器
-  // 如果这两个函数存在，并且能正常编译，最后会返回 std::true_type
+  // 如果这两个函数存在, 并且能正常编译, 最后会返回 std::true_type
   template <typename U>
   static auto test(int) -> decltype(std::begin(std::declval<U &>()),  // 检查是否支持 std::begin
                                     std::end(std::declval<U &>()),    // 检查是否支持 std::end
-                                    std::true_type{}                  // 如果能编译成功，返回 std::true_type
+                                    std::true_type{}                  // 如果能编译成功, 返回 std::true_type
   );
 
-  // 如果不支持 std::begin() 或 std::end()，会匹配到这个重载，返回 std::false_type
+  // 如果不支持 std::begin() 或 std::end(), 会匹配到这个重载, 返回 std::false_type
   template <typename>
   static std::false_type test(...);
 
  public:
-  // 静态常量值，使用 decltype 和 test<T>(0) 调用来决定类型 T 是否支持 begin() 和 end()
+  // 静态常量值, 使用 decltype 和 test<T>(0) 调用来决定类型 T 是否支持 begin() 和 end()
   static constexpr bool value = decltype(test<T>(0))::value;
 };
 
@@ -162,7 +163,7 @@ class is_ostreamable
 template <typename Iterable>
 std::string join(const Iterable &iterable, const std::string &separator)
 {
-  // 静态断言:确保 iterable 支持 begin() 和 end()，元素类型不是指针，容器不是 map 类型，并且元素类型可通过 << 输出到 std::ostream
+  // 断言 iterable 支持 begin() 和 end(), 不是 map 类型, 元素类型不是指针并且元素类型可通过 << 输出到 std::ostream
   using value_type = typename Iterable::value_type;
   static_assert(has_begin_end<Iterable>::value, "join() error: The type must support std::begin() and std::end()");
   static_assert(!std::is_pointer<value_type>::value, "join() error: Container elements cannot be of pointer type");
@@ -370,7 +371,7 @@ template <typename T, typename = void>
 struct is_to_stringable : std::false_type
 {
 };
-// 如果 T 支持 std::to_string，则 is_to_stringable<T> 为 true
+// 如果 T 能传入 std::to_string, 则 is_to_stringable<T> 为 true
 template <typename T>
 struct is_to_stringable<T, void_t<decltype(std::to_string(std::declval<T>()))>> : std::true_type
 {
@@ -535,9 +536,9 @@ struct case_insensitive_equal
 {
   bool operator()(const std::string &lhs, const std::string &rhs) const
   {
-    return lhs.size() == rhs.size() && std::equal(lhs.begin(), lhs.end(), rhs.begin(), [](unsigned char a, unsigned char b) {
-             return std::tolower(a) == std::tolower(b);
-           });
+    return lhs.size() == rhs.size() &&
+           std::equal(lhs.begin(), lhs.end(), rhs.begin(),
+                      [](unsigned char a, unsigned char b) { return std::tolower(a) == std::tolower(b); });
   }
 };
 
@@ -718,7 +719,7 @@ class field
  private:
   std::string value_;  // 存储字符串值,用于存储读取的 INI 文件字段值
   // 当前key-value的注释容器, 采用懒加载策略(默认为nullptr), 深拷贝机制.
-  std::unique_ptr<comment_container> comments_;  // 使用unique_ptr主要考虑内存占用更小. <如果在c++17标准下使用std::option更优>
+  std::unique_ptr<comment_container> comments_;  // 使用unique_ptr主要考虑内存占用更小, c++17使用std::option会更好
 };
 
 inline std::ostream &operator<<(std::ostream &os, const field &data)
@@ -1019,8 +1020,8 @@ class basic_section
 template <typename Hash = std::hash<std::string>, typename Equal = std::equal_to<std::string>>
 class basic_inifile
 {
-  using section = basic_section<Hash, Equal>;                                    // 在 basic_inifile 内部定义 section 别名
-  using comment_container = typename section::comment_container;                 // 注释容器类型
+  using section = basic_section<Hash, Equal>;                     // 在 basic_inifile 内部定义 section 别名
+  using comment_container = typename section::comment_container;  // 注释容器类型
   using data_container = std::unordered_map<std::string, section, Hash, Equal>;  // 数据容器类型
 
  public:
@@ -1391,9 +1392,9 @@ inline std::vector<std::string> split(const std::string &str, const std::string 
   return detail::split(str, delimiter, skip_empty);
 }
 
-/// @brief Joins elements of a sequence container (e.g., vector, list, set, array, deque) into a string, separated by a character.
+/// @brief Joins elements of a sequence container into a string, separated by a character.
 ///        Note: The elements of the container must not be of pointer type.
-/// @tparam Iterable Sequence container type (e.g., vector, list, set, array, deque) that supports std::begin() and std::end().
+/// @tparam Iterable Sequence container type (e.g., vector, list, set, array, deque) that supports begin() and end().
 /// @param iterable The container whose elements are joined.
 /// @param separator The character separating each element in the result.
 /// @return A string with all elements separated by the given character.
@@ -1403,9 +1404,9 @@ inline std::string join(const Iterable &iterable, char separator)
   return detail::join(iterable, std::string(1, separator));
 }
 
-/// @brief Joins elements of a sequence container (e.g., vector, list, set, array, deque) into a string, separated by a string.
+/// @brief Joins elements of a sequence container into a string, separated by a string.
 ///        Note: The elements of the container must not be of pointer type.
-/// @tparam Iterable Sequence container type (e.g., vector, list, set, array, deque) that supports std::begin() and std::end().
+/// @tparam Iterable Sequence container type (e.g., vector, list, set, array, deque) that supports begin() and end().
 /// @param iterable The container whose elements are joined.
 /// @param separator The string separating each element in the result.
 /// @return A string with all elements separated by the given string.
