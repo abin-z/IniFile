@@ -848,6 +848,19 @@ class basic_section
     return default_value;
   }
 
+  /// @brief Get all keys in the section.
+  /// @return A vector containing all keys.
+  std::vector<std::string> keys() const
+  {
+    std::vector<std::string> result;
+    result.reserve(data_.size());
+    for (const auto &pair : data_)
+    {
+      result.push_back(pair.first);
+    }
+    return result;
+  }
+
   /// @brief Remove the specified key-value pairs
   /// @param key key
   /// @return Return true if the deletion is successful, return false if it is not found
@@ -1101,6 +1114,19 @@ class basic_inifile
       }
     }
     return default_value;
+  }
+
+  /// @brief Get all section names in the INI file.
+  /// @return A vector containing all section names.
+  std::vector<std::string> sections() const
+  {
+    std::vector<std::string> result;
+    result.reserve(data_.size());
+    for (const auto &pair : data_)
+    {
+      result.push_back(pair.first);
+    }
+    return result;
   }
 
   /// @brief Remove the specified seciton

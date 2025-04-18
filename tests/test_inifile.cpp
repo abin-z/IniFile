@@ -484,6 +484,43 @@ TEST_CASE("member func test11", "[inifile]")
   CHECK(ret == true);
 }
 
+TEST_CASE("sections and keys test01", "[inifile][sections][keys]")
+{
+  ini::inifile inif;
+
+  // 添加多个 section 和 key-value 对
+  inif["Network"]["host"] = "127.0.0.1";
+  inif["Network"]["port"] = "8080";
+
+  inif["Database"]["user"] = "admin";
+  inif["Database"]["password"] = "secret";
+
+  inif["Logging"]["level"] = "debug";
+
+  // 测试 sections()
+  auto sections = inif.sections();
+  CHECK(sections.size() == 3);
+  CHECK(std::find(sections.begin(), sections.end(), "Network") != sections.end());
+  CHECK(std::find(sections.begin(), sections.end(), "Database") != sections.end());
+  CHECK(std::find(sections.begin(), sections.end(), "Logging") != sections.end());
+
+  // 测试 keys("Network")
+  auto network_keys = inif["Network"].keys();  // 假设 section 类型实现了 keys()
+  CHECK(network_keys.size() == 2);
+  CHECK(std::find(network_keys.begin(), network_keys.end(), "host") != network_keys.end());
+  CHECK(std::find(network_keys.begin(), network_keys.end(), "port") != network_keys.end());
+
+  // 测试 keys("Logging")
+  auto logging_keys = inif["Logging"].keys();
+  CHECK(logging_keys.size() == 1);
+  CHECK(logging_keys[0] == "level");
+
+  // 空 section 测试
+  inif["EmptySection"];  // 添加但不设置 key
+  auto empty_keys = inif["EmptySection"].keys();
+  CHECK(empty_keys.empty());
+}
+
 TEST_CASE("case insensitive test01", "[inifile][case_insensitive]")
 {
   ini::case_insensitive_inifile inif;
