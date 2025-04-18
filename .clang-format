@@ -1,5 +1,5 @@
 BasedOnStyle: Google  # 继承 Google 风格
-ColumnLimit: 130      # 单行最大字符数130
+ColumnLimit: 120      # 单行最大字符数120
 IndentWidth: 2        # 缩进宽度2
 UseTab: Never         # 使用空格缩进
 TabWidth: 2           # Tab 宽度2
