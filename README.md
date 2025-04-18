@@ -232,7 +232,7 @@ key2=value
 This library supports case insensitivity for `section` and `key`, use **`ini::case_insensitive_inifile`**, please [Click to view details](./examples/inifile_case_insensitive.cpp)
 
 ```cpp
-#include <inifile/inifile.h>
+#include "inifile.h"
 int main()
 {
   const char *str = R"(
