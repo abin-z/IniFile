@@ -295,7 +295,7 @@ int main()
   bool bb2 = inif["section"]["key"];
   
   /// Type conversion failure throws an exception
-  double n =  inif["section"]["key"]; // error: Converting true to double is not allowed.
+  double n = inif["section"]["key"]; // error: Converting true to double is not allowed.
 }
 ```
 
@@ -538,5 +538,7 @@ Thank you **[Catch2](https://github.com/catchorg/Catch2)** for providing strong 
 
 ### 📜 License
 
-This project is licensed under the [**MIT** License](./LICENSE). Copyright © 2025–Present Abin.
+This project is licensed under the [**MIT** License](./LICENSE). 
+
+Copyright © 2025–Present Abin.
 
