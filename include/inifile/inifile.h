@@ -588,9 +588,10 @@ class field
     swap(lhs.comments_, rhs.comments_);
   }
   /// 重写拷贝赋值(copy-and-swap 方式)
-  field &operator=(field rhs) noexcept  // `rhs` pass by value
+  field &operator=(const field &rhs) noexcept  // `rhs` pass by reference
   {
-    swap(*this, rhs);  // 利用拷贝构造+swap, 确保异常安全,也能处理自赋值问题
+    field temp(rhs);    // 使用拷贝构造函数创建一个临时对象
+    swap(*this, temp);  // 利用拷贝构造+swap, 确保异常安全,也能处理自赋值问题
     return *this;
   }
 
