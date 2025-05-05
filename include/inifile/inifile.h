@@ -772,9 +772,10 @@ class basic_section
     swap(lhs.comments_, rhs.comments_);
   }
   /// 重写拷贝赋值函数(copy and swap方式)
-  basic_section &operator=(basic_section rhs) noexcept
+  basic_section &operator=(const basic_section &rhs) noexcept
   {
-    swap(*this, rhs);  // copy and swap
+    basic_section temp(rhs);  // 使用拷贝构造函数创建一个临时对象
+    swap(*this, temp);        // copy and swap
     return *this;
   }
 
