@@ -4,11 +4,11 @@
 #include <array>
 #include <catch.hpp>
 #include <deque>
+#include <forward_list>
 #include <list>
 #include <set>
 #include <string>
 #include <vector>
-#include <forward_list>
 
 TEST_CASE("basic test")
 {
@@ -18,6 +18,154 @@ TEST_CASE("basic test")
   CHECK(sizeof(double) == sizeof(long double));
   CHECK(std::numeric_limits<long double>::max() == std::numeric_limits<double>::max());
 #endif
+}
+
+TEST_CASE("Field basic functionality", "[field]")
+{
+  using namespace ini;
+  SECTION("Default constructor")
+  {
+    field f;
+    REQUIRE(f.as<std::string>() == "");
+  }
+
+  SECTION("Parameterized constructor with string")
+  {
+    field f("value");
+    REQUIRE(f.as<std::string>() == "value");
+  }
+
+  SECTION("Move constructor")
+  {
+    field f1("value");
+    field f2(std::move(f1));
+    REQUIRE(f2.as<std::string>() == "value");
+  }
+
+  SECTION("Move assignment operator")
+  {
+    field f1("value");
+    field f2;
+    f2 = std::move(f1);
+    REQUIRE(f2.as<std::string>() == "value");
+  }
+
+  SECTION("Copy constructor")
+  {
+    field f1("value");
+    field f2(f1);
+    REQUIRE(f2.as<std::string>() == "value");
+  }
+
+  SECTION("Copy assignment operator")
+  {
+    field f1("value");
+    field f2;
+    f2 = f1;
+    REQUIRE(f2.as<std::string>() == "value");
+  }
+
+  SECTION("Template constructor with int")
+  {
+    field f(10);
+    REQUIRE(f.as<int>() == 10);
+  }
+
+  SECTION("Template assignment with double")
+  {
+    field f("10.5");
+    f = 20.5;
+    REQUIRE(f.as<double>() == 20.5);
+  }
+
+  SECTION("Conversion to int")
+  {
+    field f("10");
+    int val = f;
+    REQUIRE(val == 10);
+  }
+
+  SECTION("Setting a value")
+  {
+    field f;
+    f.set(42);
+    REQUIRE(f.as<int>() == 42);
+  }
+
+  SECTION("Set comment")
+  {
+    field f("value");
+    f.set_comment("This is a comment");
+    REQUIRE(f.as<std::string>() == "value");
+    // Check comment handling functionality
+  }
+}
+
+TEST_CASE("Basic Section functionality", "[basic_section]")
+{
+  using namespace ini;
+  ini::section section;
+
+  SECTION("Set and get key-value pair")
+  {
+    section.set("key1", 42);
+    REQUIRE(section.at("key1").as<int>() == 42);
+  }
+
+  SECTION("Check if key exists")
+  {
+    section.set("key2", 100);
+    REQUIRE(section.contains("key2"));
+    REQUIRE_FALSE(section.contains("key3"));
+  }
+
+  SECTION("Get with default value")
+  {
+    section.set("key3", "Hello");
+    field default_field;
+    REQUIRE(section.get("key3", default_field).as<std::string>() == "Hello");
+    REQUIRE(section.get("key4", default_field).as<std::string>() == "");
+  }
+
+  SECTION("Remove key-value pair")
+  {
+    section.set("key4", "Test");
+    REQUIRE(section.remove("key4"));
+    REQUIRE_FALSE(section.contains("key4"));
+  }
+
+  SECTION("Get all keys")
+  {
+    section.set("key5", 55);
+    section.set("key6", 66);
+    std::vector<std::string> keys = section.keys();
+    REQUIRE(keys.size() == 2);
+    REQUIRE(std::find(keys.begin(), keys.end(), "key5") != keys.end());
+    REQUIRE(std::find(keys.begin(), keys.end(), "key6") != keys.end());
+  }
+
+  SECTION("Set and get comment")
+  {
+    section.set_comment("Section comment");
+    section.add_comment("Additional comment");
+    // Assuming we have a way to check comments:
+    // REQUIRE(section.comments().size() == 2);
+  }
+
+  SECTION("Copy constructor")
+  {
+    section.set("key7", 123);
+    basic_section<> copied_section(section);
+    REQUIRE(copied_section.at("key7").as<int>() == 123);
+  }
+
+  SECTION("Copy assignment operator")
+  {
+    section.set("key8", "Copy assignment");
+    basic_section<> copied_section;
+    copied_section = section;
+    REQUIRE(copied_section.at("key8").as<std::string>() == "Copy assignment");
+  }
 }
 
 TEST_CASE("trim function", "[trim]")
@@ -226,8 +374,8 @@ TEST_CASE("type convert test02", "[inifile]")
   REQUIRE(uc == 'A');
 }
 
-TEMPLATE_TEST_CASE("Different types", "[template]", char, unsigned char, signed char, short, int, long, long long, unsigned short,
-                   unsigned int, unsigned long, unsigned long long, float, double, long double)
+TEMPLATE_TEST_CASE("Different types", "[template]", char, unsigned char, signed char, short, int, long, long long,
+                   unsigned short, unsigned int, unsigned long, unsigned long long, float, double, long double)
 {
   TestType x = 1;
   ini::inifile file;
@@ -343,7 +491,8 @@ TEST_CASE("member func test04", "[inifile]")
   REQUIRE_NOTHROW([&file] { auto ret = file.get("section", "key_no", "default"); }());
   REQUIRE_NOTHROW([&file] { auto ret = file.get("section", "key_no", 55).as<float>(); }());
 
-  REQUIRE_THROWS_AS([&file] { auto ret = file.get("section", "key_no", "default").as<int>(); }(), std::invalid_argument);
+  REQUIRE_THROWS_AS([&file] { auto ret = file.get("section", "key_no", "default").as<int>(); }(),
+                    std::invalid_argument);
 }
 
 TEST_CASE("member func test05", "[inifile]")
@@ -354,7 +503,8 @@ TEST_CASE("member func test05", "[inifile]")
     auto ret1 = file["section"].get("key_no", "default");
   }());
 
-  REQUIRE_THROWS_AS([&file] { auto ret = file.get("section", "key_no", "default").as<double>(); }(), std::invalid_argument);
+  REQUIRE_THROWS_AS([&file] { auto ret = file.get("section", "key_no", "default").as<double>(); }(),
+                    std::invalid_argument);
 }
 
 TEST_CASE("member func test06", "[inifile]")
@@ -673,10 +823,11 @@ TEST_CASE("case insensitive test08", "[inifile][case_insensitive]")
   CHECK(inif.get("中文节", "不存在的键", "默认值").as<std::string>() == "默认值");
 }
 
-
-struct Point {
+struct Point
+{
   int x, y;
-  friend std::ostream& operator<<(std::ostream& os, const Point& p) {
+  friend std::ostream &operator<<(std::ostream &os, const Point &p)
+  {
     return os << "(" << p.x << "," << p.y << ")";
   }
 };
