@@ -101,6 +101,155 @@ TEST_CASE("Field basic functionality", "[field]")
   }
 }
 
+TEST_CASE("basic_section default constructor initializes empty", "[section]") {
+  ini::section s;
+  REQUIRE(s.empty());
+  REQUIRE(s.size() == 0);
+}
+
+TEST_CASE("basic_section key-value assignment and access", "[section]") {
+  ini::section s;
+  s.set("username", "admin");
+  s.set("timeout", 30);
+
+  REQUIRE(s.contains("username"));
+  REQUIRE(s.contains("timeout"));
+  REQUIRE(s["username"].as<std::string>() == "admin");
+  REQUIRE(s["timeout"].as<std::string>() == "30");
+}
+
+TEST_CASE("basic_section at and get behavior", "[section]") {
+  ini::section s;
+  s.set("port", 8080);
+  
+  REQUIRE(s.at("port").as<std::string>() == "8080");
+  REQUIRE_THROWS_AS(s.at("not_exist"), std::out_of_range);
+
+  auto fallback = s.get("not_exist", ini::field("fallback"));
+  REQUIRE(fallback.as<std::string>() == "fallback");
+}
+
+TEST_CASE("basic_section copy constructor deep copies", "[section]") {
+  ini::section s1;
+  s1.set("ip", "127.0.0.1");
+  s1.set_comment("network config");
+
+  ini::section s2(s1);  // copy
+
+  REQUIRE(s2.contains("ip"));
+  REQUIRE(s2["ip"].as<std::string>() == "127.0.0.1");
+
+  // 改变 s1 不影响 s2
+  s1.set("ip", "changed");
+  REQUIRE(s2["ip"].as<std::string>() == "127.0.0.1");
+}
+
+TEST_CASE("basic_section copy assignment is deep and exception-safe", "[section]") {
+  ini::section s1;
+  s1.set("key", "value");
+  s1.add_comment("some comment");
+
+  ini::section s2;
+  s2 = s1;  // copy assignment
+
+  REQUIRE(s2.contains("key"));
+  REQUIRE(s2["key"].as<std::string>() == "value");
+  REQUIRE(s2.keys().size() == 1);
+}
+
+TEST_CASE("basic_section move constructor transfers ownership", "[section]") {
+  ini::section s1;
+  s1.set("a", 1);
+  s1.add_comment("moved");
+
+  ini::section s2(std::move(s1));  // move
+
+  REQUIRE(s2.contains("a"));
+  REQUIRE(s2["a"].as<std::string>() == "1");
+
+  REQUIRE_NOTHROW(s1.size());  // 合法但状态未指定
+}
+
+TEST_CASE("basic_section move assignment transfers ownership", "[section]") {
+  ini::section s1;
+  s1.set("b", 2);
+  s1.set_comment("m");
+
+  ini::section s2;
+  s2.set("temp", "value");
+
+  s2 = std::move(s1);
+
+  REQUIRE(s2.contains("b"));
+  REQUIRE(s2["b"].as<std::string>() == "2");
+
+  REQUIRE(!s2.contains("temp"));  // 被替换掉了
+}
+
+TEST_CASE("basic_section self copy assignment safe", "[section]") {
+  ini::section s;
+  s.set("x", "xvalue");
+  s = s;
+
+  REQUIRE(s.contains("x"));
+  REQUIRE(s["x"].as<std::string>() == "xvalue");
+}
+
+TEST_CASE("basic_section self move assignment safe", "[section]") {
+  ini::section s;
+  s.set("y", "yvalue");
+  s = std::move(s);
+
+  REQUIRE(s.contains("y"));
+  REQUIRE(s["y"].as<std::string>() == "yvalue");
+}
+
+TEST_CASE("basic_section remove, clear and erase", "[section]") {
+  ini::section s;
+  s.set("a", 1);
+  s.set("b", 2);
+
+  REQUIRE(s.remove("a"));
+  REQUIRE_FALSE(s.contains("a"));
+
+  REQUIRE(s.erase("b") == 1);
+  REQUIRE(s.empty());
+
+  s.set("x", 42);
+  s.clear();
+  REQUIRE(s.empty());
+}
+
+TEST_CASE("basic_section comment operations", "[section]") {
+  ini::section s;
+  s.set_comment("section comment");
+  s.add_comment("line2\nline3");
+
+  ini::field f;
+  f.add_comment("field comment");
+  s.set("k", f);
+}
+
+TEST_CASE("basic_section iterator and keys", "[section]") {
+  ini::section s;
+  s.set("one", 1);
+  s.set("two", 2);
+
+  std::vector<std::string> expected_keys = {"one", "two"};
+  auto keys = s.keys();
+
+  for (const auto& key : expected_keys) {
+      REQUIRE(std::find(keys.begin(), keys.end(), key) != keys.end());
+  }
+
+  size_t count = 0;
+  for (const auto& pair : s) {
+      ++count;
+      REQUIRE((pair.first == "one" || pair.first == "two"));
+  }
+  REQUIRE(count == 2);
+}
+
 TEST_CASE("Basic Section functionality", "[basic_section]")
 {
   using namespace ini;
