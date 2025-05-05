@@ -101,13 +101,15 @@ TEST_CASE("Field basic functionality", "[field]")
   }
 }
 
-TEST_CASE("basic_section default constructor initializes empty", "[section]") {
+TEST_CASE("basic_section default constructor initializes empty", "[section]")
+{
   ini::section s;
   REQUIRE(s.empty());
   REQUIRE(s.size() == 0);
 }
 
-TEST_CASE("basic_section key-value assignment and access", "[section]") {
+TEST_CASE("basic_section key-value assignment and access", "[section]")
+{
   ini::section s;
   s.set("username", "admin");
   s.set("timeout", 30);
@@ -118,10 +120,11 @@ TEST_CASE("basic_section key-value assignment and access", "[section]") {
   REQUIRE(s["timeout"].as<std::string>() == "30");
 }
 
-TEST_CASE("basic_section at and get behavior", "[section]") {
+TEST_CASE("basic_section at and get behavior", "[section]")
+{
   ini::section s;
   s.set("port", 8080);
-  
+
   REQUIRE(s.at("port").as<std::string>() == "8080");
   REQUIRE_THROWS_AS(s.at("not_exist"), std::out_of_range);
 
@@ -129,7 +132,8 @@ TEST_CASE("basic_section at and get behavior", "[section]") {
   REQUIRE(fallback.as<std::string>() == "fallback");
 }
 
-TEST_CASE("basic_section copy constructor deep copies", "[section]") {
+TEST_CASE("basic_section copy constructor deep copies", "[section]")
+{
   ini::section s1;
   s1.set("ip", "127.0.0.1");
   s1.set_comment("network config");
@@ -144,7 +148,8 @@ TEST_CASE("basic_section copy constructor deep copies", "[section]") {
   REQUIRE(s2["ip"].as<std::string>() == "127.0.0.1");
 }
 
-TEST_CASE("basic_section copy assignment is deep and exception-safe", "[section]") {
+TEST_CASE("basic_section copy assignment is deep and exception-safe", "[section]")
+{
   ini::section s1;
   s1.set("key", "value");
   s1.add_comment("some comment");
@@ -157,7 +162,8 @@ TEST_CASE("basic_section copy assignment is deep and exception-safe", "[section]
   REQUIRE(s2.keys().size() == 1);
 }
 
-TEST_CASE("basic_section move constructor transfers ownership", "[section]") {
+TEST_CASE("basic_section move constructor transfers ownership", "[section]")
+{
   ini::section s1;
   s1.set("a", 1);
   s1.add_comment("moved");
@@ -170,7 +176,8 @@ TEST_CASE("basic_section move constructor transfers ownership", "[section]") {
   REQUIRE_NOTHROW(s1.size());  // 合法但状态未指定
 }
 
-TEST_CASE("basic_section move assignment transfers ownership", "[section]") {
+TEST_CASE("basic_section move assignment transfers ownership", "[section]")
+{
   ini::section s1;
   s1.set("b", 2);
   s1.set_comment("m");
@@ -186,7 +193,8 @@ TEST_CASE("basic_section move assignment transfers ownership", "[section]") {
   REQUIRE(!s2.contains("temp"));  // 被替换掉了
 }
 
-TEST_CASE("basic_section self copy assignment safe", "[section]") {
+TEST_CASE("basic_section self copy assignment safe", "[section]")
+{
   ini::section s;
   s.set("x", "xvalue");
   s = s;
@@ -195,7 +203,8 @@ TEST_CASE("basic_section self copy assignment safe", "[section]") {
   REQUIRE(s["x"].as<std::string>() == "xvalue");
 }
 
-TEST_CASE("basic_section self move assignment safe", "[section]") {
+TEST_CASE("basic_section self move assignment safe", "[section]")
+{
   ini::section s;
   s.set("y", "yvalue");
   s = std::move(s);
@@ -204,7 +213,8 @@ TEST_CASE("basic_section self move assignment safe", "[section]") {
   REQUIRE(s["y"].as<std::string>() == "yvalue");
 }
 
-TEST_CASE("basic_section remove, clear and erase", "[section]") {
+TEST_CASE("basic_section remove, clear and erase", "[section]")
+{
   ini::section s;
   s.set("a", 1);
   s.set("b", 2);
@@ -220,7 +230,8 @@ TEST_CASE("basic_section remove, clear and erase", "[section]") {
   REQUIRE(s.empty());
 }
 
-TEST_CASE("basic_section comment operations", "[section]") {
+TEST_CASE("basic_section comment operations", "[section]")
+{
   ini::section s;
   s.set_comment("section comment");
   s.add_comment("line2\nline3");
@@ -230,7 +241,8 @@ TEST_CASE("basic_section comment operations", "[section]") {
   s.set("k", f);
 }
 
-TEST_CASE("basic_section iterator and keys", "[section]") {
+TEST_CASE("basic_section iterator and keys", "[section]")
+{
   ini::section s;
   s.set("one", 1);
   s.set("two", 2);
@@ -238,14 +250,16 @@ TEST_CASE("basic_section iterator and keys", "[section]") {
   std::vector<std::string> expected_keys = {"one", "two"};
   auto keys = s.keys();
 
-  for (const auto& key : expected_keys) {
-      REQUIRE(std::find(keys.begin(), keys.end(), key) != keys.end());
+  for (const auto &key : expected_keys)
+  {
+    REQUIRE(std::find(keys.begin(), keys.end(), key) != keys.end());
   }
 
   size_t count = 0;
-  for (const auto& pair : s) {
-      ++count;
-      REQUIRE((pair.first == "one" || pair.first == "two"));
+  for (const auto &pair : s)
+  {
+    ++count;
+    REQUIRE((pair.first == "one" || pair.first == "two"));
   }
   REQUIRE(count == 2);
 }
@@ -315,6 +329,151 @@ TEST_CASE("Basic Section functionality", "[basic_section]")
     copied_section = section;
     REQUIRE(copied_section.at("key8").as<std::string>() == "Copy assignment");
   }
+}
+
+TEST_CASE("basic_inifile copy constructor and copy assignment")
+{
+  ini::inifile inifile1;
+
+  // Set some sections and fields
+  inifile1.set("section1", "key1", "value1");
+  inifile1.set("section2", "key2", "value2");
+
+  // Use copy constructor
+  ini::inifile inifile2 = inifile1;
+  REQUIRE(inifile2.contains("section1"));
+  REQUIRE(inifile2.get("section1", "key1").as<std::string>() == "value1");
+  REQUIRE(inifile2.contains("section2"));
+  REQUIRE(inifile2.get("section2", "key2").as<std::string>() == "value2");
+
+  // Use copy assignment
+  ini::inifile inifile3;
+  inifile3 = inifile1;
+  REQUIRE(inifile3.contains("section1"));
+  REQUIRE(inifile3.get("section1", "key1").as<std::string>() == "value1");
+  REQUIRE(inifile3.contains("section2"));
+  REQUIRE(inifile3.get("section2", "key2").as<std::string>() == "value2");
+}
+
+TEST_CASE("basic_inifile move constructor and move assignment")
+{
+  ini::inifile inifile1;
+
+  // Set some sections and fields
+  inifile1.set("section1", "key1", "value1");
+  inifile1.set("section2", "key2", "value2");
+
+  // Move constructor
+  ini::inifile inifile2 = std::move(inifile1);
+  REQUIRE(inifile2.contains("section1"));
+  REQUIRE(inifile2.get("section1", "key1").as<std::string>() == "value1");
+  REQUIRE(inifile2.contains("section2"));
+  REQUIRE(inifile2.get("section2", "key2").as<std::string>() == "value2");
+  REQUIRE(inifile1.empty());  // Ensure inifile1 is empty after move
+
+  // Move assignment
+  ini::inifile inifile3;
+  inifile3 = std::move(inifile2);
+  REQUIRE(inifile3.contains("section1"));
+  REQUIRE(inifile3.get("section1", "key1").as<std::string>() == "value1");
+  REQUIRE(inifile3.contains("section2"));
+  REQUIRE(inifile3.get("section2", "key2").as<std::string>() == "value2");
+  REQUIRE(inifile2.empty());  // Ensure inifile2 is empty after move
+}
+
+TEST_CASE("basic_inifile self-assignment")
+{
+  ini::inifile inifile;
+
+  // Set some sections and fields
+  inifile.set("section1", "key1", "value1");
+  inifile.set("section2", "key2", "value2");
+
+  // Self-assignment for copy assignment operator
+  inifile = inifile;
+  REQUIRE(inifile.contains("section1"));
+  REQUIRE(inifile.get("section1", "key1").as<std::string>() == "value1");
+  REQUIRE(inifile.contains("section2"));
+  REQUIRE(inifile.get("section2", "key2").as<std::string>() == "value2");
+
+  // Self-assignment for move assignment (should be safe)
+  inifile = std::move(inifile);
+  REQUIRE(inifile.contains("section1"));
+  REQUIRE(inifile.get("section1", "key1").as<std::string>() == "value1");
+  REQUIRE(inifile.contains("section2"));
+  REQUIRE(inifile.get("section2", "key2").as<std::string>() == "value2");
+}
+
+TEST_CASE("basic_inifile contains and at methods")
+{
+  ini::inifile inifile;
+
+  // Set some sections and fields
+  inifile.set("section1", "key1", "value1");
+
+  // Testing contains() method
+  REQUIRE(inifile.contains("section1"));
+  REQUIRE(inifile.contains("section1", "key1"));
+  REQUIRE(!inifile.contains("section2"));
+  REQUIRE(!inifile.contains("section1", "key2"));
+
+  // Testing at() method
+  REQUIRE(inifile.at("section1").contains("key1"));
+  REQUIRE(inifile.at("section1").at("key1").as<std::string>() == "value1");
+
+  // Testing exception when section does not exist
+  REQUIRE_THROWS_AS(inifile.at("nonexistent_section"), std::out_of_range);
+}
+
+TEST_CASE("basic_inifile edge cases: empty section, empty key")
+{
+  ini::inifile inifile;
+
+  // Test empty section name
+  inifile.set("", "key1", "value1");
+  REQUIRE(inifile.contains(""));
+  REQUIRE(inifile.get("", "key1").as<std::string>() == "value1");
+
+  // Test empty key name
+  inifile.set("section1", "", "value1");
+  REQUIRE(inifile.contains("section1"));
+  REQUIRE(inifile.get("section1", "").as<std::string>() == "value1");
+}
+
+TEST_CASE("basic_inifile load and save methods")
+{
+  ini::inifile inifile;
+
+  // Set some sections and fields
+  inifile.set("section1", "key1", "value1");
+  inifile.set("section2", "key2", "value2");
+
+  // Save to a file
+  std::string filename = "/tmp/test.ini";
+  REQUIRE(inifile.save(filename));
+
+  // Load from the file
+  ini::inifile inifile_loaded;
+  REQUIRE(inifile_loaded.load(filename));
+  REQUIRE(inifile_loaded.contains("section1"));
+  REQUIRE(inifile_loaded.get("section1", "key1").as<std::string>() == "value1");
+  REQUIRE(inifile_loaded.contains("section2"));
+  REQUIRE(inifile_loaded.get("section2", "key2").as<std::string>() == "value2");
+}
+
+TEST_CASE("basic_inifile sections")
+{
+  ini::inifile inifile;
+
+  // Set some sections and fields
+  inifile.set("section1", "key1", "value1");
+  inifile.set("section2", "key2", "value2");
+
+  // Get all sections
+  auto sections = inifile.sections();
+  REQUIRE(sections.size() == 2);
+  REQUIRE(std::find(sections.begin(), sections.end(), "section1") != sections.end());
+  REQUIRE(std::find(sections.begin(), sections.end(), "section2") != sections.end());
 }
 
 TEST_CASE("trim function", "[trim]")
