@@ -449,7 +449,7 @@ TEST_CASE("basic_inifile load and save methods")
   inifile.set("section2", "key2", "value2");
 
   // Save to a file
-  std::string filename = "/tmp/test.ini";
+  std::string filename = "test01.ini";
   REQUIRE(inifile.save(filename));
 
   // Load from the file
