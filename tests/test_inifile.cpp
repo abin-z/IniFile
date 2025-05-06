@@ -1272,3 +1272,207 @@ TEST_CASE("join function", "[join]")
     REQUIRE(join(big, ",") == "1000000000,9223372036854775807");
   }
 }
+
+TEST_CASE("member func test12 - massive insertions and edge cases", "[inifile][stress]")
+{
+  ini::inifile inif;
+
+  // 1. 插入 100 个 section，每个 section 包含 50 个键值对
+  for (int i = 0; i < 100; ++i)
+  {
+    std::string section = "section_" + std::to_string(i);
+    for (int j = 0; j < 50; ++j)
+    {
+      std::string key = "key_" + std::to_string(j);
+      inif[section][key] = i * 100 + j;
+    }
+  }
+
+  // 2. 检查部分 section 和 key 的存在性
+  CHECK(inif.contains("section_0", "key_0"));
+  CHECK(inif.contains("section_99", "key_49"));
+  CHECK_FALSE(inif.contains("section_100"));            // 不存在的 section
+  CHECK_FALSE(inif.contains("section_10", "key_100"));  // 不存在的 key
+
+  // 3. 边界键名和值测试
+  inif[""][""] = "";  // 空 section + 空 key
+  inif[""]["key_only"] = "value";
+  inif["special"]["空格 key"] = "空格 value";
+  inif["special"]["中文key"] = "中文值";
+  inif["special"]["newline\nkey"] = "value\nwith\nnewlines";
+  inif["special"]["=equals="] = "==value==";
+
+  // 4. 类型覆盖测试（先设置为 bool，再覆盖为 string）
+  inif["overload"]["data"] = true;
+  CHECK(bool(inif["overload"]["data"]) == true);
+  inif["overload"]["data"] = "now string";
+  CHECK(inif["overload"]["data"].as<std::string>() == "now string");
+
+  // 5. 注释设置和清除
+  inif["commented"]["item1"] = 123;
+  inif["commented"].set_comment("这是 section 的注释");
+  inif["commented"]["item1"].set_comment("item1 的注释");
+
+  inif["commented"].clear_comment();
+  inif["commented"]["item1"].clear_comment();
+
+  // 6. 检查 size/count/empty/find
+  CHECK(inif.size() >= 100);
+  CHECK(inif.count("section_42") == 1);
+  CHECK(inif["section_42"].size() == 50);
+  CHECK(inif[""][""].as<std::string>() == "");
+
+  // 7. 保存并加载验证（保存后再 load 并比对）
+  const char *path = "./test_massive.ini";
+  REQUIRE_NOTHROW(inif.save(path));
+
+  ini::inifile loaded;
+  REQUIRE_NOTHROW(loaded.load(path));
+
+  CHECK(loaded.size() == inif.size());
+  CHECK(loaded["section_1"]["key_1"].as<int>() == 101);
+  CHECK(loaded["special"]["中文key"].as<std::string>() == "中文值");
+  CHECK(loaded[""]["key_only"].as<std::string>() == "value");
+  CHECK(loaded.contains("section_99", "key_49"));
+}
+
+TEST_CASE("member func test13 - extreme stress and edge cases", "[inifile][extreme]")
+{
+  ini::inifile inif;
+
+  // 1. 插入 1000 个 section，每个插入 100 个 key-value（含特殊值）
+  for (int i = 0; i < 1000; ++i)
+  {
+    std::string section = "sec_" + std::to_string(i);
+    for (int j = 0; j < 100; ++j)
+    {
+      std::string key = "key_" + std::to_string(j);
+      std::string value = "val_" + std::to_string(i) + "_" + std::to_string(j);
+      inif[section][key] = value;
+
+      // 多次覆盖
+      inif[section][key] = value + "_updated";
+      inif[section][key] = value + "_final";
+    }
+  }
+
+  // 2. 空 section 和空 key/value
+  inif[""][""] = "";
+  inif[""]["empty_key"] = "";
+  inif[""]["空值"] = "    ";
+  // inif[""]["#special_key"] = "#this is not a comment";  // 不允许#开头的 key, 会被当作注释
+
+  // 3. 含控制字符、特殊符号、换行、回车
+  inif["strange"]["中文"] = "支持中文值";
+  inif["strange"]["emoji🚀"] = "值🌟";
+
+  // 3.1 合法但极端的 Key 和 Value（不使用换行）
+  inif["strange"]["with_space"] = "value with space";
+  inif["strange"]["with_special_!@#$%^&*()"] = "~!@#￥%……&*（）——";
+
+  // 3.2 中文、emoji：仅在 UTF-8 环境下允许
+  inif["strange"]["中文key"] = "中文值";
+  inif["strange"]["emoji_key_🚀"] = "emoji_value_🌟";
+
+  // 3.3 将不可见字符放入 value 中以测试 parser（需转义或预期失败）
+  std::string encoded_ctrl_value = "line\\nbreak\\tand\\x07bell";  // 以编码字符串替代原始控制符
+  inif["strange"]["encoded_control"] = encoded_ctrl_value;
+
+  // 4. 超长 key/value
+  std::string long_key(1024, 'K');
+  std::string long_val(8192, 'V');
+  inif["long"]["long_key"] = long_val;
+  inif["long"][long_key] = "短值";
+
+  // 5. 数值边界情况
+  inif["numbers"]["int_max"] = std::numeric_limits<int>::max();
+  inif["numbers"]["int_min"] = std::numeric_limits<int>::min();
+  inif["numbers"]["double_max"] = std::numeric_limits<double>::max();
+  inif["numbers"]["double_min"] = std::numeric_limits<double>::min();
+  inif["numbers"]["neg_zero"] = -0.0;
+  inif["numbers"]["inf"] = std::numeric_limits<double>::infinity();
+  inif["numbers"]["nan"] = std::numeric_limits<double>::quiet_NaN();
+
+  // 6. 重复 key，重复 section
+  for (int i = 0; i < 10; ++i)
+  {
+    inif["dup_section"]["dup_key"] = i;
+  }
+  CHECK(inif["dup_section"]["dup_key"].as<int>() == 9);  // 最后一个覆盖
+
+  // 7. 注释多次覆盖
+  auto &sec = inif["annotated"];
+  sec.set_comment("初始注释");
+  sec.set_comment("覆盖注释");
+  sec.clear_comment();
+  sec.set_comment("最终注释");
+
+  // 8. 保存并再次加载，验证一致性
+  const char *path = "./test_extreme.ini";
+  inif.save(path);
+
+  ini::inifile reloaded;
+  reloaded.load(path);
+
+  // 校验部分加载后数据一致
+  CHECK(reloaded["sec_999"]["key_99"].as<std::string>() == "val_999_99_final");
+  CHECK(reloaded[""][""].as<std::string>() == "");
+  // CHECK(reloaded[""]["#special_key"].as<std::string>() == "#this is not a comment");
+  CHECK(reloaded["long"]["long_key"].as<std::string>() == long_val);
+  CHECK(reloaded["long"][long_key].as<std::string>() == "短值");
+  CHECK(reloaded["strange"]["emoji🚀"].as<std::string>() == "值🌟");
+  CHECK(reloaded["strange"]["with_special_!@#$%^&*()"].as<std::string>() == "~!@#￥%……&*（）——");  // 极端
+  CHECK(reloaded["numbers"]["int_max"].as<int>() == std::numeric_limits<int>::max());
+
+  // 不一定能比较 NaN，但可以判断不是 inf
+  auto nan_val = reloaded["numbers"]["nan"].as<double>();
+  CHECK(nan_val != nan_val);  // NaN 特性：不等于自身
+
+  // 9. 更加密集的校验（不需要全校验，但随机抽查）
+  CHECK(reloaded.contains("sec_0", "key_0"));
+  CHECK(reloaded.contains("sec_500", "key_50"));
+  CHECK(reloaded["sec_123"]["key_45"].as<std::string>() == "val_123_45_final");
+  CHECK(reloaded["sec_0"]["key_0"].as<std::string>() == "val_0_0_final");
+
+  // 10. 空字符串和空 section 检查
+  CHECK(reloaded.contains("", ""));
+  CHECK(reloaded.contains("", "empty_key"));
+  CHECK(reloaded.contains("", "空值"));
+  CHECK(reloaded[""]["空值"].as<std::string>() == "");  // 被trim了
+
+  // 11. 中文、emoji 内容完整性验证
+  CHECK(reloaded["strange"]["中文"].as<std::string>() == "支持中文值");
+  CHECK(reloaded["strange"]["emoji_key_🚀"].as<std::string>() == "emoji_value_🌟");
+  CHECK(reloaded["strange"]["中文key"].as<std::string>() == "中文值");
+
+  // 12. encoded 控制字符字符串正确保留
+  CHECK(reloaded["strange"]["encoded_control"].as<std::string>() == encoded_ctrl_value);
+
+  // 13. 注释是否保留（若支持注释加载）
+  // CHECK(reloaded["annotated"].comment() == "最终注释");  // 如果实现支持 comment()
+
+  // 14. 数值内容
+  CHECK(reloaded["numbers"]["double_max"].as<double>() == std::numeric_limits<double>::max());
+  CHECK(reloaded["numbers"]["double_min"].as<double>() == std::numeric_limits<double>::min());
+  CHECK(std::signbit(reloaded["numbers"]["neg_zero"].as<double>()) == true);  // 确保是 -0.0
+  CHECK(std::isinf(reloaded["numbers"]["inf"].as<double>()) == true); // 不通过
+  CHECK(std::isnan(reloaded["numbers"]["nan"].as<double>()) == true);
+
+  // 15. 重复 section 的最终值覆盖验证
+  CHECK(reloaded["dup_section"]["dup_key"].as<std::string>() == "9");
+
+  // 16. 超长 key/value 检查
+  CHECK(reloaded["long"].contains("long_key"));
+  CHECK(reloaded["long"].contains(long_key));
+  CHECK(reloaded["long"]["long_key"].as<std::string>().size() == 8192);
+  CHECK(reloaded["long"][long_key].as<std::string>() == "短值");
+
+  // 17. section 和 key 总量检查（应有1000+1+1+1+1+1 = 1005个section）
+  CHECK(reloaded.size() >= 1000);
+  CHECK(reloaded.count("sec_0") == 1);
+  CHECK(reloaded["sec_0"].size() == 100);
+
+  // 18. 极端符号内容
+  CHECK(reloaded["strange"]["with_special_!@#$%^&*()"].as<std::string>() == "~!@#￥%……&*（）——");
+  CHECK(reloaded["strange"]["with_space"].as<std::string>() == "value with space");
+}
