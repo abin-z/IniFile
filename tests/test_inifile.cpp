@@ -1824,3 +1824,71 @@ TEMPLATE_TEST_CASE("Integer value conversion in ini::inifile", "[inifile][conver
     CHECK(inif["val"]["neg"].as<T>() == neg);
   }
 }
+
+TEMPLATE_TEST_CASE("Integer edge ±1 conversion", "[inifile][convert][int][edge]", int, short, long, long long,
+                   unsigned int, unsigned short, unsigned long, unsigned long long, int8_t, int16_t, int32_t, int64_t,
+                   uint8_t, uint16_t, uint32_t, uint64_t)
+{
+  using T = TestType;
+  ini::inifile inif;
+
+  const T max_minus_1 = std::numeric_limits<T>::max() - T(1);
+  const T min_plus_1 = std::numeric_limits<T>::lowest() + T(1);
+
+  inif["val"]["max-1"] = max_minus_1;
+  CHECK(inif["val"]["max-1"].as<T>() == max_minus_1);
+
+  if (std::is_signed<T>::value)
+  {
+    inif["val"]["min+1"] = min_plus_1;
+    CHECK(inif["val"]["min+1"].as<T>() == min_plus_1);
+  }
+}
+
+TEMPLATE_TEST_CASE("Integer bit-boundary test", "[inifile][convert][bit][int]", int, short, long, long long,
+                   unsigned int, unsigned short, unsigned long, unsigned long long, int8_t, int16_t, int32_t, int64_t,
+                   uint8_t, uint16_t, uint32_t, uint64_t)
+{
+  using T = TestType;
+  ini::inifile inif;
+
+  constexpr int num_bits = sizeof(T) * 8;
+  const T high_bit = T(1) << (num_bits - 1);  // highest bit set
+  const T low_bit = 1;
+
+  inif["val"]["low_bit"] = low_bit;
+  CHECK(inif["val"]["low_bit"].as<T>() == low_bit);
+
+  inif["val"]["high_bit"] = high_bit;
+  CHECK(inif["val"]["high_bit"].as<T>() == high_bit);
+}
+
+TEMPLATE_TEST_CASE("Full-range integer conversion with min/lowest/max", "[inifile][convert][int][limits]", int, short,
+                   long, long long, unsigned int, unsigned short, unsigned long, unsigned long long, int8_t, int16_t,
+                   int32_t, int64_t, uint8_t, uint16_t, uint32_t, uint64_t)
+{
+  using T = TestType;
+  ini::inifile inif;
+
+  const T zero = 0;
+  const T pos = T(123);
+  const T neg = std::is_signed<T>::value ? T(-456) : T(0);
+
+  const T min_val = std::numeric_limits<T>::min();        // 最小正数（有符号时为 1）
+  const T lowest_val = std::numeric_limits<T>::lowest();  // 真正的最小值（如 -128）
+  const T max_val = std::numeric_limits<T>::max();
+
+  inif["val"]["zero"] = zero;
+  inif["val"]["pos"] = pos;
+  inif["val"]["min"] = min_val;
+  inif["val"]["lowest"] = lowest_val;
+  inif["val"]["max"] = max_val;
+  if (std::is_signed<T>::value) inif["val"]["neg"] = neg;
+
+  CHECK(inif["val"]["zero"].as<T>() == zero);
+  CHECK(inif["val"]["pos"].as<T>() == pos);
+  CHECK(inif["val"]["min"].as<T>() == min_val);
+  CHECK(inif["val"]["lowest"].as<T>() == lowest_val);
+  CHECK(inif["val"]["max"].as<T>() == max_val);
+  if (std::is_signed<T>::value) CHECK(inif["val"]["neg"].as<T>() == neg);
+}
