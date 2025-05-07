@@ -1392,6 +1392,7 @@ TEST_CASE("member func test13 - extreme stress and edge cases", "[inifile][extre
   inif["numbers"]["neg_zero"] = -0.0;
   inif["numbers"]["inf"] = std::numeric_limits<double>::infinity();
   inif["numbers"]["nan"] = std::numeric_limits<double>::quiet_NaN();
+  inif["special"]["negative_int"] = -2147483648LL;
 
   // 6. 重复 key，重复 section
   for (int i = 0; i < 10; ++i)
@@ -1671,7 +1672,7 @@ TEST_CASE("Integer Values in iniFile", "[inifile][integer][boundary]")
   CHECK(output_value == input_value);
 
   // 10. 负整数测试
-  inif["special"]["negative_int"] = -2147483648;
+  inif["special"]["negative_int"] = -2147483648LL;
   CHECK(inif["special"]["negative_int"].as<int>() == -2147483648);
 
   // 11. 数字格式验证：科学计数法
@@ -2043,4 +2044,134 @@ TEST_CASE("ini::field move and assignment robustness", "[field][move][self-assig
     REQUIRE(dst.as<std::string>() == "abc");
     REQUIRE(src.empty());  // 如果实现清空
   }
+}
+
+TEST_CASE("IniFile Save/Load Consistency - All Integer Types")
+{
+  ini::inifile ini;
+  ini["int"]["int_min"] = std::numeric_limits<int>::min();
+  ini["int"]["int_max"] = std::numeric_limits<int>::max();
+  ini["short"]["short_min"] = std::numeric_limits<short>::min();
+  ini["short"]["short_max"] = std::numeric_limits<short>::max();
+  ini["long"]["long_min"] = std::numeric_limits<long>::min();
+  ini["long"]["long_max"] = std::numeric_limits<long>::max();
+  ini["longlong"]["ll_min"] = std::numeric_limits<long long>::min();
+  ini["longlong"]["ll_max"] = std::numeric_limits<long long>::max();
+
+  ini["uint"]["uint_max"] = std::numeric_limits<unsigned int>::max();
+  ini["ushort"]["ushort_max"] = std::numeric_limits<unsigned short>::max();
+  ini["ulong"]["ulong_max"] = std::numeric_limits<unsigned long>::max();
+  ini["ulonglong"]["ull_max"] = std::numeric_limits<unsigned long long>::max();
+
+  // 有符号整数
+  ini["i8"]["lowest"] = std::numeric_limits<int8_t>::lowest();
+  ini["i8"]["max"] = std::numeric_limits<int8_t>::max();
+
+  ini["i16"]["lowest"] = std::numeric_limits<int16_t>::lowest();
+  ini["i16"]["max"] = std::numeric_limits<int16_t>::max();
+
+  ini["i32"]["lowest"] = std::numeric_limits<int32_t>::lowest();
+  ini["i32"]["max"] = std::numeric_limits<int32_t>::max();
+
+  ini["i64"]["lowest"] = std::numeric_limits<int64_t>::lowest();
+  ini["i64"]["max"] = std::numeric_limits<int64_t>::max();
+
+  // 无符号整数
+  ini["u8"]["lowest"] = std::numeric_limits<uint8_t>::lowest();  // = 0
+  ini["u8"]["max"] = std::numeric_limits<uint8_t>::max();
+
+  ini["u16"]["lowest"] = std::numeric_limits<uint16_t>::lowest();
+  ini["u16"]["max"] = std::numeric_limits<uint16_t>::max();
+
+  ini["u32"]["lowest"] = std::numeric_limits<uint32_t>::lowest();
+  ini["u32"]["max"] = std::numeric_limits<uint32_t>::max();
+
+  ini["u64"]["lowest"] = std::numeric_limits<uint64_t>::lowest();
+  ini["u64"]["max"] = std::numeric_limits<uint64_t>::max();
+
+  ini.save("test_integers.ini");
+
+  ini::inifile loaded;
+  loaded.load("test_integers.ini");
+
+  CHECK(loaded["int"]["int_min"].as<int>() == std::numeric_limits<int>::min());
+  CHECK(loaded["int"]["int_max"].as<int>() == std::numeric_limits<int>::max());
+  CHECK(loaded["short"]["short_min"].as<short>() == std::numeric_limits<short>::min());
+  CHECK(loaded["short"]["short_max"].as<short>() == std::numeric_limits<short>::max());
+  CHECK(loaded["long"]["long_min"].as<long>() == std::numeric_limits<long>::min());
+  CHECK(loaded["long"]["long_max"].as<long>() == std::numeric_limits<long>::max());
+  CHECK(loaded["longlong"]["ll_min"].as<long long>() == std::numeric_limits<long long>::min());
+  CHECK(loaded["longlong"]["ll_max"].as<long long>() == std::numeric_limits<long long>::max());
+
+  CHECK(loaded["uint"]["uint_max"].as<unsigned int>() == std::numeric_limits<unsigned int>::max());
+  CHECK(loaded["ushort"]["ushort_max"].as<unsigned short>() == std::numeric_limits<unsigned short>::max());
+  CHECK(loaded["ulong"]["ulong_max"].as<unsigned long>() == std::numeric_limits<unsigned long>::max());
+  CHECK(loaded["ulonglong"]["ull_max"].as<unsigned long long>() == std::numeric_limits<unsigned long long>::max());
+
+  CHECK(loaded["i8"]["lowest"].as<int8_t>() == std::numeric_limits<int8_t>::lowest());
+  CHECK(loaded["i8"]["max"].as<int8_t>() == std::numeric_limits<int8_t>::max());
+
+  CHECK(loaded["i16"]["lowest"].as<int16_t>() == std::numeric_limits<int16_t>::lowest());
+  CHECK(loaded["i16"]["max"].as<int16_t>() == std::numeric_limits<int16_t>::max());
+
+  CHECK(loaded["i32"]["lowest"].as<int32_t>() == std::numeric_limits<int32_t>::lowest());
+  CHECK(loaded["i32"]["max"].as<int32_t>() == std::numeric_limits<int32_t>::max());
+
+  CHECK(loaded["i64"]["lowest"].as<int64_t>() == std::numeric_limits<int64_t>::lowest());
+  CHECK(loaded["i64"]["max"].as<int64_t>() == std::numeric_limits<int64_t>::max());
+
+  CHECK(loaded["u8"]["lowest"].as<uint8_t>() == std::numeric_limits<uint8_t>::lowest());
+  CHECK(loaded["u8"]["max"].as<uint8_t>() == std::numeric_limits<uint8_t>::max());
+
+  CHECK(loaded["u16"]["lowest"].as<uint16_t>() == std::numeric_limits<uint16_t>::lowest());
+  CHECK(loaded["u16"]["max"].as<uint16_t>() == std::numeric_limits<uint16_t>::max());
+
+  CHECK(loaded["u32"]["lowest"].as<uint32_t>() == std::numeric_limits<uint32_t>::lowest());
+  CHECK(loaded["u32"]["max"].as<uint32_t>() == std::numeric_limits<uint32_t>::max());
+
+  CHECK(loaded["u64"]["lowest"].as<uint64_t>() == std::numeric_limits<uint64_t>::lowest());
+  CHECK(loaded["u64"]["max"].as<uint64_t>() == std::numeric_limits<uint64_t>::max());
+}
+
+TEST_CASE("IniFile Save/Load Consistency - All Floating Types")
+{
+  ini::inifile ini;
+  ini["float"]["lowest"] = std::numeric_limits<float>::lowest();  // -FLT_MAX
+  ini["float"]["min"] = std::numeric_limits<float>::min();        // 最小正数
+  ini["float"]["max"] = std::numeric_limits<float>::max();
+
+  ini["double"]["lowest"] = std::numeric_limits<double>::lowest();
+  ini["double"]["min"] = std::numeric_limits<double>::min();
+  ini["double"]["max"] = std::numeric_limits<double>::max();
+
+  ini["long double"]["lowest"] = std::numeric_limits<long double>::lowest();
+  ini["long double"]["min"] = std::numeric_limits<long double>::min();
+  ini["long double"]["max"] = std::numeric_limits<long double>::max();
+
+  ini["special"]["pos_inf"] = std::numeric_limits<double>::infinity();
+  ini["special"]["neg_inf"] = -std::numeric_limits<double>::infinity();
+  ini["special"]["nan"] = std::numeric_limits<double>::quiet_NaN();
+
+  ini.save("test_floats.ini");
+
+  ini::inifile loaded;
+  loaded.load("test_floats.ini");
+
+  CHECK(loaded["float"]["lowest"].as<float>() == std::numeric_limits<float>::lowest());
+  CHECK(loaded["float"]["min"].as<float>() == std::numeric_limits<float>::min());
+  CHECK(loaded["float"]["max"].as<float>() == std::numeric_limits<float>::max());
+
+  CHECK(loaded["double"]["lowest"].as<double>() == std::numeric_limits<double>::lowest());
+  CHECK(loaded["double"]["min"].as<double>() == std::numeric_limits<double>::min());
+  CHECK(loaded["double"]["max"].as<double>() == std::numeric_limits<double>::max());
+
+  CHECK(loaded["long double"]["lowest"].as<long double>() == std::numeric_limits<long double>::lowest());
+  CHECK(loaded["long double"]["min"].as<long double>() == std::numeric_limits<long double>::min());
+  CHECK(loaded["long double"]["max"].as<long double>() == std::numeric_limits<long double>::max());
+
+  CHECK(std::isinf(loaded["special"]["pos_inf"].as<double>()));
+  CHECK(loaded["special"]["pos_inf"].as<double>() > 0);
+  CHECK(std::isinf(loaded["special"]["neg_inf"].as<double>()));
+  CHECK(loaded["special"]["neg_inf"].as<double>() < 0);
+  CHECK(std::isnan(loaded["special"]["nan"].as<double>()));
 }
