@@ -30,6 +30,7 @@
 #include <cerrno>
 #include <cstdlib>
 #include <fstream>
+#include <iomanip>
 #include <iostream>
 #include <iterator>
 #include <limits>
@@ -474,6 +475,21 @@ struct convert<T, typename std::enable_if<std::is_floating_point<T>::value>::typ
       throw std::invalid_argument("<inifile> Cannot convert empty string to floating point.");
     }
 
+    // 检查长度为 3 或 4 的特殊值(inf或者nan)
+    if (value.size() == 3 || value.size() == 4)
+    {
+      static const std::unordered_map<std::string, T> special_values = {{"inf", std::numeric_limits<T>::infinity()},
+                                                                        {"-inf", -std::numeric_limits<T>::infinity()},
+                                                                        {"nan", std::numeric_limits<T>::quiet_NaN()},
+                                                                        {"-nan", -std::numeric_limits<T>::quiet_NaN()}};
+      auto it = special_values.find(value);
+      if (it != special_values.end())
+      {
+        result = it->second;
+        return;
+      }
+    }
+
     char *end_ptr = nullptr;
     errno = 0;
     long double temp = std::strtold(value.c_str(), &end_ptr);
@@ -496,12 +512,14 @@ struct convert<T, typename std::enable_if<std::is_floating_point<T>::value>::typ
    * @param value 需要转换的浮点数
    * @param result 转换后的字符串
    *
-   * - 直接调用 `std::to_string()` 进行转换
-   * - `std::to_string()` 可能会影响精度,对于高精度需求可使用 `std::stringstream`
+   * - 不使用 `std::to_string()` 进行转换, `std::to_string()` 会影响浮点数精度;
+   * - 对于高精度需求可使用 `std::stringstream`;
    */
   void encode(const T value, std::string &result)
   {
-    result = std::to_string(value);
+    std::ostringstream oss;
+    oss << std::setprecision(std::numeric_limits<T>::max_digits10) << value;
+    result = oss.str();
   }
 };
 
