@@ -415,7 +415,7 @@ struct convert<T, typename std::enable_if<std::is_integral<T>::value && is_to_st
       long long temp = std::strtoll(value.c_str(), &end_ptr, 10);
       if (errno == ERANGE || temp < std::numeric_limits<T>::min() || temp > std::numeric_limits<T>::max())
       {
-        throw std::out_of_range("<inifile> Integer conversion out of range.");
+        throw std::out_of_range("<inifile> Integer conversion out of range: " + value);
       }
       result = static_cast<T>(temp);
     }
@@ -424,7 +424,7 @@ struct convert<T, typename std::enable_if<std::is_integral<T>::value && is_to_st
       unsigned long long temp = std::strtoull(value.c_str(), &end_ptr, 10);
       if (errno == ERANGE || temp > std::numeric_limits<T>::max())
       {
-        throw std::out_of_range("<inifile> Unsigned integer conversion out of range.");
+        throw std::out_of_range("<inifile> Unsigned integer conversion out of range: " + value);
       }
       result = static_cast<T>(temp);
     }
@@ -503,10 +503,10 @@ struct convert<T, typename std::enable_if<std::is_floating_point<T>::value>::typ
     // 检查长度为 3 或 4 的特殊值(inf或者nan)
     if (value.size() == 3 || value.size() == 4)
     {
-      static const std::unordered_map<std::string, T> special_values = {{"inf", std::numeric_limits<T>::infinity()},
-                                                                        {"-inf", -std::numeric_limits<T>::infinity()},
-                                                                        {"nan", std::numeric_limits<T>::quiet_NaN()},
-                                                                        {"-nan", -std::numeric_limits<T>::quiet_NaN()}};
+      static const std::unordered_map<std::string, T> special_values = {
+        {"inf", std::numeric_limits<T>::infinity()},   {"+inf", std::numeric_limits<T>::infinity()},
+        {"-inf", -std::numeric_limits<T>::infinity()}, {"nan", std::numeric_limits<T>::quiet_NaN()},
+        {"+nan", std::numeric_limits<T>::quiet_NaN()}, {"-nan", -std::numeric_limits<T>::quiet_NaN()}};
       auto it = special_values.find(value);
       if (it != special_values.end())
       {
@@ -521,7 +521,7 @@ struct convert<T, typename std::enable_if<std::is_floating_point<T>::value>::typ
 
     if (errno == ERANGE || temp < std::numeric_limits<T>::lowest() || temp > std::numeric_limits<T>::max())
     {
-      throw std::out_of_range("<inifile> Floating point conversion out of range.");
+      throw std::out_of_range("<inifile> Floating point conversion out of range: " + value);
     }
 
     result = temp;
