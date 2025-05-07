@@ -2175,3 +2175,93 @@ TEST_CASE("IniFile Save/Load Consistency - All Floating Types")
   CHECK(loaded["special"]["neg_inf"].as<double>() < 0);
   CHECK(std::isnan(loaded["special"]["nan"].as<double>()));
 }
+
+TEST_CASE("IniFile Save/Load Consistency - Special Floating-Point Values")
+{
+  ini::inifile ini;
+
+  // 使用 std::numeric_limits<T>::quiet_NaN() 更标准
+  ini["float"]["nan"] = std::numeric_limits<float>::quiet_NaN();
+  ini["float"]["inf"] = std::numeric_limits<float>::infinity();
+  ini["float"]["-inf"] = -std::numeric_limits<float>::infinity();
+
+  ini["double"]["nan"] = std::numeric_limits<double>::quiet_NaN();
+  ini["double"]["inf"] = std::numeric_limits<double>::infinity();
+  ini["double"]["-inf"] = -std::numeric_limits<double>::infinity();
+
+  ini["long double"]["nan"] = std::numeric_limits<long double>::quiet_NaN();
+  ini["long double"]["inf"] = std::numeric_limits<long double>::infinity();
+  ini["long double"]["-inf"] = -std::numeric_limits<long double>::infinity();
+
+  ini.save("test_special_floats.ini");
+
+  ini::inifile loaded;
+  loaded.load("test_special_floats.ini");
+
+  // float
+  CHECK((std::isnan(loaded["float"]["nan"].as<float>())));
+  CHECK((std::isinf(loaded["float"]["inf"].as<float>()) && loaded["float"]["inf"].as<float>() > 0));
+  CHECK((std::isinf(loaded["float"]["-inf"].as<float>()) && loaded["float"]["-inf"].as<float>() < 0));
+
+  // double
+  CHECK((std::isnan(loaded["double"]["nan"].as<double>())));
+  CHECK((std::isinf(loaded["double"]["inf"].as<double>()) && loaded["double"]["inf"].as<double>() > 0));
+  CHECK((std::isinf(loaded["double"]["-inf"].as<double>()) && loaded["double"]["-inf"].as<double>() < 0));
+
+  // long double
+  CHECK((std::isnan(loaded["long double"]["nan"].as<long double>())));
+  CHECK((std::isinf(loaded["long double"]["inf"].as<long double>()) && loaded["long double"]["inf"].as<long double>() > 0));
+  CHECK((std::isinf(loaded["long double"]["-inf"].as<long double>()) && loaded["long double"]["-inf"].as<long double>() < 0));
+}
+
+TEST_CASE("IniFile Save/Load Consistency - bool, std::string, const char*, char types")
+{
+  ini::inifile ini;
+  
+  // 测试 bool 类型的保存和加载
+  ini["bool"]["true"] = true;
+  ini["bool"]["false"] = false;
+  
+  // 测试 std::string 类型的保存和加载
+  ini["string"]["hello"] = "Hello, world!";
+  ini["string"]["empty"] = "";
+  
+  // 测试 const char* 类型的保存和加载
+  ini["cstr"]["sample"] = "This is a test!";
+  ini["cstr"]["empty"] = "";
+
+  // 测试 char 类型的保存和加载
+  ini["char"]["char_val"] = 'A';
+  
+  // 测试 signed char 类型的保存和加载
+  ini["signed_char"]["signed_char_val"] = static_cast<signed char>(-128);
+  
+  // 测试 unsigned char 类型的保存和加载
+  ini["unsigned_char"]["unsigned_char_val"] = static_cast<unsigned char>(255);
+
+  ini.save("test_all_types.ini");
+
+  ini::inifile loaded;
+  loaded.load("test_all_types.ini");
+
+  // 验证 bool 类型
+  CHECK(loaded["bool"]["true"].as<bool>() == true);
+  CHECK(loaded["bool"]["false"].as<bool>() == false);
+  
+  // 验证 std::string 类型
+  CHECK(loaded["string"]["hello"].as<std::string>() == "Hello, world!");
+  CHECK(loaded["string"]["empty"].as<std::string>() == "");
+  
+  // 验证 const char* 类型
+  CHECK(loaded["cstr"]["sample"].as<const char*>() == std::string("This is a test!"));
+  CHECK(loaded["cstr"]["empty"].as<const char*>() == std::string(""));
+  
+  // 验证 char 类型
+  CHECK(loaded["char"]["char_val"].as<char>() == 'A');
+  
+  // 验证 signed char 类型
+  CHECK(loaded["signed_char"]["signed_char_val"].as<signed char>() == static_cast<signed char>(-128));
+  
+  // 验证 unsigned char 类型
+  CHECK(loaded["unsigned_char"]["unsigned_char_val"].as<unsigned char>() == static_cast<unsigned char>(255));
+}
