@@ -448,6 +448,31 @@ struct convert<T, typename std::enable_if<std::is_integral<T>::value && is_to_st
   }
 };
 
+// 通用浮点字符串解析模板
+template <typename T>
+T parse_string_to_floating_point(const char *str, char **end_ptr)
+{
+  return static_cast<T>(std::strtold(str, end_ptr));
+}
+// 特化 float
+template <>
+float parse_string_to_floating_point<float>(const char *str, char **end_ptr)
+{
+  return std::strtof(str, end_ptr);
+}
+// 特化 double
+template <>
+double parse_string_to_floating_point<double>(const char *str, char **end_ptr)
+{
+  return std::strtod(str, end_ptr);
+}
+// 特化 long double
+template <>
+long double parse_string_to_floating_point<long double>(const char *str, char **end_ptr)
+{
+  return std::strtold(str, end_ptr);
+}
+
 /**
  * @brief convert 模板特化:处理浮点数类型 (`float`, `double`, `long double`)
  *
@@ -492,14 +517,14 @@ struct convert<T, typename std::enable_if<std::is_floating_point<T>::value>::typ
 
     char *end_ptr = nullptr;
     errno = 0;
-    long double temp = std::strtold(value.c_str(), &end_ptr);
+    T temp = parse_string_to_floating_point<T>(value.c_str(), &end_ptr);
 
     if (errno == ERANGE || temp < std::numeric_limits<T>::lowest() || temp > std::numeric_limits<T>::max())
     {
       throw std::out_of_range("<inifile> Floating point conversion out of range.");
     }
 
-    result = static_cast<T>(temp);
+    result = temp;
 
     if (end_ptr == value.c_str() || *end_ptr != '\0')  // 检查是否转换完整
     {
