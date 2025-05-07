@@ -1448,14 +1448,11 @@ TEST_CASE("member func test13 - extreme stress and edge cases", "[inifile][extre
   // 12. encoded 控制字符字符串正确保留
   CHECK(reloaded["strange"]["encoded_control"].as<std::string>() == encoded_ctrl_value);
 
-  // 13. 注释是否保留（若支持注释加载）
-  // CHECK(reloaded["annotated"].comment() == "最终注释");  // 如果实现支持 comment()
-
   // 14. 数值内容
   CHECK(reloaded["numbers"]["double_max"].as<double>() == std::numeric_limits<double>::max());
   CHECK(reloaded["numbers"]["double_min"].as<double>() == std::numeric_limits<double>::min());
   CHECK(std::signbit(reloaded["numbers"]["neg_zero"].as<double>()) == true);  // 确保是 -0.0
-  CHECK(std::isinf(reloaded["numbers"]["inf"].as<double>()) == true); // 不通过
+  CHECK(std::isinf(reloaded["numbers"]["inf"].as<double>()) == true);
   CHECK(std::isnan(reloaded["numbers"]["nan"].as<double>()) == true);
 
   // 15. 重复 section 的最终值覆盖验证
