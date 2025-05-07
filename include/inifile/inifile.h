@@ -421,6 +421,12 @@ struct convert<T, typename std::enable_if<std::is_integral<T>::value && is_to_st
     }
     else
     {
+      // 防止 -123 被 strtoull 转换成很大的数
+      if (!value.empty() && value[0] == '-')
+      {
+        throw std::out_of_range("<inifile> Unsigned integer cannot be negative: " + value);
+      }
+      
       unsigned long long temp = std::strtoull(value.c_str(), &end_ptr, 10);
       if (errno == ERANGE || temp > std::numeric_limits<T>::max())
       {
