@@ -1,6 +1,6 @@
 ## 🌟 Lightweight INI File Parsing Library
 
-[![iniparser](https://img.shields.io/badge/INI_Parser-8A2BE2)](https://github.com/abin-z/IniFile) [![headeronly](https://img.shields.io/badge/Header_Only-green)](https://github.com/abin-z/IniFile/blob/main/include/inifile/inifile.h) [![moderncpp](https://img.shields.io/badge/Modern_C%2B%2B-218c73)](https://learn.microsoft.com/en-us/cpp/cpp/welcome-back-to-cpp-modern-cpp?view=msvc-170) [![licenseMIT](https://img.shields.io/badge/License-MIT-green)](https://opensource.org/license/MIT) [![version](https://img.shields.io/badge/version-0.9.6-green)](https://github.com/abin-z/IniFile/releases)
+[![iniparser](https://img.shields.io/badge/INI_Parser-8A2BE2)](https://github.com/abin-z/IniFile) [![headeronly](https://img.shields.io/badge/Header_Only-green)](https://github.com/abin-z/IniFile/blob/main/include/inifile/inifile.h) [![moderncpp](https://img.shields.io/badge/Modern_C%2B%2B-218c73)](https://learn.microsoft.com/en-us/cpp/cpp/welcome-back-to-cpp-modern-cpp?view=msvc-170) [![licenseMIT](https://img.shields.io/badge/License-MIT-green)](https://opensource.org/license/MIT) [![version](https://img.shields.io/badge/version-0.9.7-green)](https://github.com/abin-z/IniFile/releases)
 
 🌍 Languages/语言:  [English](README.md)  |  [简体中文](README.zh-CN.md)
 
@@ -19,6 +19,7 @@ This is a lightweight, cross-platform, efficient and **header-only** INI configu
 - **Support comment function**: Support ini line comments (`;` or `#`), you can add line comments for `[section]` and `key=value` (does not support end-of-line comments).
 - **Custom type conversion**: You can customize type conversion, inifile will automatically convert according to the definition you wrote (reduce duplication)
 - **Support case insensitivity**: Provides optional case insensitivity (for `section` and `key`)
+- **Fully tested and memory-safe**: Functionality has been verified with the [Catch2](https://github.com/catchorg/Catch2) unit testing framework and memory management is leak-free with [Valgrind](https://valgrind.org/).
 
 Ideal for C++ projects that require **parsing, editing, and storing** INI configuration files. The following is the basic ini format:
 
@@ -535,6 +536,8 @@ We welcome contributions! Feel free to submit **Issues** and **Pull Requests** t
 ### 🙌 Acknowledgements
 
 Thank you **[Catch2](https://github.com/catchorg/Catch2)** for providing strong support and assisting in the unit testing of this project!
+
+Thanks to **[Valgrind](http://valgrind.org/)** for his help in securing memory and preventing memory leaks!
 
 ### 📜 License
 

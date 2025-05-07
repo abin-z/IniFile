@@ -1,6 +1,6 @@
 ##  🌟 轻量级ini文件解析库
 
-[![iniparser](https://img.shields.io/badge/INI_Parser-8A2BE2)](https://github.com/abin-z/IniFile) [![headeronly](https://img.shields.io/badge/Header_Only-green)](https://github.com/abin-z/IniFile/blob/main/include/inifile/inifile.h) [![moderncpp](https://img.shields.io/badge/Modern_C%2B%2B-218c73)](https://learn.microsoft.com/en-us/cpp/cpp/welcome-back-to-cpp-modern-cpp?view=msvc-170) [![licenseMIT](https://img.shields.io/badge/License-MIT-green)](https://opensource.org/license/MIT) [![version](https://img.shields.io/badge/version-0.9.6-green)](https://github.com/abin-z/IniFile/releases)
+[![iniparser](https://img.shields.io/badge/INI_Parser-8A2BE2)](https://github.com/abin-z/IniFile) [![headeronly](https://img.shields.io/badge/Header_Only-green)](https://github.com/abin-z/IniFile/blob/main/include/inifile/inifile.h) [![moderncpp](https://img.shields.io/badge/Modern_C%2B%2B-218c73)](https://learn.microsoft.com/en-us/cpp/cpp/welcome-back-to-cpp-modern-cpp?view=msvc-170) [![licenseMIT](https://img.shields.io/badge/License-MIT-green)](https://opensource.org/license/MIT) [![version](https://img.shields.io/badge/version-0.9.7-green)](https://github.com/abin-z/IniFile/releases)
 
 🌍 Languages/语言:  [English](README.md)  |  [简体中文](README.zh-CN.md)
 
@@ -17,6 +17,7 @@
 - **支持注释功能**:  支持ini行注释(`;`或者`#`), 可以为`[section]`和`key=value`添加行注释(不支持行尾注释)
 - **自定义类型转换**: 可以自定义类型转换, inifile将根据你写的定义进行自动转换(减少重复)
 - **支持大小写不敏感功能**: 提供可选的大小写不敏感功能(针对`section`和`key`)
+- **全面测试与内存安全**：已通过 [Catch2](https://github.com/catchorg/Catch2) 单元测试框架验证功能正确性，并使用 [Valgrind](https://valgrind.org/) 确保内存管理无泄漏
 
 适用于对 INI 配置有 **解析、编辑、存储** 需求的 C++ 项目。以下是基础的ini格式:
 
@@ -543,6 +544,8 @@ int main()
 ### 🙌 致谢
 
 感谢 **[Catch2](https://github.com/catchorg/Catch2)** 提供强大支持，助力本项目的单元测试！
+
+感谢 **[Valgrind](http://valgrind.org/)** 在确保内存安全和防止内存泄漏方面的帮助！
 
 ### 📜 许可证
 
