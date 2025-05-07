@@ -822,9 +822,13 @@ class basic_section
     swap(*this, temp);        // noexcept swap
     return *this;
   }
-  // 默认移动构造函数
-  basic_section(basic_section &&) noexcept = default;
-  // 重写移动赋值函数, 默认的不能处理移动自赋值情况
+  // 移动构造函数
+  basic_section(basic_section &&other) noexcept : data_(std::move(other.data_)), comments_(std::move(other.comments_))
+  {
+    other.data_.clear();  // 显式清空, 跨平台行为一致
+    other.comments_.reset();
+  }
+  // 移动赋值函数, 默认的不能处理移动自赋值情况
   basic_section &operator=(basic_section &&rhs) noexcept
   {
     basic_section tmp(std::move(rhs));  // move ctor
@@ -1106,7 +1110,10 @@ class basic_inifile
   basic_inifile &operator=(const basic_inifile &rhs) = default;
 
   // 移动构造
-  basic_inifile(basic_inifile &&other) noexcept = default;
+  basic_inifile(basic_inifile &&other) noexcept : data_(std::move(other.data_))
+  {
+    other.data_.clear();  // 显式清空, 跨平台行为一致
+  };
   // 移动赋值 (move and swap)
   basic_inifile &operator=(basic_inifile &&rhs) noexcept
   {
