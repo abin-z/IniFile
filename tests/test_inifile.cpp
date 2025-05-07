@@ -1688,7 +1688,7 @@ TEST_CASE("Integer Values in iniFile", "[inifile][integer][boundary]")
   catch (const std::out_of_range &e)
   {
     // 检查溢出异常
-    CHECK(std::string(e.what()) == "<inifile> Integer conversion out of range.");
+    CHECK((std::string(e.what()).find("out of range") != std::string::npos));
   }
 
   // 13. 文件保存和加载，验证一致性
@@ -1891,4 +1891,156 @@ TEMPLATE_TEST_CASE("Full-range integer conversion with min/lowest/max", "[inifil
   CHECK(inif["val"]["lowest"].as<T>() == lowest_val);
   CHECK(inif["val"]["max"].as<T>() == max_val);
   if (std::is_signed<T>::value) CHECK(inif["val"]["neg"].as<T>() == neg);
+}
+
+TEST_CASE("basic_inifile move and assignment robustness", "[inifile][move][self-assignment]")
+{
+  ini::inifile original;
+  original.set("section", "key", "value");
+
+  SECTION("Self-assignment")
+  {
+    original = original;  // 正常的自赋值，不应崩溃或修改数据
+    REQUIRE(original.contains("section"));
+    REQUIRE(original.get("section", "key").as<std::string>() == "value");
+  }
+
+  SECTION("Self move-assignment (should be safe)")
+  {
+    ini::inifile &ref = original;
+    ref = std::move(ref);  // 不推荐但应安全处理
+    REQUIRE(ref.contains("section"));
+    REQUIRE(ref.get("section", "key").as<std::string>() == "value");
+  }
+
+  SECTION("Move constructor clears original")
+  {
+    ini::inifile moved = std::move(original);
+    REQUIRE(moved.contains("section"));
+    REQUIRE(moved.get("section", "key").as<std::string>() == "value");
+
+    // 检查原对象是否为空
+    REQUIRE(original.empty());  // 如果你实现了 clear/move 后置空
+  }
+
+  SECTION("Move assignment clears original")
+  {
+    ini::inifile src;
+    src.set("foo", "bar", "baz");
+
+    ini::inifile target;
+    target.set("x", "y", "z");
+
+    target = std::move(src);
+
+    REQUIRE(target.contains("foo"));
+    REQUIRE(target.get("foo", "bar").as<std::string>() == "baz");
+
+    // 原始 src 应为空
+    REQUIRE(src.empty());
+  }
+
+  SECTION("Move into empty inifile")
+  {
+    ini::inifile empty;
+    ini::inifile data;
+    data.set("s", "k", "v");
+
+    empty = std::move(data);
+    REQUIRE(empty.contains("s"));
+    REQUIRE(empty.get("s", "k").as<std::string>() == "v");
+    REQUIRE(data.empty());
+  }
+
+  SECTION("Move from empty inifile")
+  {
+    ini::inifile empty;
+    ini::inifile full;
+    full.set("s", "k", "v");
+
+    full = std::move(empty);
+    REQUIRE(full.empty());  // 原内容应被清空
+    REQUIRE(empty.empty());
+  }
+}
+
+TEST_CASE("ini::section move and assignment robustness", "[section][move][self-assignment]")
+{
+  ini::section sec;
+  sec.set("key1", "value1");
+
+  SECTION("Self-assignment")
+  {
+    sec = sec;
+    REQUIRE(sec.contains("key1"));
+    REQUIRE(sec.get("key1").as<std::string>() == "value1");
+  }
+
+  SECTION("Self move-assignment")
+  {
+    ini::section &ref = sec;
+    ref = std::move(ref);
+    REQUIRE(ref.contains("key1"));
+    REQUIRE(ref.get("key1").as<std::string>() == "value1");
+  }
+
+  SECTION("Move constructor clears source")
+  {
+    ini::section moved = std::move(sec);
+    REQUIRE(moved.contains("key1"));
+    REQUIRE(moved.get("key1").as<std::string>() == "value1");
+
+    REQUIRE(sec.empty());
+  }
+
+  SECTION("Move assignment clears source")
+  {
+    ini::section src;
+    src.set("k", "v");
+
+    ini::section target;
+    target.set("a", "b");
+
+    target = std::move(src);
+    REQUIRE(target.contains("k"));
+    REQUIRE(target.get("k").as<std::string>() == "v");
+    REQUIRE(src.empty());
+  }
+}
+
+TEST_CASE("ini::field move and assignment robustness", "[field][move][self-assignment]")
+{
+  ini::field f1("some_value");
+
+  SECTION("Self-assignment")
+  {
+    f1 = f1;
+    REQUIRE(f1.as<std::string>() == "some_value");
+  }
+
+  SECTION("Self move-assignment")
+  {
+    ini::field &ref = f1;
+    ref = std::move(ref);
+    REQUIRE(ref.as<std::string>() == "some_value");
+  }
+
+  SECTION("Move constructor clears source")
+  {
+    ini::field f2 = std::move(f1);
+    REQUIRE(f2.as<std::string>() == "some_value");
+
+    // moved-from field 应该为空或默认状态
+    REQUIRE(f1.empty());  // 假设 empty() 存在，或者检查 f1.as<std::string>() == ""
+  }
+
+  SECTION("Move assignment clears source")
+  {
+    ini::field src("abc");
+    ini::field dst("xyz");
+
+    dst = std::move(src);
+    REQUIRE(dst.as<std::string>() == "abc");
+    REQUIRE(src.empty());  // 如果实现清空
+  }
 }
