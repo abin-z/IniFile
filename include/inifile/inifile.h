@@ -426,7 +426,7 @@ struct convert<T, typename std::enable_if<std::is_integral<T>::value && is_to_st
       {
         throw std::out_of_range("<inifile> Unsigned integer cannot be negative: " + value);
       }
-      
+
       unsigned long long temp = std::strtoull(value.c_str(), &end_ptr, 10);
       if (errno == ERANGE || temp > std::numeric_limits<T>::max())
       {
