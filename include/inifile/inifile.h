@@ -504,9 +504,9 @@ struct convert<T, typename std::enable_if<std::is_floating_point<T>::value>::typ
     if (value.size() == 3 || value.size() == 4)
     {
       static const std::unordered_map<std::string, T> special_values = {
-        {"inf", std::numeric_limits<T>::infinity()},   {"+inf", std::numeric_limits<T>::infinity()},
-        {"-inf", -std::numeric_limits<T>::infinity()}, {"nan", std::numeric_limits<T>::quiet_NaN()},
-        {"+nan", std::numeric_limits<T>::quiet_NaN()}, {"-nan", -std::numeric_limits<T>::quiet_NaN()}};
+        {"inf", std::numeric_limits<T>::infinity()},   {"nan", std::numeric_limits<T>::quiet_NaN()},
+        {"+inf", std::numeric_limits<T>::infinity()},  {"+nan", std::numeric_limits<T>::quiet_NaN()},
+        {"-inf", -std::numeric_limits<T>::infinity()}, {"-nan", -std::numeric_limits<T>::quiet_NaN()}};
       auto it = special_values.find(value);
       if (it != special_values.end())
       {
@@ -611,18 +611,6 @@ class field
   /// 默认析构函数,使用编译器生成的默认实现.
   ~field() = default;
 
-  /// 默认移动构造函数,按值移动另一个 field 对象.
-  field(field &&other) noexcept = default;
-
-  /// 默认移动赋值运算符,按值移动另一个 field 对象.
-  field &operator=(field &&rhs) noexcept = default;
-
-  /// 重写拷贝构造函数,深拷贝 other 对象.
-  field(const field &other) :
-    value_(other.value_),
-    comments_(other.comments_ ? std::unique_ptr<comment_container>(new comment_container(*other.comments_)) : nullptr)
-  {
-  }
   // 友元 swap(非成员函数)
   friend void swap(field &lhs, field &rhs) noexcept
   {
@@ -630,6 +618,29 @@ class field
     swap(lhs.value_, rhs.value_);
     swap(lhs.comments_, rhs.comments_);
   }
+
+  /// 移动构造函数
+  field(field &&other) noexcept : value_(std::move(other.value_)), comments_(std::move(other.comments_))
+  {
+    other.value_.clear();  // 显式清空, 跨平台行为一致
+    other.comments_.reset();
+  }
+
+  /// 移动赋值运算符
+  field &operator=(field &&rhs) noexcept
+  {
+    field temp(std::move(rhs));  // move ctor
+    swap(*this, temp);           // noexcept swap
+    return *this;
+  }
+
+  /// 重写拷贝构造函数,深拷贝 other 对象.
+  field(const field &other) :
+    value_(other.value_),
+    comments_(other.comments_ ? std::unique_ptr<comment_container>(new comment_container(*other.comments_)) : nullptr)
+  {
+  }
+
   /// 重写拷贝赋值(copy-and-swap 方式)
   field &operator=(const field &rhs) noexcept  // `rhs` pass by reference
   {
