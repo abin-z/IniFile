@@ -792,21 +792,6 @@ class basic_section
   using iterator = typename data_container::iterator;
   using const_iterator = typename data_container::const_iterator;
 
-  // 默认构造
-  basic_section() = default;
-  // 默认析构函数
-  ~basic_section() = default;
-  // 默认移动构造函数
-  basic_section(basic_section &&) noexcept = default;
-  // 默认移动赋值函数
-  basic_section &operator=(basic_section &&) noexcept = default;
-
-  /// 重写拷贝构造函数, 深拷贝
-  basic_section(const basic_section &other) :
-    data_(other.data_),
-    comments_(other.comments_ ? std::unique_ptr<comment_container>(new comment_container(*other.comments_)) : nullptr)
-  {
-  }
   // 友元 swap函数(非成员函数)
   friend void swap(basic_section &lhs, basic_section &rhs) noexcept
   {
@@ -814,11 +799,31 @@ class basic_section
     swap(lhs.data_, rhs.data_);
     swap(lhs.comments_, rhs.comments_);
   }
+
+  // 默认构造
+  basic_section() = default;
+  // 默认析构函数
+  ~basic_section() = default;
+  /// 重写拷贝构造函数, 深拷贝
+  basic_section(const basic_section &other) :
+    data_(other.data_),
+    comments_(other.comments_ ? std::unique_ptr<comment_container>(new comment_container(*other.comments_)) : nullptr)
+  {
+  }
   /// 重写拷贝赋值函数(copy and swap方式)
   basic_section &operator=(const basic_section &rhs) noexcept
   {
-    basic_section temp(rhs);  // 使用拷贝构造函数创建一个临时对象
-    swap(*this, temp);        // copy and swap
+    basic_section temp(rhs);  // copy ctor
+    swap(*this, temp);        // noexcept swap
+    return *this;
+  }
+  // 默认移动构造函数
+  basic_section(basic_section &&) noexcept = default;
+  // 重写移动赋值函数, 默认的不能处理移动自赋值情况
+  basic_section &operator=(basic_section &&rhs) noexcept
+  {
+    basic_section tmp(std::move(rhs));  // move ctor
+    swap(*this, tmp);                   // noexcept swap
     return *this;
   }
 
@@ -1078,6 +1083,32 @@ class basic_inifile
 
   using iterator = typename data_container::iterator;
   using const_iterator = typename data_container::const_iterator;
+
+  friend void swap(basic_inifile &lhs, basic_inifile &rhs) noexcept
+  {
+    using std::swap;
+    swap(lhs.data_, rhs.data_);
+  }
+
+  // 构造函数
+  basic_inifile() = default;
+  // 析构函数
+  ~basic_inifile() = default;
+
+  // 拷贝构造
+  basic_inifile(const basic_inifile &other) = default;
+  // 拷贝赋值
+  basic_inifile &operator=(const basic_inifile &rhs) = default;
+
+  // 移动构造
+  basic_inifile(basic_inifile &&other) noexcept = default;
+  // 移动赋值 (move and swap)
+  basic_inifile &operator=(basic_inifile &&rhs) noexcept
+  {
+    basic_inifile temp(std::move(rhs));  // move ctor
+    swap(*this, temp);                   // noexcept swap
+    return *this;
+  };
 
   /// @brief Get or insert a field. If section_name does not exist, insert a default constructed section object
   /// @param sec section name
