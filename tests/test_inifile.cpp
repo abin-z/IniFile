@@ -1592,3 +1592,235 @@ TEST_CASE("Floating Point Values in iniFile", "[inifile][floating_point][boundar
   CHECK(reloaded["numbers"]["zero_value"].as<double>() == 0.0);
   CHECK(reloaded["dup"]["value"].as<double>() == Approx(2.71).epsilon(1e-5));
 }
+
+TEST_CASE("Integer Values in iniFile", "[inifile][integer][boundary]")
+{
+  ini::inifile inif;
+
+  // 1. 正常的整数
+  inif["normal"]["positive_int"] = 123456789;
+  inif["normal"]["negative_int"] = -987654321;
+  CHECK(inif["normal"]["positive_int"].as<int>() == 123456789);
+  CHECK(inif["normal"]["negative_int"].as<int>() == -987654321);
+
+  // 2. 负零（-0）验证
+  inif["special"]["neg_zero"] = -0;
+  CHECK(inif["special"]["neg_zero"].as<int>() == 0);  // -0 转换为 0
+
+  // 3. 最大/最小整数值
+  inif["boundary"]["int_max"] = std::numeric_limits<int>::max();
+  inif["boundary"]["int_min"] = std::numeric_limits<int>::min();
+  inif["boundary"]["long_max"] = std::numeric_limits<long>::max();
+  inif["boundary"]["long_min"] = std::numeric_limits<long>::min();
+  CHECK(inif["boundary"]["int_max"].as<int>() == std::numeric_limits<int>::max());
+  CHECK(inif["boundary"]["int_min"].as<int>() == std::numeric_limits<int>::min());
+  CHECK(inif["boundary"]["long_max"].as<long>() == std::numeric_limits<long>::max());
+  CHECK(inif["boundary"]["long_min"].as<long>() == std::numeric_limits<long>::min());
+
+  // 4. 边界测试：非常大的整数
+  inif["large"]["big_number"] = 1234567890123456789LL;  // long long
+  CHECK(inif["large"]["big_number"].as<long long>() == 1234567890123456789LL);
+
+  // 5. 空字符串转换，预期抛出异常
+  try
+  {
+    inif["empty"]["empty_value"] = "";
+    // 尝试解析空字符串，应该抛出异常
+    inif["empty"]["empty_value"].as<int>();
+    CHECK(false);  // 强制测试失败
+  }
+  catch (const std::invalid_argument &e)
+  {
+    // 检查异常消息是否正确
+    CHECK(std::string(e.what()) == "<inifile> Cannot convert empty string to integer.");
+  }
+  catch (...)
+  {
+    // 捕获其他类型的异常，测试失败
+    CHECK(false);
+  }
+
+  // 6. 非法整数格式（字母或特殊字符）
+  try
+  {
+    inif["invalid"]["invalid_value"] = "abc123";
+    inif["invalid"]["invalid_value"].as<int>();
+    CHECK(false);  // 强制测试失败
+  }
+  catch (const std::invalid_argument &e)
+  {
+    // 检查异常消息是否正确
+    CHECK(std::string(e.what()) == "<inifile> Invalid integer format: abc123");
+  }
+
+  // 7. 重复键的覆盖，检查最后一个赋值生效
+  inif["dup"]["value"] = 42;
+  inif["dup"]["value"] = 99;
+  CHECK(inif["dup"]["value"].as<int>() == 99);
+
+  // 8. 负数整数值验证
+  inif["numbers"]["negative_number"] = -123456;
+  inif["numbers"]["zero_value"] = 0;
+  CHECK(inif["numbers"]["negative_number"].as<int>() == -123456);
+  CHECK(inif["numbers"]["zero_value"].as<int>() == 0);
+
+  // 9. 整数写入和读取的一致性验证
+  int input_value = 98765;
+  inif["test"]["int_value"] = input_value;
+  int output_value = inif["test"]["int_value"].as<int>();
+  CHECK(output_value == input_value);
+
+  // 10. 负整数测试
+  inif["special"]["negative_int"] = -2147483648;
+  CHECK(inif["special"]["negative_int"].as<int>() == -2147483648);
+
+  // 11. 数字格式验证：科学计数法
+  inif["formats"]["scientific"] = 1e6;  // 科学计数法
+  CHECK(inif["formats"]["scientific"].as<int>() == 1000000);
+
+  // 12. 边界条件：大于 int 最大值的 long 转换
+  try
+  {
+    inif["too_large"]["big_value"] = "2147483648";  // int 最大值加1
+    inif["too_large"]["big_value"].as<int>();
+    CHECK(false);  // 强制测试失败
+  }
+  catch (const std::out_of_range &e)
+  {
+    // 检查溢出异常
+    CHECK(std::string(e.what()) == "<inifile> Integer conversion out of range.");
+  }
+
+  // 13. 文件保存和加载，验证一致性
+  const char *path = "./test_integer_values.ini";
+  inif.save(path);
+
+  ini::inifile reloaded;
+  reloaded.load(path);
+
+  // 检查重载后的数据一致性
+  CHECK(reloaded["normal"]["positive_int"].as<int>() == 123456789);
+  CHECK(reloaded["normal"]["negative_int"].as<int>() == -987654321);
+  CHECK(reloaded["boundary"]["int_max"].as<int>() == std::numeric_limits<int>::max());
+  CHECK(reloaded["boundary"]["int_min"].as<int>() == std::numeric_limits<int>::min());
+  CHECK(reloaded["large"]["big_number"].as<long long>() == 1234567890123456789LL);
+  CHECK(reloaded["dup"]["value"].as<int>() == 99);
+  CHECK(reloaded["numbers"]["negative_number"].as<int>() == -123456);
+  CHECK(reloaded["numbers"]["zero_value"].as<int>() == 0);
+}
+
+TEST_CASE("2 Integer Values in iniFile", "[inifile][integer][boundary]")
+{
+  ini::inifile inif;
+
+  SECTION("Standard signed integers")
+  {
+    inif["signed"]["int"] = int(-12345);
+    inif["signed"]["short"] = short(-1234);
+    inif["signed"]["long"] = long(-123456789L);
+    inif["signed"]["long_long"] = (long long)(-123456789012345LL);
+    inif["signed"]["int8"] = int8_t(-128);
+    inif["signed"]["int16"] = int16_t(-32768);
+    inif["signed"]["int32"] = int32_t(-2147483647);
+    inif["signed"]["int64"] = int64_t(-9223372036854775807LL);
+
+    CHECK(inif["signed"]["int"].as<int>() == -12345);
+    CHECK(inif["signed"]["short"].as<short>() == -1234);
+    CHECK(inif["signed"]["long"].as<long>() == -123456789L);
+    CHECK(inif["signed"]["long_long"].as<long long>() == -123456789012345LL);
+    CHECK(inif["signed"]["int8"].as<int8_t>() == -128);
+    CHECK(inif["signed"]["int16"].as<int16_t>() == -32768);
+    CHECK(inif["signed"]["int32"].as<int32_t>() == -2147483647);
+    CHECK(inif["signed"]["int64"].as<int64_t>() == -9223372036854775807LL);
+  }
+
+  SECTION("Standard unsigned integers")
+  {
+    inif["unsigned"]["uint"] = unsigned(12345);
+    inif["unsigned"]["ushort"] = (unsigned short)(1234);
+    inif["unsigned"]["ulong"] = (unsigned long)(123456789UL);
+    inif["unsigned"]["ulong_long"] = (unsigned long long)(123456789012345ULL);
+    inif["unsigned"]["uint8"] = uint8_t(255);
+    inif["unsigned"]["uint16"] = uint16_t(65535);
+    inif["unsigned"]["uint32"] = uint32_t(4294967295U);
+    inif["unsigned"]["uint64"] = uint64_t(18446744073709551615ULL);
+
+    CHECK(inif["unsigned"]["uint"].as<unsigned>() == 12345);
+    CHECK(inif["unsigned"]["ushort"].as<unsigned short>() == 1234);
+    CHECK(inif["unsigned"]["ulong"].as<unsigned long>() == 123456789UL);
+    CHECK(inif["unsigned"]["ulong_long"].as<unsigned long long>() == 123456789012345ULL);
+    CHECK(inif["unsigned"]["uint8"].as<uint8_t>() == 255);
+    CHECK(inif["unsigned"]["uint16"].as<uint16_t>() == 65535);
+    CHECK(inif["unsigned"]["uint32"].as<uint32_t>() == 4294967295U);
+    CHECK(inif["unsigned"]["uint64"].as<uint64_t>() == 18446744073709551615ULL);
+  }
+
+  SECTION("Edge cases and errors")
+  {
+    // 空字符串
+    inif["error"]["empty"] = "";
+    CHECK_THROWS_AS(inif["error"]["empty"].as<int>(), std::invalid_argument);
+
+    // 非法格式
+    inif["error"]["not_a_number"] = "abc123";
+    CHECK_THROWS_AS(inif["error"]["not_a_number"].as<int>(), std::invalid_argument);
+
+    // 溢出
+    inif["error"]["too_big"] = "999999999999999999999999";
+    CHECK_THROWS_AS(inif["error"]["too_big"].as<int64_t>(), std::out_of_range);
+  }
+
+  SECTION("Overwriting value")
+  {
+    inif["overwrite"]["x"] = 123;
+    inif["overwrite"]["x"] = 456;
+    CHECK(inif["overwrite"]["x"].as<int>() == 456);
+  }
+
+  SECTION("Write and reload file")
+  {
+    inif["persist"]["a"] = 42;
+    inif["persist"]["b"] = -99;
+
+    const char *path = "./test_integer_values.ini";
+    inif.save(path);
+
+    ini::inifile reloaded;
+    reloaded.load(path);
+
+    CHECK(reloaded["persist"]["a"].as<int>() == 42);
+    CHECK(reloaded["persist"]["b"].as<int>() == -99);
+  }
+}
+
+TEMPLATE_TEST_CASE("Integer value conversion in ini::inifile", "[inifile][convert][int]", int, short, long, long long,
+                   unsigned int, unsigned short, unsigned long, unsigned long long, int8_t, int16_t, int32_t, int64_t,
+                   uint8_t, uint16_t, uint32_t, uint64_t)
+{
+  using T = TestType;
+  ini::inifile inif;
+
+  const T min_value = std::numeric_limits<T>::lowest();
+  const T max_value = std::numeric_limits<T>::max();
+  const T zero = 0;
+  const T pos = T(123);
+  const T neg = std::is_signed<T>::value ? T(-456) : T(0);  // for unsigned, use 0
+
+  inif["val"]["zero"] = zero;
+  inif["val"]["pos"] = pos;
+  inif["val"]["min"] = min_value;
+  inif["val"]["max"] = max_value;
+  if (std::is_signed<T>::value)
+  {
+    inif["val"]["neg"] = neg;
+  }
+
+  CHECK(inif["val"]["zero"].as<T>() == zero);
+  CHECK(inif["val"]["pos"].as<T>() == pos);
+  CHECK(inif["val"]["min"].as<T>() == min_value);
+  CHECK(inif["val"]["max"].as<T>() == max_value);
+  if (std::is_signed<T>::value)
+  {
+    CHECK(inif["val"]["neg"].as<T>() == neg);
+  }
+}
