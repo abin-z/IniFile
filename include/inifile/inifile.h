@@ -736,6 +736,11 @@ class field
     comments_.reset();
   }
 
+  bool empty() const noexcept
+  {
+    return value_.empty();
+  }
+
  private:
   /// @brief 惰性初始化comments_, 确保comments_是有效的
   void lazy_init_comments()
