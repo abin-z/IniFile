@@ -1473,3 +1473,122 @@ TEST_CASE("member func test13 - extreme stress and edge cases", "[inifile][extre
   CHECK(reloaded["strange"]["with_special_!@#$%^&*()"].as<std::string>() == "~!@#￥%……&*（）——");
   CHECK(reloaded["strange"]["with_space"].as<std::string>() == "value with space");
 }
+
+TEST_CASE("Floating Point Values in iniFile", "[inifile][floating_point][boundary]")
+{
+  ini::inifile inif;
+
+  // 1. 正常的浮点数
+  inif["normal"]["pi"] = 3.141592653589793;
+  inif["normal"]["e"] = 2.718281828459045;
+  CHECK(inif["normal"]["pi"].as<double>() == Approx(3.141592653589793).epsilon(1e-15));
+  CHECK(inif["normal"]["e"].as<double>() == Approx(2.718281828459045).epsilon(1e-15));
+
+  // 2. 特殊值：inf, -inf, nan, -nan
+  inif["special"]["inf"] = std::numeric_limits<double>::infinity();
+  inif["special"]["-inf"] = -std::numeric_limits<double>::infinity();
+  inif["special"]["nan"] = std::numeric_limits<double>::quiet_NaN();
+  inif["special"]["-nan"] = -std::numeric_limits<double>::quiet_NaN();
+  CHECK(inif["special"]["inf"].as<double>() == std::numeric_limits<double>::infinity());
+  CHECK(inif["special"]["-inf"].as<double>() == -std::numeric_limits<double>::infinity());
+  CHECK(std::isnan(inif["special"]["nan"].as<double>()));
+  CHECK(std::isnan(inif["special"]["-nan"].as<double>()));
+
+  // 3. 最大/最小浮点值
+  inif["boundary"]["double_max"] = std::numeric_limits<double>::max();
+  inif["boundary"]["double_min"] = std::numeric_limits<double>::min();
+  inif["boundary"]["float_max"] = std::numeric_limits<float>::max();
+  inif["boundary"]["float_min"] = std::numeric_limits<float>::min();
+  CHECK(inif["boundary"]["double_max"].as<double>() == std::numeric_limits<double>::max());
+  CHECK(inif["boundary"]["double_min"].as<double>() == std::numeric_limits<double>::min());
+  CHECK(inif["boundary"]["float_max"].as<float>() == std::numeric_limits<float>::max());
+  CHECK(inif["boundary"]["float_min"].as<float>() == std::numeric_limits<float>::min());
+
+  // 4. 负零（-0.0）
+  inif["special"]["neg_zero"] = -0.0;
+  CHECK(std::signbit(inif["special"]["neg_zero"].as<double>()) == true);  // 确保是 -0.
+
+  // 6. 浮点数的大数值，验证字符串转换的精度
+  inif["large"]["big_number"] = 12345678901234567890.1234567890;
+  CHECK(inif["large"]["big_number"].as<double>() == Approx(12345678901234567890.1234567890).epsilon(1e-10));
+
+  // 7. 浮点数写入和读取的一致性验证
+  double input_value = 3.14159;
+  inif["test"]["pi_value"] = input_value;
+  double output_value = inif["test"]["pi_value"].as<double>();
+  CHECK(output_value == Approx(input_value).epsilon(1e-5));
+
+  // 8. 长度较长的浮点数值，验证能否正确处理
+  inif["long"]["long_value"] = 1.2345678901234567e+308;  // double最大值
+  CHECK(inif["long"]["long_value"].as<double>() == Approx(1.2345678901234567e+308));
+
+  // 9. 浮点数的空字符串转换，预期抛出异常
+  try
+  {
+    inif["empty"]["empty_value"] = "";
+    // 尝试解析空字符串，应该抛出异常
+    inif["empty"]["empty_value"].as<double>();
+    // 如果没有抛出异常，则测试失败
+    CHECK(false);  // 强制测试失败
+  }
+  catch (const std::invalid_argument &e)
+  {
+    // 检查异常消息是否正确
+    CHECK(std::string(e.what()) == "<inifile> Cannot convert empty string to floating point.");
+  }
+  catch (...)
+  {
+    // 捕获其他类型的异常，测试失败
+    CHECK(false);
+  }
+
+  // 10. 各种浮点数格式和数值的转换
+  inif["formats"]["small"] = 0.000000123456789;
+  inif["formats"]["scientific"] = 1.23e10;
+  inif["formats"]["percentage"] = 45.67;
+  CHECK(inif["formats"]["small"].as<double>() == Approx(0.000000123456789).epsilon(1e-18));
+  CHECK(inif["formats"]["scientific"].as<double>() == Approx(1.23e10).epsilon(1e-5));
+  CHECK(inif["formats"]["percentage"].as<double>() == Approx(45.67).epsilon(1e-2));
+
+  // 11. 负数和零的校验
+  inif["numbers"]["negative_number"] = -123.456;
+  inif["numbers"]["zero_value"] = 0.0;
+  CHECK(inif["numbers"]["negative_number"].as<double>() == -123.456);
+  CHECK(inif["numbers"]["zero_value"].as<double>() == 0.0);
+
+  // 12. 重复键的覆盖，检查最后一个赋值生效
+  inif["dup"]["value"] = 3.14;
+  inif["dup"]["value"] = 2.71;
+  CHECK(inif["dup"]["value"].as<double>() == Approx(2.71).epsilon(1e-5));
+
+  // 13. 注释的处理
+  inif["comments"]["with_comment"] = 3.14159;
+  inif["comments"].set_comment("This is Pi");
+
+  // 14. 文件保存和加载，验证一致性
+  const char *path = "./test_floating_point.ini";
+  inif.save(path);
+
+  ini::inifile reloaded;
+  reloaded.load(path);
+
+  // 检查重载后的数据一致性
+  CHECK(reloaded["normal"]["pi"].as<double>() == Approx(3.141592653589793).epsilon(1e-15));
+  CHECK(reloaded["normal"]["e"].as<double>() == Approx(2.718281828459045).epsilon(1e-15));
+  CHECK(reloaded["special"]["inf"].as<double>() == std::numeric_limits<double>::infinity());
+  CHECK(reloaded["special"]["-inf"].as<double>() == -std::numeric_limits<double>::infinity());
+  CHECK(std::isnan(reloaded["special"]["nan"].as<double>()));
+  CHECK(std::isnan(reloaded["special"]["-nan"].as<double>()));
+  CHECK(reloaded["boundary"]["double_max"].as<double>() == std::numeric_limits<double>::max());
+  CHECK(reloaded["boundary"]["double_min"].as<double>() == std::numeric_limits<double>::min());
+  CHECK(reloaded["boundary"]["float_max"].as<float>() == std::numeric_limits<float>::max());
+  CHECK(reloaded["boundary"]["float_min"].as<float>() == std::numeric_limits<float>::min());
+  CHECK(std::signbit(reloaded["special"]["neg_zero"].as<double>()) == true);  // 确保是 -0.0
+  CHECK(reloaded["large"]["big_number"].as<double>() == Approx(12345678901234567890.1234567890).epsilon(1e-10));
+  CHECK(reloaded["formats"]["small"].as<double>() == Approx(0.000000123456789).epsilon(1e-18));
+  CHECK(reloaded["formats"]["scientific"].as<double>() == Approx(1.23e10).epsilon(1e-5));
+  CHECK(reloaded["formats"]["percentage"].as<double>() == Approx(45.67).epsilon(1e-2));
+  CHECK(reloaded["numbers"]["negative_number"].as<double>() == -123.456);
+  CHECK(reloaded["numbers"]["zero_value"].as<double>() == 0.0);
+  CHECK(reloaded["dup"]["value"].as<double>() == Approx(2.71).epsilon(1e-5));
+}
