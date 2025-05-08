@@ -267,7 +267,7 @@ struct convert<char>
   {
     if (value.empty())
     {
-      throw std::invalid_argument("[inifile] error: Cannot convert empty string to char.");
+      throw std::invalid_argument("[inifile] error: Cannot convert empty string to char: \"" + value + '"');
     }
     result = value[0];
   }
@@ -284,7 +284,7 @@ struct convert<unsigned char>
   {
     if (value.empty())
     {
-      throw std::invalid_argument("[inifile] error: Cannot convert empty string to unsigned char.");
+      throw std::invalid_argument("[inifile] error: Cannot convert empty string to unsigned char: \"" + value + '"');
     }
     result = static_cast<unsigned char>(value[0]);
   }
@@ -302,7 +302,7 @@ struct convert<signed char>
   {
     if (value.empty())
     {
-      throw std::invalid_argument("[inifile] error: Cannot convert empty string to signed char.");
+      throw std::invalid_argument("[inifile] error: Cannot convert empty string to signed char: \"" + value + '"');
     }
     result = static_cast<signed char>(value[0]);
   }
@@ -406,7 +406,7 @@ struct convert<T, typename std::enable_if<std::is_integral<T>::value && is_to_st
   {
     if (value.empty())
     {
-      throw std::invalid_argument("[inifile] error: Cannot convert empty string to integer.");
+      throw std::invalid_argument("[inifile] error: Cannot convert empty string to integer: \"" + value + '"');
     }
 
     char *end_ptr = nullptr;
@@ -417,7 +417,7 @@ struct convert<T, typename std::enable_if<std::is_integral<T>::value && is_to_st
       long long temp = std::strtoll(value.c_str(), &end_ptr, 10);
       if (errno == ERANGE || temp < std::numeric_limits<T>::min() || temp > std::numeric_limits<T>::max())
       {
-        throw std::out_of_range("[inifile] error: Integer conversion out of range \"" + value + '"');
+        throw std::out_of_range("[inifile] error: Integer conversion out of range: \"" + value + '"');
       }
       result = static_cast<T>(temp);
     }
@@ -426,20 +426,20 @@ struct convert<T, typename std::enable_if<std::is_integral<T>::value && is_to_st
       // 防止 -123 被 strtoull 转换成很大的数
       if (!value.empty() && value[0] == '-')
       {
-        throw std::out_of_range("[inifile] error: Unsigned integer cannot be negative \"" + value + '"');
+        throw std::out_of_range("[inifile] error: Unsigned integer cannot be negative: \"" + value + '"');
       }
 
       unsigned long long temp = std::strtoull(value.c_str(), &end_ptr, 10);
       if (errno == ERANGE || temp > std::numeric_limits<T>::max())
       {
-        throw std::out_of_range("[inifile] error: Unsigned integer conversion out of range \"" + value + '"');
+        throw std::out_of_range("[inifile] error: Unsigned integer conversion out of range: \"" + value + '"');
       }
       result = static_cast<T>(temp);
     }
 
     if (end_ptr == value.c_str() || *end_ptr != '\0')  // 检查是否转换完整
     {
-      throw std::invalid_argument("[inifile] error: Invalid integer format \"" + value + '"');
+      throw std::invalid_argument("[inifile] error: Invalid integer format: \"" + value + '"');
     }
   }
 
@@ -505,7 +505,7 @@ struct convert<T, typename std::enable_if<std::is_floating_point<T>::value>::typ
   {
     if (value.empty())
     {
-      throw std::invalid_argument("[inifile] error: Cannot convert empty string to floating point.");
+      throw std::invalid_argument("[inifile] error: Cannot convert empty string to floating-point: \"" + value + '"');
     }
 
     // 检查长度为 3 或 4 的特殊值(inf或者nan)
@@ -529,14 +529,14 @@ struct convert<T, typename std::enable_if<std::is_floating_point<T>::value>::typ
 
     if (errno == ERANGE || temp < std::numeric_limits<T>::lowest() || temp > std::numeric_limits<T>::max())
     {
-      throw std::out_of_range("[inifile] error: Floating point conversion out of range \"" + value + '"');
+      throw std::out_of_range("[inifile] error: Floating-point conversion out of range: \"" + value + '"');
     }
 
     result = temp;
 
     if (end_ptr == value.c_str() || *end_ptr != '\0')  // 检查是否转换完整
     {
-      throw std::invalid_argument("[inifile] error: Invalid floating point format \"" + value + '"');
+      throw std::invalid_argument("[inifile] error: Invalid floating-point format: \"" + value + '"');
     }
   }
 
