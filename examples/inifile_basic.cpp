@@ -24,11 +24,23 @@ void save_func()
 void load_func()
 {
   ini::inifile inif;
-  // Call the load method to load the ini file and return whether the loading was successful
-  bool isok = inif.load(path);
-  bool        b = inif["section"]["key0"];
-  double      d = inif["section"]["key1"];
-  std::string s = inif["section"]["key2"];
+  try
+  {
+    // Call the load method to load the ini file and return whether the loading was successful
+    bool isok = inif.load(path);
+    bool        b = inif["section"]["key0"];
+    double      d = inif["section"]["key1"];
+    std::string s = inif["section"]["key2"];
+
+    // explicit type conversion
+    bool        bb = inif["section"]["key0"].as<bool>();
+    double      dd = inif["section"]["key1"].as<double>();
+    std::string ss = inif["section"]["key2"].as<std::string>();
+  }
+  catch (const std::exception &e)
+  {
+    std::cout << e.what() << std::endl;
+  }
 }
 
 void read_func()
