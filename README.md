@@ -13,7 +13,7 @@ This is a lightweight, cross-platform, efficient and **header-only** INI configu
 - **Lightweight & Dependency-Free**: Only relies on the C++11 standard library, no additional dependencies required.
 - **Easy Integration**: Header-only design, out of the box, simple enough.
 - **Intuitive API**: Provides a clear and user-friendly interface to simplify INI file operations.
-- **Cross-platform**: Supports Linux, Windows, MacOS and other systems, as well as mainstream compilers
+- **Cross-platform**: Supports Linux, Windows, MacOS and other systems, as well as mainstream compilers.
 - **Multiple Data Sources**: Supports parsing INI data from files, `std::string` or `std::istream`, and writing to them.
 - **Automatic Type Conversion**: Supports multiple data types and can automatically handle type conversion (elegant API interface).
 - **Support comment function**: Support ini line comments (`;` or `#`), you can add line comments for `[section]` and `key=value` (does not support end-of-line comments).
@@ -80,23 +80,16 @@ int main()
 {
   constexpr char path[] = "path/to/ini/file";
   ini::inifile inif;
-  try
-  {
-    // Load the ini file, return whether the loading was successful or not.
-    bool isok = inif.load(path);
-    bool        b = inif["section"]["key0"];
-    double      d = inif["section"]["key1"];
-    std::string s = inif["section"]["key2"];
+  // Load the ini file, return whether the loading was successful or not.
+  bool isok = inif.load(path);
+  bool        b = inif["section"]["key0"];
+  double      d = inif["section"]["key1"];
+  std::string s = inif["section"]["key2"];
 
-    // Explicit type conversion via as function
-    bool        bb = inif["section"]["key0"].as<bool>();
-    double      dd = inif["section"]["key1"].as<double>();
-    std::string ss = inif["section"]["key2"].as<std::string>();
-  }
-  catch (const std::exception &e)
-  {
-    std::cout << e.what() << std::endl;
-  }
+  // Explicit type conversion via as function
+  bool        bb = inif["section"]["key0"].as<bool>();
+  double      dd = inif["section"]["key1"].as<double>();
+  std::string ss = inif["section"]["key2"].as<std::string>();
 }
 ```
 
@@ -185,19 +178,25 @@ Explanation: There are two things to keep in mind when getting values.
 int main()
 {
   ini::inifile inif;
-    
-  /// automatic type conversion
-  std::string s0 = inif["section"]["key1"];
-  bool isok = inif["section"]["key2"];
-    
-  int ii0 = inif.get("section", "key3");
-  int ii2 = inif.get("section", "key3", -1); // Specify default values
-    
-  std::string ss2 = inif["section"].get("key4");
-  std::string ss3 = inif["section"].get("key5", "default"); // Specify default values
-    
-  double dd0 = inif.at("section").at("key");
-  std::cout << "section-key:" << inif["section"]["key"].as<double>() << std::endl;
+  try
+  {
+    /// automatic type conversion
+    std::string s0 = inif["section"]["key1"];
+    bool isok = inif["section"]["key2"];
+
+    int ii0 = inif.get("section", "key3");
+    int ii2 = inif.get("section", "key3", -1); // Specify default values
+
+    std::string ss2 = inif["section"].get("key4");
+    std::string ss3 = inif["section"].get("key5", "default"); // Specify default values
+
+    double dd0 = inif.at("section").at("key");
+    std::cout << "section-key:" << inif["section"]["key"].as<double>() << std::endl;
+  }
+  catch (const std::exception &e)
+  {
+    std::cout << e.what() << std::endl;
+  }
 }
 ```
 
