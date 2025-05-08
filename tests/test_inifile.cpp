@@ -1535,7 +1535,7 @@ TEST_CASE("Floating Point Values in iniFile", "[inifile][floating_point][boundar
   catch (const std::invalid_argument &e)
   {
     // 检查异常消息是否正确
-    CHECK(std::string(e.what()) == "<inifile> Cannot convert empty string to floating point.");
+    CHECK(std::string(e.what()) == "[inifile] error: Cannot convert empty string to floating point.");
   }
   catch (...)
   {
@@ -1633,7 +1633,7 @@ TEST_CASE("Integer Values in iniFile", "[inifile][integer][boundary]")
   catch (const std::invalid_argument &e)
   {
     // 检查异常消息是否正确
-    CHECK(std::string(e.what()) == "<inifile> Cannot convert empty string to integer.");
+    CHECK(std::string(e.what()) == "[inifile] error: Cannot convert empty string to integer.");
   }
   catch (...)
   {
@@ -1651,7 +1651,7 @@ TEST_CASE("Integer Values in iniFile", "[inifile][integer][boundary]")
   catch (const std::invalid_argument &e)
   {
     // 检查异常消息是否正确
-    CHECK(std::string(e.what()) == "<inifile> Invalid integer format: abc123");
+    CHECK(std::string(e.what()) == "[inifile] error: Invalid integer format \"abc123\"");
   }
 
   // 7. 重复键的覆盖，检查最后一个赋值生效
