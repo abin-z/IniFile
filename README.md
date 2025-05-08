@@ -80,11 +80,23 @@ int main()
 {
   constexpr char path[] = "path/to/ini/file";
   ini::inifile inif;
-  // Load the ini file, return whether the loading was successful or not.
-  bool isok = inif.load(path);
-  bool        b = inif["section"]["key0"];
-  double      d = inif["section"]["key1"];
-  std::string s = inif["section"]["key2"];
+  try
+  {
+    // Load the ini file, return whether the loading was successful or not.
+    bool isok = inif.load(path);
+    bool        b = inif["section"]["key0"];
+    double      d = inif["section"]["key1"];
+    std::string s = inif["section"]["key2"];
+
+    // Explicit type conversion via as function
+    bool        bb = inif["section"]["key0"].as<bool>();
+    double      dd = inif["section"]["key1"].as<double>();
+    std::string ss = inif["section"]["key2"].as<std::string>();
+  }
+  catch (const std::exception &e)
+  {
+    std::cout << e.what() << std::endl;
+  }
 }
 ```
 
