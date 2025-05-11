@@ -507,6 +507,9 @@ int main()
 | remove        | `bool remove(std::string key)`                               | 删除指定的key-value键值对, 若不存在则什么都不做              |
 | empty         | `bool empty() const noexcept`                                | 判断key-value键值对是否为空, 为空返回true                    |
 | clear         | `void clear() noexcept`                                      | 清除所有key - value键值对                                    |
+| keys          | `std::vector<key_type> keys() const`                         | 获取所有的keys                                               |
+| values        | `std::vector<ini::filed> values() const`                     | 获取所有的values, 类型为ini::filed                           |
+| items         | `std::vector<value_type> items() const`                      | 获取所有的key-value键值对                                    |
 | size          | `size_type size() const noexcept`                            | 返回有多少key - value键值对                                  |
 | count         | `size_type count(const key_type &key) const`                 | 返回有多少指定key的key - value键值对                         |
 | begin         | `iterator begin() noexcept`                                  | 返回起始迭代器                                               |

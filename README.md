@@ -500,6 +500,9 @@ The following functions will throw an exception if the type conversion fails or 
 | empty         | `bool empty() const noexcept`                                | Determine whether the key-value pair is empty, and return true if it is empty |
 | clear         | `void clear() noexcept`                                      | Clear all key-value pairs                                    |
 | size          | `size_type size() const noexcept`                            | Returns how many key-value pairs there are.                  |
+| keys          | `std::vector<key_type> keys() const`                         | Get all keys in the section.                                 |
+| values        | `std::vector<ini::filed> values() const`                     | Get all values in the section.*each value is a `ini::field` object.* |
+| items         | `std::vector<value_type> items() const`                      | Get all key-value pairs in the section.                      |
 | count         | `size_type count(const key_type &key) const`                 | Returns the number of key-value pairs for the specified key. |
 | begin         | `iterator begin() noexcept`                                  | Returns the begin iterator.                                  |
 | end           | `iterator end() noexcept`                                    | Returns the end iterator.                                    |
