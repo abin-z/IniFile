@@ -539,6 +539,7 @@ int main()
 | empty       | `bool empty() const noexcept`                                | 判断是否没有section, 没有section空返回true                   |
 | clear       | `void clear() noexcept`                                      | 清空所有的section                                            |
 | size        | `size_type size() const noexcept`                            | 返回有多少section                                            |
+| sections    | `std::vector<key_type> sections() const`                     | 获取ini文件的所有section                                     |
 | count       | `size_type count(const key_type &key) const`                 | 返回有多少指定section-name的section                          |
 | begin       | `iterator begin() noexcept`                                  | 返回起始迭代器                                               |
 | end         | `iterator end() noexcept`                                    | 返回末尾迭代器                                               |

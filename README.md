@@ -531,6 +531,7 @@ The following functions will throw an exception if the type conversion fails or 
 | empty         | `bool empty() const noexcept`                                | Determines whether there is no section, returns true if there is no section |
 | clear         | `void clear() noexcept`                                      | Clear all sections                                           |
 | size          | `size_type size() const noexcept`                            | Returns how many sections                                    |
+| sections      | `std::vector<key_type> sections() const`                     | Get all section names in the INI file.                       |
 | count         | `size_type count(const key_type &key) const`                 | Returns how many sections have the specified section-name    |
 | begin         | `iterator begin() noexcept`                                  | Returns the begin iterator.                                  |
 | end           | `iterator end() noexcept`                                    | Returns the end iterator.                                    |
