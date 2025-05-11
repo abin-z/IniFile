@@ -2332,3 +2332,42 @@ TEST_CASE("IniFile Save/Load Consistency - bool, std::string, const char*, char 
   // 验证 unsigned char 类型
   CHECK(loaded["unsigned_char"]["unsigned_char_val"].as<unsigned char>() == static_cast<unsigned char>(255));
 }
+
+TEST_CASE("field: swap exchanges values and comments correctly", "[field][swap]") {
+  ini::field f1("value1");
+  f1.set_comment("comment1");
+
+  ini::field f2("value2");
+  f2.set_comment("comment2");
+
+  // 交换前检查初始值
+  REQUIRE(f1.as<std::string>() == "value1");
+  REQUIRE(f2.as<std::string>() == "value2");
+
+  // 交换
+  using std::swap;
+  swap(f1, f2);
+
+  // 交换后检查
+  REQUIRE(f1.as<std::string>() == "value2");
+  REQUIRE(f2.as<std::string>() == "value1");
+}
+
+TEST_CASE("field: member swap exchanges values and comments correctly", "[field][member_swap]") {
+  ini::field f1("value1");
+  f1.set_comment("comment1");
+
+  ini::field f2("value2");
+  f2.set_comment("comment2");
+
+  // 交换前检查初始值
+  REQUIRE(f1.as<std::string>() == "value1");
+  REQUIRE(f2.as<std::string>() == "value2");
+
+  // 使用成员函数 swap
+  f1.swap(f2);
+
+  // 交换后检查
+  REQUIRE(f1.as<std::string>() == "value2");
+  REQUIRE(f2.as<std::string>() == "value1");
+}
