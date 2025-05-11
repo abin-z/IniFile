@@ -2333,7 +2333,8 @@ TEST_CASE("IniFile Save/Load Consistency - bool, std::string, const char*, char 
   CHECK(loaded["unsigned_char"]["unsigned_char_val"].as<unsigned char>() == static_cast<unsigned char>(255));
 }
 
-TEST_CASE("field: swap exchanges values and comments correctly", "[field][swap]") {
+TEST_CASE("field: swap exchanges values and comments correctly", "[field][swap]")
+{
   ini::field f1("value1");
   f1.set_comment("comment1");
 
@@ -2353,7 +2354,8 @@ TEST_CASE("field: swap exchanges values and comments correctly", "[field][swap]"
   REQUIRE(f2.as<std::string>() == "value1");
 }
 
-TEST_CASE("field: member swap exchanges values and comments correctly", "[field][member_swap]") {
+TEST_CASE("field: member swap exchanges values and comments correctly", "[field][member_swap]")
+{
   ini::field f1("value1");
   f1.set_comment("comment1");
 
@@ -2370,4 +2372,192 @@ TEST_CASE("field: member swap exchanges values and comments correctly", "[field]
   // 交换后检查
   REQUIRE(f1.as<std::string>() == "value2");
   REQUIRE(f2.as<std::string>() == "value1");
+}
+
+TEST_CASE("basic_section: member swap exchanges data and comments correctly", "[basic_section][member_swap]")
+{
+  // 创建第一个 section，包含数据和注释
+  ini::section s1;
+  s1.set("key1", "value1");
+  s1.set("key2", "value2");
+  s1.set_comment("This is section 1\nSecond line of comment", '#');
+
+  // 创建第二个 section，包含不同的数据和注释
+  ini::section s2;
+  s2.set("keyA", "valueA");
+  s2.set("keyB", "valueB");
+  s2.set_comment("This is section 2\nAnother comment", ';');
+
+  // 交换前检查 s1 和 s2 的状态
+  REQUIRE(s1.size() == 2);
+  REQUIRE(s1.get("key1").as<std::string>() == "value1");
+  REQUIRE(s1.get("key2").as<std::string>() == "value2");
+
+  REQUIRE(s2.size() == 2);
+  REQUIRE(s2.get("keyA").as<std::string>() == "valueA");
+  REQUIRE(s2.get("keyB").as<std::string>() == "valueB");
+
+  // 使用成员函数 swap 交换 s1 和 s2
+  s1.swap(s2);
+
+  // 交换后检查 s1 和 s2 的状态
+  REQUIRE(s1.size() == 2);
+  REQUIRE(s1.get("keyA").as<std::string>() == "valueA");
+  REQUIRE(s1.get("keyB").as<std::string>() == "valueB");
+
+  REQUIRE(s2.size() == 2);
+  REQUIRE(s2.get("key1").as<std::string>() == "value1");
+  REQUIRE(s2.get("key2").as<std::string>() == "value2");
+}
+
+TEST_CASE("basic_section: non-member swap exchanges data and comments correctly", "[basic_section][non_member_swap]")
+{
+  // 创建第一个 section，包含数据和注释
+  ini::section s1;
+  s1.set("key1", "value1");
+  s1.set("key2", "value2");
+  s1.set_comment("Comment for section 1", '#');
+
+  // 创建第二个 section，包含不同的数据和注释
+  ini::section s2;
+  s2.set("keyA", "valueA");
+  s2.set("keyB", "valueB");
+  s2.set_comment("Comment for section 2", ';');
+
+  // 交换前检查 s1 和 s2 的状态
+  REQUIRE(s1.size() == 2);
+  REQUIRE(s1.get("key1").as<std::string>() == "value1");
+  REQUIRE(s1.get("key2").as<std::string>() == "value2");
+
+  REQUIRE(s2.size() == 2);
+  REQUIRE(s2.get("keyA").as<std::string>() == "valueA");
+  REQUIRE(s2.get("keyB").as<std::string>() == "valueB");
+
+  // 使用非成员函数 swap 交换 s1 和 s2
+  swap(s1, s2);
+
+  // 交换后检查 s1 和 s2 的状态
+  REQUIRE(s1.size() == 2);
+  REQUIRE(s1.get("keyA").as<std::string>() == "valueA");
+  REQUIRE(s1.get("keyB").as<std::string>() == "valueB");
+
+  REQUIRE(s2.size() == 2);
+  REQUIRE(s2.get("key1").as<std::string>() == "value1");
+  REQUIRE(s2.get("key2").as<std::string>() == "value2");
+}
+
+TEST_CASE("basic_section: swap with empty section", "[basic_section][swap_empty]")
+{
+  // 创建一个空的 section 和一个包含数据的 section
+  ini::section s1;
+  ini::section s2;
+  s2.set("key1", "value1");
+  s2.set("key2", "value2");
+
+  // 交换前检查 s1 和 s2 的状态
+  REQUIRE(s1.size() == 0);  // 空 section
+  REQUIRE(s2.size() == 2);  // 有数据的 section
+
+  // 使用成员函数 swap 交换 s1 和 s2
+  s1.swap(s2);
+
+  // 交换后检查 s1 和 s2 的状态
+  REQUIRE(s1.size() == 2);  // 交换后 s1 包含数据
+  REQUIRE(s2.size() == 0);  // 交换后 s2 变为空
+}
+
+TEST_CASE("basic_section: swap with self", "[basic_section][swap_self]")
+{
+  // 创建一个包含数据的 section
+  ini::section s;
+  s.set("key1", "value1");
+  s.set("key2", "value2");
+
+  // 交换前检查 s 的状态
+  REQUIRE(s.size() == 2);
+  REQUIRE(s.get("key1").as<std::string>() == "value1");
+  REQUIRE(s.get("key2").as<std::string>() == "value2");
+
+  // 使用成员函数 swap 交换 s 自身
+  s.swap(s);
+
+  // 交换后检查 s 的状态
+  REQUIRE(s.size() == 2);
+  REQUIRE(s.get("key1").as<std::string>() == "value1");
+  REQUIRE(s.get("key2").as<std::string>() == "value2");
+}
+
+TEST_CASE("Test swap functionality of basic_inifile", "[swap]")
+{
+  // 1. 基本交换测试：添加一些数据到 ini1 和 ini2 中
+  ini::inifile ini1;
+  ini::inifile ini2;
+
+  ini1["section1"]["key1"] = "value1";
+  ini1["section1"]["key2"] = "value2";
+  ini2["section2"]["key3"] = "value3";
+
+  REQUIRE(ini1["section1"]["key1"].as<std::string>() == "value1");
+  REQUIRE(ini1["section1"]["key2"].as<std::string>() == "value2");
+  REQUIRE(ini2["section2"]["key3"].as<std::string>() == "value3");
+
+  // 交换 ini1 和 ini2
+  swap(ini1, ini2);
+
+  // 检查交换后的结果
+  REQUIRE(ini1["section2"]["key3"].as<std::string>() == "value3");
+  REQUIRE(ini2["section1"]["key1"].as<std::string>() == "value1");
+  REQUIRE(ini2["section1"]["key2"].as<std::string>() == "value2");
+
+  // 确保大小一致
+  REQUIRE(ini1.size() == 1);
+  REQUIRE(ini2.size() == 1);
+
+  // 2. 空对象交换：交换两个空的 basic_inifile 对象
+  ini::inifile empty1;
+  ini::inifile empty2;
+
+  swap(empty1, empty2);
+  REQUIRE(empty1.empty() == true);
+  REQUIRE(empty2.empty() == true);
+
+  // 3. 不同大小对象交换：一个空对象与一个非空对象交换
+  ini::inifile non_empty;
+  non_empty["section1"]["key1"] = "value1";
+
+  swap(empty1, non_empty);
+
+  // 确保交换后，empty1 拥有 non_empty 的内容，non_empty 成为空
+  REQUIRE(empty1["section1"]["key1"].as<std::string>() == "value1");
+  REQUIRE(non_empty.empty() == true);
+  REQUIRE(empty1.size() == 1);
+  REQUIRE(non_empty.size() == 0);
+
+  // 4. 多次交换：交换两次，确保交换回原样
+  ini::inifile ini3;
+  ini3["section1"]["key1"] = "value1";
+  ini::inifile ini4;
+  ini4["section2"]["key2"] = "value2";
+
+  swap(ini3, ini4);  // 初次交换
+  swap(ini3, ini4);  // 再次交换，应该恢复到初始状态
+
+  REQUIRE(ini3["section1"]["key1"].as<std::string>() == "value1");
+  REQUIRE(ini4["section2"]["key2"].as<std::string>() == "value2");
+  REQUIRE(ini3.size() == 1);
+  REQUIRE(ini4.size() == 1);
+
+  // 5. 检查交换后的内容一致性
+  ini::inifile ini5;
+  ini5["section1"]["key1"] = "value1";
+  ini5["section1"]["key2"] = "value2";
+
+  ini::inifile ini6;
+  ini6["section2"]["key3"] = "value3";
+
+  // 交换后，检查数据是否一致
+  swap(ini5, ini6);
+  REQUIRE(ini5["section2"]["key3"].as<std::string>() == "value3");
+  REQUIRE(ini6["section1"]["key1"].as<std::string>() == "value1");
+  REQUIRE(ini6["section1"]["key2"].as<std::string>() == "value2");
 }
