@@ -822,12 +822,18 @@ class basic_section
   using iterator = typename data_container::iterator;
   using const_iterator = typename data_container::const_iterator;
 
+  /// @brief 成员swap函数
+  void swap(basic_section &other) noexcept
+  {
+    using std::swap;
+    swap(data_, other.data_);
+    swap(comments_, other.comments_);
+  }
+
   // 友元 swap函数(非成员函数)
   friend void swap(basic_section &lhs, basic_section &rhs) noexcept
   {
-    using std::swap;
-    swap(lhs.data_, rhs.data_);
-    swap(lhs.comments_, rhs.comments_);
+    lhs.swap(rhs);
   }
 
   // 默认构造
@@ -844,7 +850,7 @@ class basic_section
   basic_section &operator=(const basic_section &rhs) noexcept
   {
     basic_section temp(rhs);  // copy ctor
-    swap(*this, temp);        // noexcept swap
+    swap(temp);               // noexcept swap
     return *this;
   }
   // 移动构造函数
@@ -856,8 +862,8 @@ class basic_section
   // 移动赋值函数, 默认的不能处理移动自赋值情况
   basic_section &operator=(basic_section &&rhs) noexcept
   {
-    basic_section tmp(std::move(rhs));  // move ctor
-    swap(*this, tmp);                   // noexcept swap
+    basic_section temp(std::move(rhs));  // move ctor
+    swap(temp);                          // noexcept swap
     return *this;
   }
 
