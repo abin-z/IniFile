@@ -929,15 +929,35 @@ class basic_section
 
   /// @brief Get all keys in the section.
   /// @return A vector containing all keys.
-  std::vector<std::string> keys() const
+  std::vector<key_type> keys() const
   {
-    std::vector<std::string> result;
+    std::vector<key_type> result;
     result.reserve(data_.size());
     for (const auto &pair : data_)
     {
-      result.push_back(pair.first);
+      result.emplace_back(pair.first);
     }
     return result;
+  }
+
+  /// @brief Get all values in the section.
+  /// @return A vector containing all values, each value is a `ini::field` object.
+  std::vector<mapped_type> values() const
+  {
+    std::vector<mapped_type> result;
+    result.reserve(data_.size());
+    for (const auto &pair : data_)
+    {
+      result.emplace_back(pair.second);
+    }
+    return result;
+  }
+
+  /// @brief Get all key-value pairs in the section.
+  /// @return A vector containing all key-value pairs, each pair is a `std::pair<std::string, ini::field>`.
+  std::vector<value_type> items() const
+  {
+    return {data_.begin(), data_.end()};
   }
 
   /// @brief Remove the specified key-value pairs
@@ -1226,9 +1246,9 @@ class basic_inifile
 
   /// @brief Get all section names in the INI file.
   /// @return A vector containing all section names.
-  std::vector<std::string> sections() const
+  std::vector<key_type> sections() const
   {
-    std::vector<std::string> result;
+    std::vector<key_type> result;
     result.reserve(data_.size());
     for (const auto &pair : data_)
     {
