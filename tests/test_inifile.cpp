@@ -979,6 +979,71 @@ TEST_CASE("sections and keys test01", "[inifile][sections][keys]")
   CHECK(empty_keys.empty());
 }
 
+TEST_CASE("section keys, values, and items test", "[section][keys][values][items]")
+{
+  ini::inifile inif;
+
+  // 设置字段
+  inif["General"]["version"] = "1.2.3";
+  inif["General"]["author"] = "Abin";
+  inif["General"]["license"] = "MIT";
+
+  const auto &section = inif["General"];
+
+  // 测试 keys()
+  auto keys = section.keys();
+  CHECK(keys.size() == 3);
+  CHECK(std::find(keys.begin(), keys.end(), "version") != keys.end());
+  CHECK(std::find(keys.begin(), keys.end(), "author") != keys.end());
+  CHECK(std::find(keys.begin(), keys.end(), "license") != keys.end());
+
+  // 测试 values()
+  auto values = section.values();
+  CHECK(values.size() == 3);
+
+  bool has_version_value = false, has_author_value = false, has_license_value = false;
+  for (const auto &val : values)
+  {
+    if (val.as<std::string>() == "1.2.3")
+      has_version_value = true;
+    else if (val.as<std::string>() == "Abin")
+      has_author_value = true;
+    else if (val.as<std::string>() == "MIT")
+      has_license_value = true;
+  }
+  CHECK(has_version_value);
+  CHECK(has_author_value);
+  CHECK(has_license_value);
+
+  // 测试 items()
+  auto items = section.items();
+  CHECK(items.size() == 3);
+
+  bool has_version = false, has_author = false, has_license = false;
+  for (const auto &item : items)
+  {
+    if (item.first == "version" && item.second.as<std::string>() == "1.2.3")
+      has_version = true;
+    else if (item.first == "author" && item.second.as<std::string>() == "Abin")
+      has_author = true;
+    else if (item.first == "license" && item.second.as<std::string>() == "MIT")
+      has_license = true;
+  }
+  CHECK(has_version);
+  CHECK(has_author);
+  CHECK(has_license);
+
+  // 空 section 测试
+  inif["Empty"];
+  auto empty_keys = inif["Empty"].keys();
+  auto empty_values = inif["Empty"].values();
+  auto empty_items = inif["Empty"].items();
+
+  CHECK(empty_keys.empty());
+  CHECK(empty_values.empty());
+  CHECK(empty_items.empty());
+}
+
 TEST_CASE("case insensitive test01", "[inifile][case_insensitive]")
 {
   ini::case_insensitive_inifile inif;
