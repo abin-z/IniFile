@@ -619,12 +619,18 @@ class field
   /// 默认析构函数,使用编译器生成的默认实现.
   ~field() = default;
 
-  // 友元 swap(非成员函数)
-  friend void swap(field &lhs, field &rhs) noexcept
+  /// @brief 成员swap函数
+  void swap(field &other) noexcept
   {
     using std::swap;
-    swap(lhs.value_, rhs.value_);
-    swap(lhs.comments_, rhs.comments_);
+    swap(value_, other.value_);
+    swap(comments_, other.comments_);
+  }
+
+  // 友元 swap(非成员函数)(std::swap 支持)
+  friend void swap(field &lhs, field &rhs) noexcept
+  {
+    lhs.swap(rhs);
   }
 
   /// 移动构造函数
@@ -638,7 +644,7 @@ class field
   field &operator=(field &&rhs) noexcept
   {
     field temp(std::move(rhs));  // move ctor
-    swap(*this, temp);           // noexcept swap
+    swap(temp);                  // noexcept swap
     return *this;
   }
 
@@ -652,8 +658,8 @@ class field
   /// 重写拷贝赋值(copy-and-swap 方式)
   field &operator=(const field &rhs) noexcept  // `rhs` pass by reference
   {
-    field temp(rhs);    // 使用拷贝构造函数创建一个临时对象
-    swap(*this, temp);  // 利用拷贝构造+swap, 确保异常安全,也能处理自赋值问题
+    field temp(rhs);  // 使用拷贝构造函数创建一个临时对象
+    swap(temp);       // 利用拷贝构造+swap, 确保异常安全,也能处理自赋值问题
     return *this;
   }
 
