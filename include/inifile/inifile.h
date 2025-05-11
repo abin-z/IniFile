@@ -1144,10 +1144,15 @@ class basic_inifile
   using iterator = typename data_container::iterator;
   using const_iterator = typename data_container::const_iterator;
 
-  friend void swap(basic_inifile &lhs, basic_inifile &rhs) noexcept
+  void swap(basic_inifile &other) noexcept
   {
     using std::swap;
-    swap(lhs.data_, rhs.data_);
+    swap(data_, other.data_);
+  }
+
+  friend void swap(basic_inifile &lhs, basic_inifile &rhs) noexcept
+  {
+    lhs.swap(rhs);
   }
 
   // 构造函数
@@ -1169,7 +1174,7 @@ class basic_inifile
   basic_inifile &operator=(basic_inifile &&rhs) noexcept
   {
     basic_inifile temp(std::move(rhs));  // move ctor
-    swap(*this, temp);                   // noexcept swap
+    swap(temp);                          // noexcept swap
     return *this;
   };
 
