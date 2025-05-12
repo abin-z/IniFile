@@ -595,6 +595,52 @@ struct case_insensitive_equal
 
 }  // namespace detail
 
+/// @brief ini line-comment class
+class comment
+{
+ public:
+  comment() = default;
+  ~comment() = default;
+  void swap(comment &other) noexcept
+  {
+    using std::swap;
+    swap(comments_, other.comments_);
+  }
+  friend void swap(comment &lhs, comment &rhs) noexcept
+  {
+    lhs.swap(rhs);
+  }
+  // copy constructor
+  comment(const comment &other) :
+    comments_(other.comments_
+                ? std::unique_ptr<std::vector<std::string>>(new std::vector<std::string>(*other.comments_))
+                : nullptr)
+  {
+  }
+  // move constructor
+  comment(comment &&other) noexcept : comments_(std::move(other.comments_))
+  {
+    other.comments_.reset();  // 显式清空, 跨平台行为一致
+  }
+  // copy assignment
+  comment &operator=(const comment &rhs)
+  {
+    comment temp(rhs);  // copy ctor
+    swap(temp);         // noexcept swap
+    return *this;
+  }
+  // move assignment
+  comment &operator=(comment &&rhs) noexcept
+  {
+    comment temp(std::move(rhs));  // move ctor
+    swap(temp);                    // noexcept swap
+    return *this;
+  }
+
+ private:
+  std::unique_ptr<std::vector<std::string>> comments_{nullptr};  // 行级注释容器, 不支持行尾注释
+};
+
 // 先声明模板类 basic_inifile
 template <typename, typename>
 class basic_inifile;
