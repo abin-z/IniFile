@@ -598,6 +598,7 @@ struct case_insensitive_equal
 /// @brief ini line-comment class
 class comment
 {
+  using comment_container = std::vector<std::string>;  // 注释容器
  public:
   comment() = default;
   ~comment() = default;
@@ -612,9 +613,7 @@ class comment
   }
   // copy constructor
   comment(const comment &other) :
-    comments_(other.comments_
-                ? std::unique_ptr<std::vector<std::string>>(new std::vector<std::string>(*other.comments_))
-                : nullptr)
+    comments_(other.comments_ ? std::unique_ptr<comment_container>(new comment_container(*other.comments_)) : nullptr)
   {
   }
   // move constructor
@@ -637,8 +636,18 @@ class comment
     return *this;
   }
 
+  bool empty() const noexcept
+  {
+    return !comments_ || comments_->empty();
+  }
+
+  void clear() noexcept
+  {
+    comments_.reset();
+  }
+
  private:
-  std::unique_ptr<std::vector<std::string>> comments_{nullptr};  // 行级注释容器, 不支持行尾注释
+  std::unique_ptr<std::vector<std::string>> comments_{nullptr};  // 行级注释容器, 使用unique_ptr主要考虑内存占用更小
 };
 
 // 先声明模板类 basic_inifile
