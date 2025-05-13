@@ -76,6 +76,14 @@ inline void trim(std::string &str)
   str.erase(0, str.find_first_not_of(whitespaces));
 }
 
+/// @brief 判断字符串是否全是空白字符
+/// @param str 输入的字符串
+/// @return 如果字符串全是空白字符，则返回true，否则返回false
+inline bool is_all_whitespace(const std::string &str)
+{
+  return str.find_first_not_of(whitespaces) == std::string::npos;
+}
+
 /// @brief 字符串切割功能
 /// @param str 待处理字符串
 /// @param delimiter 分割字符串(支持多字符)
@@ -666,7 +674,7 @@ class comment
 
   void append(const std::string &str, char symbol = ';')
   {
-    if (str.empty()) return;
+    if (detail::is_all_whitespace(str)) return;
     ensure_comments_initialized();
     add_comments_from_string(str, symbol);
   }
@@ -688,7 +696,7 @@ class comment
 
   void set(const std::string &str, char symbol = ';')
   {
-    if (!str.empty())
+    if (!detail::is_all_whitespace(str))
     {
       ensure_comments_initialized();
       comments_->clear();
@@ -753,6 +761,7 @@ class comment
     std::string line;
     while (std::getline(stream, line))
     {
+      if (detail::is_all_whitespace(line)) continue;
       comments_->emplace_back(format_comment_line(std::move(line), symbol));
     }
   }
