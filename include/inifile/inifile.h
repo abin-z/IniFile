@@ -667,33 +667,32 @@ class comment
   void append(const std::string &str, char symbol = ';')
   {
     if (str.empty()) return;
-    lazy_init_comment();
-    std::istringstream stream(str);
-    std::string line;
-    while (std::getline(stream, line))
-    {
-      comments_->emplace_back(format_comment_line(std::move(line), symbol));
-    }
+    ensure_comments_initialized();
+    add_comments_from_string(str, symbol);
   }
   void append(const comment &other)
   {
     if (other.empty()) return;
-    lazy_init_comment();
+    ensure_comments_initialized();
     comments_->insert(comments_->end(), other.comments_->begin(), other.comments_->end());
+  }
+
+  void append(comment &&other) noexcept
+  {
+    if (other.empty()) return;
+    ensure_comments_initialized();
+    comments_->insert(comments_->end(), std::make_move_iterator(other.comments_->begin()),
+                      std::make_move_iterator(other.comments_->end()));
+    other.clear();  // 清空 other 的 comments_，防止重复使用
   }
 
   void set(const std::string &str, char symbol = ';')
   {
     if (!str.empty())
     {
-      lazy_init_comment();
+      ensure_comments_initialized();
       comments_->clear();
-      std::istringstream stream(str);
-      std::string line;
-      while (std::getline(stream, line))
-      {
-        comments_->emplace_back(format_comment_line(std::move(line), symbol));
-      }
+      add_comments_from_string(str, symbol);
     }
     else
     {
@@ -723,10 +722,11 @@ class comment
 
  private:
   /// @brief 初始化 comments_, 确保不为nullptr
-  void lazy_init_comment()
+  void ensure_comments_initialized()
   {
     if (!comments_) comments_.reset(new comment_container());
   }
+
   static std::string format_comment_line(std::string comment, char symbol)
   {
     detail::trim(comment);
@@ -741,6 +741,16 @@ class comment
       comment.insert(0, 1, comment_prefix);
     }
     return comment;
+  }
+
+  void add_comments_from_string(const std::string &str, char symbol)
+  {
+    std::istringstream stream(str);
+    std::string line;
+    while (std::getline(stream, line))
+    {
+      comments_->emplace_back(format_comment_line(std::move(line), symbol));
+    }
   }
 
  private:
