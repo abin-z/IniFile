@@ -719,6 +719,10 @@ class comment
     if (comments_ && rhs.comments_) return *comments_ == *rhs.comments_;
     return !comments_ && !rhs.comments_;
   }
+  bool operator!=(const comment &rhs) const
+  {
+    return !(*this == rhs);
+  }
 
  private:
   /// @brief 初始化 comments_, 确保不为nullptr
@@ -756,6 +760,15 @@ class comment
  private:
   std::unique_ptr<comment_container> comments_{nullptr};  // 行级注释容器, 使用unique_ptr主要考虑内存占用更小
 };
+
+inline std::ostream &operator<<(std::ostream &os, const comment &c)
+{
+  for (const auto &line : c.to_vector())
+  {
+    os << line << '\n';
+  }
+  return os;
+}
 
 // 先声明模板类 basic_inifile
 template <typename, typename>
