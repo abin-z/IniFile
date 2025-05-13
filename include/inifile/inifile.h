@@ -668,7 +668,12 @@ class comment
   {
     if (str.empty()) return;
     lazy_init_comment();
-    comments_->emplace_back(format_comment_line(str, symbol));
+    std::istringstream stream(str);
+    std::string line;
+    while (std::getline(stream, line))
+    {
+      comments_->emplace_back(format_comment_line(std::move(line), symbol));
+    }
   }
   void append(const comment &other)
   {
@@ -683,7 +688,12 @@ class comment
     {
       lazy_init_comment();
       comments_->clear();
-      comments_->emplace_back(format_comment_line(str, symbol));
+      std::istringstream stream(str);
+      std::string line;
+      while (std::getline(stream, line))
+      {
+        comments_->emplace_back(format_comment_line(std::move(line), symbol));
+      }
     }
     else
     {
