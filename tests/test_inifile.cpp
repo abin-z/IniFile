@@ -2561,3 +2561,460 @@ TEST_CASE("Test swap functionality of basic_inifile", "[swap]")
   REQUIRE(ini6["section1"]["key1"].as<std::string>() == "value1");
   REQUIRE(ini6["section1"]["key2"].as<std::string>() == "value2");
 }
+
+////////////////////////////////////////////////// ini::comment //////////////////////////////
+TEST_CASE("comment default constructor", "[comment]")
+{
+  ini::comment c;
+  REQUIRE(c.empty() == true);
+}
+
+TEST_CASE("comment string constructor", "[comment]")
+{
+  ini::comment c("This is a comment");
+  REQUIRE_FALSE(c.empty());
+  REQUIRE(c.to_vector() == std::vector<std::string>{"; This is a comment"});
+}
+
+TEST_CASE("comment vector constructor", "[comment]")
+{
+  std::vector<std::string> vec = {"First comment", "Second comment"};
+  ini::comment c(vec);
+  REQUIRE_FALSE(c.empty());
+  REQUIRE(c.to_vector() == std::vector<std::string>{"; First comment", "; Second comment"});
+}
+
+TEST_CASE("comment initializer_list constructor", "[comment]")
+{
+  ini::comment c({"Comment 1", "Comment 2"});
+  REQUIRE_FALSE(c.empty());
+  REQUIRE(c.to_vector() == std::vector<std::string>{"; Comment 1", "; Comment 2"});
+}
+
+TEST_CASE("comment append", "[comment]")
+{
+  ini::comment c;
+  c.append("This is a comment");
+  REQUIRE_FALSE(c.empty());
+  REQUIRE(c.to_vector() == std::vector<std::string>{"; This is a comment"});
+
+  c.append("Another comment");
+  REQUIRE(c.to_vector() == std::vector<std::string>{"; This is a comment", "; Another comment"});
+}
+
+TEST_CASE("comment append comment", "[comment]")
+{
+  ini::comment c1({"Comment 1"});
+  ini::comment c2({"Comment 2"});
+
+  c1.append(c2);
+  REQUIRE(c1.to_vector() == std::vector<std::string>{"; Comment 1", "; Comment 2"});
+}
+
+TEST_CASE("comment append move comment", "[comment]")
+{
+  ini::comment c1({"Comment 1"});
+  ini::comment c2("Comment 2");
+
+  c1.append(std::move(c2));
+  REQUIRE(c1.to_vector() == std::vector<std::string>{"; Comment 1", "; Comment 2"});
+  REQUIRE(c2.empty() == true);  // c2 should be empty after move
+}
+
+TEST_CASE("comment set", "[comment]")
+{
+  ini::comment c;
+  c.set("This is a new comment");
+  REQUIRE(c.to_vector() == std::vector<std::string>{"; This is a new comment"});
+
+  c.set("Another comment");
+  REQUIRE(c.to_vector() == std::vector<std::string>{"; Another comment"});
+
+  c.set("");  // Reset to empty
+  REQUIRE(c.empty() == true);
+}
+
+TEST_CASE("comment set comment", "[comment]")
+{
+  ini::comment c1({"Comment 1"});
+  ini::comment c2({"New comment"});
+
+  c1.set(c2);
+  REQUIRE(c1.to_vector() == std::vector<std::string>{"; New comment"});
+}
+
+TEST_CASE("comment set move comment", "[comment]")
+{
+  ini::comment c1({"Comment 1"});
+  ini::comment c2({"New comment"});
+
+  c1.set(std::move(c2));
+  REQUIRE(c1.to_vector() == std::vector<std::string>{"; New comment"});
+  REQUIRE(c2.empty() == true);  // c2 should be empty after move
+}
+
+TEST_CASE("comment empty", "[comment]")
+{
+  ini::comment c;
+  REQUIRE(c.empty() == true);
+
+  c.append("Some comment");
+  REQUIRE(c.empty() == false);
+
+  c.clear();
+  REQUIRE(c.empty() == true);
+}
+
+TEST_CASE("comment copy constructor", "[comment]")
+{
+  ini::comment c1({"Comment 1", "Comment 2"});
+  ini::comment c2 = c1;  // Copy constructor
+
+  REQUIRE(c2.to_vector() == c1.to_vector());
+}
+
+TEST_CASE("comment move constructor", "[comment]")
+{
+  ini::comment c1({"Comment 1", "Comment 2"});
+  ini::comment c2 = std::move(c1);  // Move constructor
+
+  REQUIRE(c2.to_vector() == std::vector<std::string>{"; Comment 1", "; Comment 2"});
+  REQUIRE(c1.empty() == true);  // c1 should be empty after move
+}
+
+TEST_CASE("comment copy assignment", "[comment]")
+{
+  ini::comment c1({"Comment 1", "Comment 2"});
+  ini::comment c2;
+
+  c2 = c1;  // Copy assignment
+  REQUIRE(c2.to_vector() == c1.to_vector());
+}
+
+TEST_CASE("comment move assignment", "[comment]")
+{
+  ini::comment c1({"Comment 1", "Comment 2"});
+  ini::comment c2;
+
+  c2 = std::move(c1);  // Move assignment
+  REQUIRE(c2.to_vector() == std::vector<std::string>{"; Comment 1", "; Comment 2"});
+  REQUIRE(c1.empty() == true);  // c1 should be empty after move
+}
+
+TEST_CASE("comment self-assignment", "[comment]")
+{
+  ini::comment c({"Comment 1"});
+
+  c = c;  // Self-assignment
+  REQUIRE(c.to_vector() == std::vector<std::string>{"; Comment 1"});
+}
+
+TEST_CASE("comment equality operator", "[comment]")
+{
+  ini::comment c1({"Comment 1"});
+  ini::comment c2({"Comment 1"});
+  ini::comment c3({"Comment 2"});
+
+  REQUIRE(c1 == c2);  // Same content
+  REQUIRE(c1 != c3);  // Different content
+}
+
+TEST_CASE("comment clear", "[comment]")
+{
+  ini::comment c({"Comment 1", "Comment 2"});
+  c.clear();
+  REQUIRE(c.empty() == true);
+}
+
+TEST_CASE("comment constructors", "[comment]")
+{
+  SECTION("default constructor")
+  {
+    ini::comment c;
+    REQUIRE(c.empty());
+  }
+
+  SECTION("construct from string")
+  {
+    ini::comment c("Comment line");
+    REQUIRE_FALSE(c.empty());
+    REQUIRE(c.to_vector().size() == 1);
+  }
+
+  SECTION("construct from vector")
+  {
+    std::vector<std::string> vec = {"Line1", "Line2"};
+    ini::comment c(vec);
+    REQUIRE(c.to_vector() == std::vector<std::string>{"; Line1", "; Line2"});
+  }
+
+  SECTION("construct from initializer_list")
+  {
+    ini::comment c({"Line1", "Line2"});
+    REQUIRE(c.to_vector() == std::vector<std::string>{"; Line1", "; Line2"});
+  }
+}
+
+TEST_CASE("comment copy and move", "[comment]")
+{
+  ini::comment original({"Line1", "Line2"});
+
+  SECTION("copy constructor")
+  {
+    ini::comment copy(original);
+    REQUIRE(copy == original);
+  }
+
+  SECTION("move constructor")
+  {
+    ini::comment moved(std::move(original));
+    REQUIRE(moved.to_vector() == std::vector<std::string>{"; Line1", "; Line2"});
+  }
+
+  SECTION("copy assignment")
+  {
+    ini::comment c;
+    c = original;
+    REQUIRE(c == original);
+  }
+
+  SECTION("move assignment")
+  {
+    ini::comment c;
+    ini::comment temp({"LineX"});
+    c = std::move(temp);
+    REQUIRE(c.to_vector() == std::vector<std::string>{"; LineX"});
+  }
+
+  SECTION("self copy assignment")
+  {
+    ini::comment self({"Same"});
+    self = self;  // 自赋值测试
+    REQUIRE(self.to_vector() == std::vector<std::string>{"; Same"});
+  }
+
+  SECTION("self move assignment")
+  {
+    ini::comment self({"Same"});
+    self = std::move(self);  // 自移动赋值
+    REQUIRE(self.to_vector() == std::vector<std::string>{"; Same"});
+  }
+}
+
+TEST_CASE("comment set functions", "[comment]")
+{
+  ini::comment c;
+
+  SECTION("set from string")
+  {
+    c.set("Hello\nWorld");
+    REQUIRE(c.to_vector() == std::vector<std::string>{"; Hello", "; World"});
+  }
+
+  SECTION("set from another comment (copy)")
+  {
+    ini::comment other({"A", "B"});
+    c.set(other);
+    REQUIRE(c == other);
+  }
+
+  SECTION("set from another comment (move)")
+  {
+    ini::comment other({"X", "Y"});
+    c.set(std::move(other));
+    REQUIRE(c.to_vector() == std::vector<std::string>{"; X", "; Y"});
+  }
+
+  SECTION("set from initializer list")
+  {
+    c.set({"C", "D"});
+    REQUIRE(c.to_vector() == std::vector<std::string>{"; C", "; D"});
+  }
+
+  SECTION("set empty string clears comments")
+  {
+    c.set("Line");
+    c.set("");  // 设置空字符串后应该清空
+    REQUIRE(c.empty());
+  }
+}
+
+TEST_CASE("comment append functions", "[comment]")
+{
+  ini::comment c;
+
+  SECTION("append string")
+  {
+    c.append("First\nSecond");
+    REQUIRE(c.to_vector() == std::vector<std::string>{"; First", "; Second"});
+  }
+
+  SECTION("append another comment (copy)")
+  {
+    ini::comment other({"A", "B"});
+    c.append(other);
+    REQUIRE(c.to_vector() == std::vector<std::string>{"; A", "; B"});
+  }
+
+  SECTION("append another comment (move)")
+  {
+    ini::comment other({"X", "Y"});
+    c.append(std::move(other));
+    REQUIRE(c.to_vector() == std::vector<std::string>{"; X", "; Y"});
+  }
+
+  SECTION("append empty comment has no effect")
+  {
+    ini::comment empty;
+    c.append(empty);
+    REQUIRE(c.empty());
+  }
+}
+
+TEST_CASE("comment clear and empty", "[comment]")
+{
+  ini::comment c({"Comment 1", "Comment 2"});
+  REQUIRE_FALSE(c.empty());
+  c.clear();
+  REQUIRE(c.empty());
+}
+
+TEST_CASE("comment to_vector returns correct content", "[comment]")
+{
+  ini::comment c({"Line1", "Line2"});
+  auto vec = c.to_vector();
+  REQUIRE(vec == std::vector<std::string>{"; Line1", "; Line2"});
+}
+
+TEST_CASE("comment equality and inequality", "[comment]")
+{
+  ini::comment c1({"Comment 1"});
+  ini::comment c2({"Comment 1"});
+  ini::comment c3({"Comment 2"});
+
+  REQUIRE(c1 == c2);  // Same content
+  REQUIRE(c1 != c3);  // Different content
+}
+
+TEST_CASE("comment swap", "[comment]")
+{
+  ini::comment c1({"A"});
+  ini::comment c2({"B", "C"});
+  c1.swap(c2);
+  REQUIRE(c1.to_vector() == std::vector<std::string>{"; B", "; C"});
+  REQUIRE(c2.to_vector() == std::vector<std::string>{"; A"});
+
+  swap(c1, c2);  // 测试友元swap
+  REQUIRE(c1.to_vector() == std::vector<std::string>{"; A"});
+  REQUIRE(c2.to_vector() == std::vector<std::string>{"; B", "; C"});
+}
+
+TEST_CASE("comment with custom symbol", "[comment]")
+{
+  SECTION("construct with '#' symbol")
+  {
+    ini::comment c("Line1\nLine2", '#');
+    REQUIRE(c.to_vector() == std::vector<std::string>{"# Line1", "# Line2"});
+  }
+
+  SECTION("append with '#' symbol")
+  {
+    ini::comment c;
+    c.append("Appended1\nAppended2", '#');
+    REQUIRE(c.to_vector() == std::vector<std::string>{"# Appended1", "# Appended2"});
+  }
+
+  SECTION("set with '#' symbol")
+  {
+    ini::comment c;
+    c.set("Set1\nSet2", '#');
+    REQUIRE(c.to_vector() == std::vector<std::string>{"# Set1", "# Set2"});
+  }
+
+  SECTION("initializer list with '#' symbol")
+  {
+    ini::comment c({"IL1", "IL2"}, '#');
+    REQUIRE(c.to_vector() == std::vector<std::string>{"# IL1", "# IL2"});
+  }
+
+  SECTION("set initializer list with '#' symbol")
+  {
+    ini::comment c;
+    c.set({"X", "Y"}, '#');
+    REQUIRE(c.to_vector() == std::vector<std::string>{"# X", "# Y"});
+  }
+}
+
+TEST_CASE("comment multi-line string handling", "[comment]")
+{
+  ini::comment c;
+
+  SECTION("append multi-line string")
+  {
+    c.append("Line1\nLine2\nLine3");
+    REQUIRE(c.to_vector() == std::vector<std::string>{"; Line1", "; Line2", "; Line3"});
+  }
+
+  SECTION("set multi-line string")
+  {
+    c.set("One\nTwo\nThree");
+    REQUIRE(c.to_vector() == std::vector<std::string>{"; One", "; Two", "; Three"});
+  }
+
+  SECTION("empty lines are handled correctly")
+  {
+    c.set("First\n\nThird");
+    REQUIRE(c.to_vector() == std::vector<std::string>{"; First", ";", "; Third"});
+  }
+
+  SECTION("whitespace-only lines are trimmed")
+  {
+    c.set("  One  \n   \n  Three ");
+    REQUIRE(c.to_vector() == std::vector<std::string>{"; One", ";", "; Three"});
+  }
+
+  SECTION("leading/trailing whitespace preserved after symbol")
+  {
+    c.set("  Hello\nWorld  ");
+    REQUIRE(c.to_vector() == std::vector<std::string>{"; Hello", "; World"});
+  }
+}
+
+TEST_CASE("comment content contains symbol", "[comment]")
+{
+  SECTION("content contains ;, but symbol is default ;")
+  {
+    ini::comment c({";Already commented", "  Normal line"});
+    REQUIRE(c.to_vector() == std::vector<std::string>{";Already commented", "; Normal line"});
+  }
+
+  SECTION("content contains #, but symbol is default ;")
+  {
+    ini::comment c({"#Hash style", "  \rAnother line  \r\n"});
+    REQUIRE(c.to_vector() == std::vector<std::string>{"; #Hash style", "; Another line"});
+  }
+
+  SECTION("content contains ;, with symbol = '#'")
+  {
+    ini::comment c({";Semicolon line", "Line2"}, '#');
+    REQUIRE(c.to_vector() == std::vector<std::string>{"# ;Semicolon line", "# Line2"});
+  }
+
+  SECTION("content contains #, with symbol = '#'")
+  {
+    ini::comment c({"#Already commented", "LineB"}, '#');
+    REQUIRE(c.to_vector() == std::vector<std::string>{"#Already commented", "# LineB"});
+  }
+
+  SECTION("lines with only comment symbols")
+  {
+    ini::comment c({";", "#"}, ';');
+    REQUIRE(c.to_vector() == std::vector<std::string>{";", "; #"});
+  }
+
+  SECTION("lines with only empty comment symbols")
+  {
+    ini::comment c({";", "", "#"}, ';');
+    REQUIRE(c.to_vector() == std::vector<std::string>{";", "; #"});
+  }
+}
