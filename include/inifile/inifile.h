@@ -607,6 +607,9 @@ struct case_insensitive_equal
 class comment
 {
   using comment_container = std::vector<std::string>;  // 注释容器
+  using const_iterator = typename comment_container::const_iterator;
+  using const_reverse_iterator = typename comment_container::const_reverse_iterator;
+
  public:
   comment() = default;
   ~comment() = default;
@@ -671,6 +674,10 @@ class comment
   {
     return comments_ ? *comments_ : comment_container{};
   }
+  const std::vector<std::string> &view() const
+  {
+    return comments_ ? *comments_ : empty_comments();  // 避免返回空引用
+  }
 
   void append(const std::string &str, char symbol = ';')
   {
@@ -692,6 +699,10 @@ class comment
     comments_->insert(comments_->end(), std::make_move_iterator(other.comments_->begin()),
                       std::make_move_iterator(other.comments_->end()));
     other.clear();  // 清空 other 的 comments_，防止重复使用
+  }
+  void append(std::initializer_list<std::string> list, char symbol = ';')
+  {
+    for (const auto &item : list) append(item, symbol);
   }
 
   void set(const std::string &str, char symbol = ';')
@@ -720,6 +731,40 @@ class comment
   void set(std::initializer_list<std::string> list, char symbol = ';')
   {
     set(comment(list, symbol));
+  }
+
+  /// @brief 迭代器相关函数, 仅提供只读访问
+  const_iterator begin() const
+  {
+    return comments_ ? comments_->cbegin() : empty_comments().cbegin();
+  }
+  const_iterator end() const
+  {
+    return comments_ ? comments_->cend() : empty_comments().cend();
+  }
+  const_iterator cbegin() const
+  {
+    return begin();
+  }
+  const_iterator cend() const
+  {
+    return end();
+  }
+  const_reverse_iterator rbegin() const
+  {
+    return comments_ ? comments_->crbegin() : empty_comments().crbegin();
+  }
+  const_reverse_iterator rend() const
+  {
+    return comments_ ? comments_->crend() : empty_comments().crend();
+  }
+  const_reverse_iterator crbegin() const
+  {
+    return rbegin();
+  }
+  const_reverse_iterator crend() const
+  {
+    return rend();
   }
 
   bool operator==(const comment &rhs) const
@@ -766,6 +811,14 @@ class comment
     }
   }
 
+  /// @brief 提供一个空的注释容器, 用于避免空指针异常, 主要提供给迭代器使用
+  /// @return 一个始终为空的注释容器
+  static const comment_container &empty_comments()
+  {
+    static const comment_container empty;
+    return empty;
+  }
+
  private:
   std::unique_ptr<comment_container> comments_{nullptr};  // 行级注释容器, 使用unique_ptr主要考虑内存占用更小
 };
@@ -793,7 +846,6 @@ class field
   friend std::ostream &operator<<(std::ostream &os, const field &data);
 
  public:
-  using comment_container = std::vector<std::string>;  // 注释容器
   /// 默认构造函数,使用编译器生成的默认实现.
   field() = default;
 
@@ -820,8 +872,8 @@ class field
   /// 移动构造函数
   field(field &&other) noexcept : value_(std::move(other.value_)), comments_(std::move(other.comments_))
   {
-    other.value_.clear();  // 显式清空, 跨平台行为一致
-    other.comments_.reset();
+    other.value_.clear();     // 显式清空, 跨平台行为一致
+    other.comments_.clear();  // 显式清空, 跨平台行为一致
   }
 
   /// 移动赋值运算符
@@ -833,11 +885,7 @@ class field
   }
 
   /// 重写拷贝构造函数,深拷贝 other 对象.
-  field(const field &other) :
-    value_(other.value_),
-    comments_(other.comments_ ? std::unique_ptr<comment_container>(new comment_container(*other.comments_)) : nullptr)
-  {
-  }
+  field(const field &other) : value_(other.value_), comments_(other.comments_) {}
 
   /// 重写拷贝赋值(copy-and-swap 方式)
   field &operator=(const field &rhs) noexcept  // `rhs` pass by reference
@@ -910,17 +958,19 @@ class field
   /// @param symbol Comment symbol, default is `;`, only supports `;` and `#`
   void set_comment(const std::string &str, char symbol = ';')
   {
-    lazy_init_comments();
-    comments_->clear();
-
-    std::istringstream stream(str);
-    std::string line;
-    while (std::getline(stream, line))
-    {
-      detail::remove_trailing_cr(line);  // 处理 Windows 换行符 "\r\n"
-      // line 被移动后不会再使用,但会在循环的下一次迭代中被重新赋值.
-      comments_->emplace_back(detail::format_comment(std::move(line), symbol));
-    }
+    comments_.set(str, symbol);
+  }
+  void set_comment(const comment &other)
+  {
+    comments_.set(other);
+  }
+  void set_comment(comment &&other) noexcept
+  {
+    comments_.set(std::move(other));
+  }
+  void set_comment(std::initializer_list<std::string> list, char symbol = ';')
+  {
+    comments_.set(list, symbol);
   }
 
   /// @brief Add `key=value` comments and then append them.
@@ -928,21 +978,34 @@ class field
   /// @param symbol Comment symbol, default is `;`, only supports `;` and `#`
   void add_comment(const std::string &str, char symbol = ';')
   {
-    lazy_init_comments();
-    std::istringstream stream(str);
-    std::string line;
-    while (std::getline(stream, line))
-    {
-      detail::remove_trailing_cr(line);  // 处理 Windows 换行符 "\r\n"
-      // line 被移动后不会再使用,但会在循环的下一次迭代中被重新赋值.
-      comments_->emplace_back(detail::format_comment(std::move(line), symbol));
-    }
+    comments_.append(str, symbol);
+  }
+  void add_comment(const comment &other)
+  {
+    comments_.append(other);
+  }
+  void add_comment(comment &&other) noexcept
+  {
+    comments_.append(std::move(other));
+  }
+  void add_comment(std::initializer_list<std::string> list, char symbol = ';')
+  {
+    comments_.append(list, symbol);
+  }
+
+  const comment &get_comment() const
+  {
+    return comments_;
+  }
+  comment &get_comment()
+  {
+    return comments_;
   }
 
   /// @brief Clear `key=value` comment
   void clear_comment()
   {
-    comments_.reset();
+    comments_.clear();
   }
 
   bool empty() const noexcept
@@ -951,33 +1014,8 @@ class field
   }
 
  private:
-  /// @brief 惰性初始化comments_, 确保comments_是有效的
-  void lazy_init_comments()
-  {
-    if (!comments_)
-    {
-      comments_.reset(new comment_container());
-    }
-  }
-  /// @brief 设置注释容器(重载函数)
-  /// @param comments 值传递方式
-  void set_comment(comment_container comments)
-  {
-    if (comments.empty())
-    {
-      clear_comment();
-    }
-    else
-    {
-      lazy_init_comments();
-      *comments_ = std::move(comments);
-    }
-  }
-
- private:
   std::string value_;  // 存储字符串值,用于存储读取的 INI 文件字段值
-  // 当前key-value的注释容器, 采用懒加载策略(默认为nullptr), 深拷贝机制.
-  std::unique_ptr<comment_container> comments_;  // 使用unique_ptr主要考虑内存占用更小, c++17使用std::option会更好
+  comment comments_;   // key-value 键值对的注释
 };
 
 inline std::ostream &operator<<(std::ostream &os, const field &data)
@@ -993,7 +1031,6 @@ class basic_section
   template <typename, typename>
   friend class basic_inifile;
 
-  using comment_container = field::comment_container;                          // 注释容器
   using data_container = std::unordered_map<std::string, field, Hash, Equal>;  // 数据容器类型
 
  public:
@@ -1025,11 +1062,7 @@ class basic_section
   // 默认析构函数
   ~basic_section() = default;
   /// 重写拷贝构造函数, 深拷贝
-  basic_section(const basic_section &other) :
-    data_(other.data_),
-    comments_(other.comments_ ? std::unique_ptr<comment_container>(new comment_container(*other.comments_)) : nullptr)
-  {
-  }
+  basic_section(const basic_section &other) : data_(other.data_), comments_(other.comments_) {}
   /// 重写拷贝赋值函数(copy and swap方式)
   basic_section &operator=(const basic_section &rhs) noexcept
   {
@@ -1040,8 +1073,8 @@ class basic_section
   // 移动构造函数
   basic_section(basic_section &&other) noexcept : data_(std::move(other.data_)), comments_(std::move(other.comments_))
   {
-    other.data_.clear();  // 显式清空, 跨平台行为一致
-    other.comments_.reset();
+    other.data_.clear();      // 显式清空, 跨平台行为一致
+    other.comments_.clear();  // 显式清空, 跨平台行为一致
   }
   // 移动赋值函数, 默认的不能处理移动自赋值情况
   basic_section &operator=(basic_section &&rhs) noexcept
@@ -1244,17 +1277,19 @@ class basic_section
   /// @param symbol Comment symbol, default is `;`, only supports `;` and `#`
   void set_comment(const std::string &str, char symbol = ';')
   {
-    lazy_init_comments();
-    comments_->clear();
-
-    std::istringstream stream(str);
-    std::string line;
-    while (std::getline(stream, line))
-    {
-      detail::remove_trailing_cr(line);  // 处理 Windows 换行符 "\r\n"
-      // line 被移动后不会再使用,但会在循环的下一次迭代中被重新赋值.
-      comments_->emplace_back(detail::format_comment(std::move(line), symbol));
-    }
+    comments_.set(str, symbol);
+  }
+  void set_comment(const comment &other)
+  {
+    comments_.set(other);
+  }
+  void set_comment(comment &&other) noexcept
+  {
+    comments_.set(std::move(other));
+  }
+  void set_comment(std::initializer_list<std::string> list, char symbol = ';')
+  {
+    comments_.set(list, symbol);
   }
 
   /// @brief Add `[section]` comments and then append them.
@@ -1262,60 +1297,46 @@ class basic_section
   /// @param symbol Comment symbol, default is `;`, only supports `;` and `#`
   void add_comment(const std::string &str, char symbol = ';')
   {
-    lazy_init_comments();
-    std::istringstream stream(str);
-    std::string line;
-    while (std::getline(stream, line))
-    {
-      detail::remove_trailing_cr(line);  // 处理 Windows 换行符 "\r\n"
-      // line 被移动后不会再使用,但会在循环的下一次迭代中被重新赋值.
-      comments_->emplace_back(detail::format_comment(std::move(line), symbol));
-    }
+    comments_.append(str, symbol);
+  }
+  void add_comment(const comment &other)
+  {
+    comments_.append(other);
+  }
+  void add_comment(comment &&other) noexcept
+  {
+    comments_.append(std::move(other));
+  }
+  void add_comment(std::initializer_list<std::string> list, char symbol = ';')
+  {
+    comments_.append(list, symbol);
+  }
+
+  const comment &get_comment() const
+  {
+    return comments_;
+  }
+  comment &get_comment()
+  {
+    return comments_;
   }
 
   /// @brief Clear `[section]` comment
   void clear_comment()
   {
-    comments_.reset();
-  }
-
- private:
-  /// @brief 确保comments_是有效的
-  void lazy_init_comments()
-  {
-    if (!comments_)
-    {
-      comments_.reset(new comment_container());
-    }
-  }
-
-  /// @brief 设置注释容器(重载函数)
-  /// @param comments 值传递方式
-  void set_comment(comment_container comments)
-  {
-    if (comments.empty())
-    {
-      clear_comment();
-    }
-    else
-    {
-      lazy_init_comments();
-      *comments_ = std::move(comments);
-    }
+    comments_.clear();
   }
 
  private:
   data_container data_;  // key-value pairs
-  // 当前section的注释容器, 采用懒加载策略(默认为nullptr), 深拷贝机制.
-  std::unique_ptr<comment_container> comments_;  // 使用unique_ptr主要考虑内存占用更小, c++17使用std::option会更好
+  comment comments_;     // section-level comments
 };
 
 /// @brief ini file class
 template <typename Hash = std::hash<std::string>, typename Equal = std::equal_to<std::string>>
 class basic_inifile
 {
-  using section = basic_section<Hash, Equal>;                     // 在 basic_inifile 内部定义 section 别名
-  using comment_container = typename section::comment_container;  // 注释容器类型
+  using section = basic_section<Hash, Equal>;  // 在 basic_inifile 内部定义 section 别名
   using data_container = std::unordered_map<std::string, section, Hash, Equal>;  // 数据容器类型
 
  public:
@@ -1546,7 +1567,7 @@ class basic_inifile
   {
     data_.clear();
     std::string line, current_section;
-    comment_container comments;  // 注释容器
+    comment comments;  // 注释类
     while (std::getline(is, line))
     {
       detail::trim(line);
@@ -1556,7 +1577,7 @@ class basic_inifile
       }
       if (line[0] == ';' || line[0] == '#')  // 添加注释行
       {
-        comments.emplace_back(line);
+        comments.append(line);
         continue;
       }
       if (line.front() == '[' && line.back() == ']')  // 处理section
@@ -1605,7 +1626,7 @@ class basic_inifile
     {
       for (const auto &kv : it->second)
       {
-        write_comment(os, kv.second.comments_);  // 添加kv注释
+        write_comment(os, kv.second.get_comment());  // 添加kv注释
         os << kv.first << "=" << kv.second << "\n";
       }
       first_section = false;
@@ -1619,11 +1640,11 @@ class basic_inifile
 
       if (!first_section) os << "\n";  // Section 之间插入空行
       first_section = false;
-      write_comment(os, sec.second.comments_);  // 添加section注释
+      write_comment(os, sec.second.get_comment());  // 添加section注释
       os << "[" << sec.first << "]\n";
       for (const auto &kv : sec.second)
       {
-        write_comment(os, kv.second.comments_);  // 添加kv注释
+        write_comment(os, kv.second.get_comment());  // 添加kv注释
         os << kv.first << "=" << kv.second << "\n";
       }
     }
@@ -1675,12 +1696,12 @@ class basic_inifile
  private:
   /// @brief 写注释内容
   /// @param os 输出流
-  /// @param comments 注释容器指针
-  void write_comment(std::ostream &os, const std::unique_ptr<comment_container> &comments) const
+  /// @param comments 注释内容
+  void write_comment(std::ostream &os, const comment &comments) const
   {
-    if (comments && !comments->empty())
+    if (comments.empty())
     {
-      for (const auto &item : *comments)
+      for (const auto &item : comments)
       {
         os << item << '\n';
       }
