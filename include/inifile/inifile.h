@@ -1699,7 +1699,7 @@ class basic_inifile
   /// @param comments 注释内容
   void write_comment(std::ostream &os, const comment &comments) const
   {
-    if (comments.empty())
+    if (!comments.empty())
     {
       for (const auto &item : comments)
       {
