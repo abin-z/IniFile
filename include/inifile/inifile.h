@@ -616,15 +616,15 @@ class comment
 
   explicit comment(const std::string &str, char symbol = ';')
   {
-    append(str, symbol);
+    add(str, symbol);
   }
   explicit comment(const std::vector<std::string> &vec, char symbol = ';')
   {
-    for (const auto &item : vec) append(item, symbol);
+    for (const auto &item : vec) add(item, symbol);
   }
   explicit comment(std::initializer_list<std::string> list, char symbol = ';')
   {
-    for (const auto &item : list) append(item, symbol);
+    for (const auto &item : list) add(item, symbol);
   }
   void swap(comment &other) noexcept
   {
@@ -679,20 +679,20 @@ class comment
     return comments_ ? *comments_ : empty_comments();  // 避免返回空引用
   }
 
-  void append(const std::string &str, char symbol = ';')
+  void add(const std::string &str, char symbol = ';')
   {
     if (detail::is_all_whitespace(str)) return;
     ensure_comments_initialized();
     add_comments_from_string(str, symbol);
   }
-  void append(const comment &other)
+  void add(const comment &other)
   {
     if (other.empty()) return;
     ensure_comments_initialized();
     comments_->insert(comments_->end(), other.comments_->begin(), other.comments_->end());
   }
 
-  void append(comment &&other) noexcept
+  void add(comment &&other) noexcept
   {
     if (other.empty()) return;
     ensure_comments_initialized();
@@ -700,9 +700,9 @@ class comment
                       std::make_move_iterator(other.comments_->end()));
     other.clear();  // 清空 other 的 comments_，防止重复使用
   }
-  void append(std::initializer_list<std::string> list, char symbol = ';')
+  void add(std::initializer_list<std::string> list, char symbol = ';')
   {
-    for (const auto &item : list) append(item, symbol);
+    for (const auto &item : list) add(item, symbol);
   }
 
   void set(const std::string &str, char symbol = ';')
@@ -975,19 +975,19 @@ class field
   /// @param symbol Comment symbol, default is `;`, only supports `;` and `#`
   void add_comment(const std::string &str, char symbol = ';')
   {
-    comments_.append(str, symbol);
+    comments_.add(str, symbol);
   }
   void add_comment(const comment &other)
   {
-    comments_.append(other);
+    comments_.add(other);
   }
   void add_comment(comment &&other) noexcept
   {
-    comments_.append(std::move(other));
+    comments_.add(std::move(other));
   }
   void add_comment(std::initializer_list<std::string> list, char symbol = ';')
   {
-    comments_.append(list, symbol);
+    comments_.add(list, symbol);
   }
 
   const comment &get_comment() const
@@ -1290,19 +1290,19 @@ class basic_section
   /// @param symbol Comment symbol, default is `;`, only supports `;` and `#`
   void add_comment(const std::string &str, char symbol = ';')
   {
-    comments_.append(str, symbol);
+    comments_.add(str, symbol);
   }
   void add_comment(const comment &other)
   {
-    comments_.append(other);
+    comments_.add(other);
   }
   void add_comment(comment &&other) noexcept
   {
-    comments_.append(std::move(other));
+    comments_.add(std::move(other));
   }
   void add_comment(std::initializer_list<std::string> list, char symbol = ';')
   {
-    comments_.append(list, symbol);
+    comments_.add(list, symbol);
   }
 
   const comment &get_comment() const
@@ -1570,7 +1570,7 @@ class basic_inifile
       }
       if (line[0] == ';' || line[0] == '#')  // 添加注释行
       {
-        comments.append(line, line[0]);
+        comments.add(line, line[0]);
         continue;
       }
       if (line.front() == '[' && line.back() == ']')  // 处理section
