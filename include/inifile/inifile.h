@@ -602,6 +602,19 @@ class comment
  public:
   comment() = default;
   ~comment() = default;
+
+  explicit comment(const std::string &str, char symbol = ';')
+  {
+    append(str, symbol);
+  }
+  explicit comment(const std::vector<std::string> &vec, char symbol = ';')
+  {
+    for (const auto &item : vec) append(item, symbol);
+  }
+  explicit comment(std::initializer_list<std::string> list, char symbol = ';')
+  {
+    for (const auto &item : list) append(item, symbol);
+  }
   void swap(comment &other) noexcept
   {
     using std::swap;
@@ -646,8 +659,82 @@ class comment
     comments_.reset();
   }
 
+  std::vector<std::string> to_vector() const
+  {
+    return comments_ ? *comments_ : comment_container{};
+  }
+
+  void append(const std::string &str, char symbol = ';')
+  {
+    if (str.empty()) return;
+    lazy_init_comment();
+    comments_->emplace_back(format_comment_line(str, symbol));
+  }
+  void append(const comment &other)
+  {
+    if (other.empty()) return;
+    lazy_init_comment();
+    comments_->insert(comments_->end(), other.comments_->begin(), other.comments_->end());
+  }
+
+  void set(const std::string &str, char symbol = ';')
+  {
+    if (!str.empty())
+    {
+      lazy_init_comment();
+      comments_->clear();
+      comments_->emplace_back(format_comment_line(str, symbol));
+    }
+    else
+    {
+      comments_.reset();  // 不需要保留空注释
+    }
+  }
+  void set(const comment &other)
+  {
+    comment temp(other);  // copy
+    swap(temp);           // noexcept swap
+  }
+  void set(comment &&other) noexcept
+  {
+    comment temp(std::move(other));  // move
+    swap(temp);                      // noexcept swap
+  }
+  void set(std::initializer_list<std::string> list, char symbol = ';')
+  {
+    set(comment(list, symbol));
+  }
+
+  bool operator==(const comment &rhs) const
+  {
+    if (comments_ && rhs.comments_) return *comments_ == *rhs.comments_;
+    return !comments_ && !rhs.comments_;
+  }
+
  private:
-  std::unique_ptr<std::vector<std::string>> comments_{nullptr};  // 行级注释容器, 使用unique_ptr主要考虑内存占用更小
+  /// @brief 初始化 comments_, 确保不为nullptr
+  void lazy_init_comment()
+  {
+    if (!comments_) comments_.reset(new comment_container());
+  }
+  static std::string format_comment_line(std::string comment, char symbol)
+  {
+    detail::trim(comment);
+    char comment_prefix = symbol == '#' ? '#' : ';';  // 只支持 ';' 和 '#' 注释, 默认使用 ';'
+    if (comment.empty())
+    {
+      return std::string(1, comment_prefix);
+    }
+    if (comment[0] != comment_prefix)
+    {
+      comment.insert(0, 1, ' ');
+      comment.insert(0, 1, comment_prefix);
+    }
+    return comment;
+  }
+
+ private:
+  std::unique_ptr<comment_container> comments_{nullptr};  // 行级注释容器, 使用unique_ptr主要考虑内存占用更小
 };
 
 // 先声明模板类 basic_inifile
