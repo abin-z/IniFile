@@ -1577,7 +1577,7 @@ class basic_inifile
       }
       if (line[0] == ';' || line[0] == '#')  // 添加注释行
       {
-        comments.append(line);
+        comments.append(line, line[0]);
         continue;
       }
       if (line.front() == '[' && line.back() == ']')  // 处理section
