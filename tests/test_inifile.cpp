@@ -2591,32 +2591,32 @@ TEST_CASE("comment initializer_list constructor", "[comment]")
   REQUIRE(c.to_vector() == std::vector<std::string>{"; Comment 1", "; Comment 2"});
 }
 
-TEST_CASE("comment append", "[comment]")
+TEST_CASE("comment add", "[comment]")
 {
   ini::comment c;
-  c.append("This is a comment");
+  c.add("This is a comment");
   REQUIRE_FALSE(c.empty());
   REQUIRE(c.to_vector() == std::vector<std::string>{"; This is a comment"});
 
-  c.append("Another comment");
+  c.add("Another comment");
   REQUIRE(c.to_vector() == std::vector<std::string>{"; This is a comment", "; Another comment"});
 }
 
-TEST_CASE("comment append comment", "[comment]")
+TEST_CASE("comment add comment", "[comment]")
 {
   ini::comment c1({"Comment 1"});
   ini::comment c2({"Comment 2"});
 
-  c1.append(c2);
+  c1.add(c2);
   REQUIRE(c1.to_vector() == std::vector<std::string>{"; Comment 1", "; Comment 2"});
 }
 
-TEST_CASE("comment append move comment", "[comment]")
+TEST_CASE("comment add move comment", "[comment]")
 {
   ini::comment c1({"Comment 1"});
   ini::comment c2("Comment 2");
 
-  c1.append(std::move(c2));
+  c1.add(std::move(c2));
   REQUIRE(c1.to_vector() == std::vector<std::string>{"; Comment 1", "; Comment 2"});
   REQUIRE(c2.empty() == true);  // c2 should be empty after move
 }
@@ -2658,7 +2658,7 @@ TEST_CASE("comment empty", "[comment]")
   ini::comment c;
   REQUIRE(c.empty() == true);
 
-  c.append("Some comment");
+  c.add("Some comment");
   REQUIRE(c.empty() == false);
 
   c.clear();
@@ -2839,34 +2839,34 @@ TEST_CASE("comment set functions", "[comment]")
   }
 }
 
-TEST_CASE("comment append functions", "[comment]")
+TEST_CASE("comment add functions", "[comment]")
 {
   ini::comment c;
 
-  SECTION("append string")
+  SECTION("add string")
   {
-    c.append("First\nSecond");
+    c.add("First\nSecond");
     REQUIRE(c.to_vector() == std::vector<std::string>{"; First", "; Second"});
   }
 
-  SECTION("append another comment (copy)")
+  SECTION("add another comment (copy)")
   {
     ini::comment other({"A", "B"});
-    c.append(other);
+    c.add(other);
     REQUIRE(c.to_vector() == std::vector<std::string>{"; A", "; B"});
   }
 
-  SECTION("append another comment (move)")
+  SECTION("add another comment (move)")
   {
     ini::comment other({"X", "Y"});
-    c.append(std::move(other));
+    c.add(std::move(other));
     REQUIRE(c.to_vector() == std::vector<std::string>{"; X", "; Y"});
   }
 
-  SECTION("append empty comment has no effect")
+  SECTION("add empty comment has no effect")
   {
     ini::comment empty;
-    c.append(empty);
+    c.add(empty);
     REQUIRE(c.empty());
   }
 }
@@ -2917,10 +2917,10 @@ TEST_CASE("comment with custom symbol", "[comment]")
     REQUIRE(c.to_vector() == std::vector<std::string>{"# Line1", "# Line2"});
   }
 
-  SECTION("append with '#' symbol")
+  SECTION("add with '#' symbol")
   {
     ini::comment c;
-    c.append("Appended1\nAppended2", '#');
+    c.add("Appended1\nAppended2", '#');
     REQUIRE(c.to_vector() == std::vector<std::string>{"# Appended1", "# Appended2"});
   }
 
@@ -2949,9 +2949,9 @@ TEST_CASE("comment multi-line string handling", "[comment]")
 {
   ini::comment c;
 
-  SECTION("append multi-line string")
+  SECTION("add multi-line string")
   {
-    c.append("Line1\nLine2\nLine3");
+    c.add("Line1\nLine2\nLine3");
     REQUIRE(c.to_vector() == std::vector<std::string>{"; Line1", "; Line2", "; Line3"});
   }
 
@@ -3115,124 +3115,124 @@ TEST_CASE("set function", "[comment]")
   }
 }
 
-TEST_CASE("append function", "[comment]")
+TEST_CASE("add function", "[comment]")
 {
-  SECTION("append non-empty string")
+  SECTION("add non-empty string")
   {
     ini::comment c;
-    c.append("First line");
+    c.add("First line");
     REQUIRE(c.to_vector() == std::vector<std::string>{"; First line"});
   }
 
-  SECTION("append empty string")
+  SECTION("add empty string")
   {
     ini::comment c;
-    c.append("");  // 不添加任何注释
+    c.add("");  // 不添加任何注释
     REQUIRE(c.empty() == true);
   }
 
-  SECTION("append whitespace string")
+  SECTION("add whitespace string")
   {
     ini::comment c;
-    c.append("     \t  \t  ");  // 仅空白字符
+    c.add("     \t  \t  ");  // 仅空白字符
     REQUIRE(c.empty() == true);
   }
 
-  SECTION("append multiple lines")
+  SECTION("add multiple lines")
   {
     ini::comment c;
-    c.append("Line 1\nLine 2\nLine 3");
+    c.add("Line 1\nLine 2\nLine 3");
     REQUIRE(c.to_vector() == std::vector<std::string>{"; Line 1", "; Line 2", "; Line 3"});
   }
 
-  SECTION("append multiple lines with whitespace")
+  SECTION("add multiple lines with whitespace")
   {
     ini::comment c;
-    c.append("Line 1\n     \t  \t  \nLine 2");
+    c.add("Line 1\n     \t  \t  \nLine 2");
     REQUIRE(c.to_vector() == std::vector<std::string>{"; Line 1", "; Line 2"});
   }
 
-  SECTION("append with custom symbol")
+  SECTION("add with custom symbol")
   {
     ini::comment c;
-    c.append("Custom comment", '#');
+    c.add("Custom comment", '#');
     REQUIRE(c.to_vector() == std::vector<std::string>{"# Custom comment"});
   }
 
-  SECTION("append to existing comments")
+  SECTION("add to existing comments")
   {
     ini::comment c({"First comment", "Second comment"});
-    c.append("Third comment");
+    c.add("Third comment");
     REQUIRE(c.to_vector() == std::vector<std::string>{"; First comment", "; Second comment", "; Third comment"});
   }
 
-  SECTION("append with whitespace between lines")
+  SECTION("add with whitespace between lines")
   {
     ini::comment c({"First comment", "Second comment"});
-    c.append("   \t  \t ");  // 仅空白字符
-    c.append("Third comment");
+    c.add("   \t  \t ");  // 仅空白字符
+    c.add("Third comment");
     REQUIRE(c.to_vector() == std::vector<std::string>{"; First comment", "; Second comment", "; Third comment"});
   }
 }
 
 TEST_CASE("set function with whitespace between lines", "[comment]")
 {
-    SECTION("set with multiple lines containing whitespace between them")
-    {
-        ini::comment c;
-        c.set("Line 1\n \t \nLine 2\n\n   \t");
-        REQUIRE(c.to_vector() == std::vector<std::string>{"; Line 1", "; Line 2"});
-    }
+  SECTION("set with multiple lines containing whitespace between them")
+  {
+    ini::comment c;
+    c.set("Line 1\n \t \nLine 2\n\n   \t");
+    REQUIRE(c.to_vector() == std::vector<std::string>{"; Line 1", "; Line 2"});
+  }
 
-    SECTION("set with newlines and spaces between")
-    {
-        ini::comment c;
-        c.set("Line 1\n \nLine 2\n   \n  \nLine 3");
-        REQUIRE(c.to_vector() == std::vector<std::string>{"; Line 1", "; Line 2", "; Line 3"});
-    }
+  SECTION("set with newlines and spaces between")
+  {
+    ini::comment c;
+    c.set("Line 1\n \nLine 2\n   \n  \nLine 3");
+    REQUIRE(c.to_vector() == std::vector<std::string>{"; Line 1", "; Line 2", "; Line 3"});
+  }
 
-    SECTION("set with only whitespace between lines")
-    {
-        ini::comment c;
-        c.set("Line 1\n \t\n\n \t\nLine 2");
-        REQUIRE(c.to_vector() == std::vector<std::string>{"; Line 1", "; Line 2"});
-    }
+  SECTION("set with only whitespace between lines")
+  {
+    ini::comment c;
+    c.set("Line 1\n \t\n\n \t\nLine 2");
+    REQUIRE(c.to_vector() == std::vector<std::string>{"; Line 1", "; Line 2"});
+  }
 
-    SECTION("set with multiple types of whitespace")
-    {
-        ini::comment c;
-        c.set("Line 1\n\t \n  Line 2\n \t\nLine 3");
-        REQUIRE(c.to_vector() == std::vector<std::string>{"; Line 1", "; Line 2", "; Line 3"});
-    }
+  SECTION("set with multiple types of whitespace")
+  {
+    ini::comment c;
+    c.set("Line 1\n\t \n  Line 2\n \t\nLine 3");
+    REQUIRE(c.to_vector() == std::vector<std::string>{"; Line 1", "; Line 2", "; Line 3"});
+  }
 }
 
-TEST_CASE("append function with whitespace between lines", "[comment]")
+TEST_CASE("add function with whitespace between lines", "[comment]")
 {
-    SECTION("append with multiple lines containing whitespace between them")
-    {
-        ini::comment c;
-        c.append("Line 1\n \t \nLine 2\n\n   \t");
-        REQUIRE(c.to_vector() == std::vector<std::string>{"; Line 1", "; Line 2"});
-    }
+  SECTION("add with multiple lines containing whitespace between them")
+  {
+    ini::comment c;
+    c.add("Line 1\n \t \nLine 2\n\n   \t");
+    REQUIRE(c.to_vector() == std::vector<std::string>{"; Line 1", "; Line 2"});
+  }
 
-    SECTION("append with newlines and spaces between")
-    {
-        ini::comment c;
-        c.append("Line 1\n \nLine 2\n   \n  \nLine 3");
-        REQUIRE(c.to_vector() == std::vector<std::string>{"; Line 1", "; Line 2", "; Line 3"});
-    }
+  SECTION("add with newlines and spaces between")
+  {
+    ini::comment c;
+    c.add("Line 1\n \nLine 2\n   \n  \nLine 3");
+    REQUIRE(c.to_vector() == std::vector<std::string>{"; Line 1", "; Line 2", "; Line 3"});
+  }
 
-    SECTION("append with only whitespace between lines")
-    {
-        ini::comment c;
-        c.append("Line 1\n \t\n\n \t\nLine 2");
-        REQUIRE(c.to_vector() == std::vector<std::string>{"; Line 1", "; Line 2"});
-    }
+  SECTION("add with only whitespace between lines")
+  {
+    ini::comment c;
+    c.add("Line 1\n \t\n\n \t\nLine 2");
+    REQUIRE(c.to_vector() == std::vector<std::string>{"; Line 1", "; Line 2"});
+  }
 
-    SECTION("append with multiple types of whitespace")
-    {
-        ini::comment c;
-        c.append("Line 1\n\t \n  Line 2\n \t\nLine 3");
-        REQUIRE(c.to_vector() == std::vector<std::string>{"; Line 1", "; Line 2", "; Line 3"});
-    }
+  SECTION("add with multiple types of whitespace")
+  {
+    ini::comment c;
+    c.add("Line 1\n\t \n  Line 2\n \t\nLine 3");
+    REQUIRE(c.to_vector() == std::vector<std::string>{"; Line 1", "; Line 2", "; Line 3"});
+  }
 }
