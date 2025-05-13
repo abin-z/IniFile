@@ -990,11 +990,11 @@ class field
     comments_.add(list, symbol);
   }
 
-  const comment &get_comment() const
+  const ini::comment &comment() const
   {
     return comments_;
   }
-  comment &get_comment()
+  ini::comment &comment()
   {
     return comments_;
   }
@@ -1011,8 +1011,8 @@ class field
   }
 
  private:
-  std::string value_;  // 存储字符串值,用于存储读取的 INI 文件字段值
-  comment comments_;   // key-value 键值对的注释
+  std::string value_;      // 存储字符串值,用于存储读取的 INI 文件字段值
+  ini::comment comments_;  // key-value 键值对的注释
 };
 
 inline std::ostream &operator<<(std::ostream &os, const field &data)
@@ -1305,11 +1305,11 @@ class basic_section
     comments_.add(list, symbol);
   }
 
-  const comment &get_comment() const
+  const ini::comment &comment() const
   {
     return comments_;
   }
-  comment &get_comment()
+  ini::comment &comment()
   {
     return comments_;
   }
@@ -1321,8 +1321,8 @@ class basic_section
   }
 
  private:
-  data_container data_;  // key-value pairs
-  comment comments_;     // section-level comments
+  data_container data_;    // key-value pairs
+  ini::comment comments_;  // section-level comments
 };
 
 /// @brief ini file class
@@ -1619,7 +1619,7 @@ class basic_inifile
     {
       for (const auto &kv : it->second)
       {
-        write_comment(os, kv.second.get_comment());  // 添加kv注释
+        write_comment(os, kv.second.comment());  // 添加kv注释
         os << kv.first << "=" << kv.second << "\n";
       }
       first_section = false;
@@ -1633,11 +1633,11 @@ class basic_inifile
 
       if (!first_section) os << "\n";  // Section 之间插入空行
       first_section = false;
-      write_comment(os, sec.second.get_comment());  // 添加section注释
+      write_comment(os, sec.second.comment());  // 添加section注释
       os << "[" << sec.first << "]\n";
       for (const auto &kv : sec.second)
       {
-        write_comment(os, kv.second.get_comment());  // 添加kv注释
+        write_comment(os, kv.second.comment());  // 添加kv注释
         os << kv.first << "=" << kv.second << "\n";
       }
     }
