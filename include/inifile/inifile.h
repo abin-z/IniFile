@@ -832,17 +832,14 @@ inline std::ostream &operator<<(std::ostream &os, const comment &c)
   return os;
 }
 
-// 先声明模板类 basic_inifile
+// 先声明模板类 basic_inifile, 声明友元的时候需要
+// 声明完整的类型, 否则编译器会报错
 template <typename, typename>
 class basic_inifile;
 
 /// @brief ini field value
 class field
 {
-  // 友元类,允许 basic_inifile 访问 field 的私有成员
-  template <typename, typename>
-  friend class basic_inifile;
-
   friend std::ostream &operator<<(std::ostream &os, const field &data);
 
  public:
@@ -1027,10 +1024,6 @@ inline std::ostream &operator<<(std::ostream &os, const field &data)
 template <typename Hash = std::hash<std::string>, typename Equal = std::equal_to<std::string>>
 class basic_section
 {
-  // 友元类,允许 basic_inifile 访问 basic_section 的私有成员
-  template <typename, typename>
-  friend class basic_inifile;
-
   using data_container = std::unordered_map<std::string, field, Hash, Equal>;  // 数据容器类型
 
  public:
