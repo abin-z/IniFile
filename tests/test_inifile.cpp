@@ -3583,3 +3583,780 @@ TEST_CASE("ini::field comment edge cases", "[ini][field][comment][edge]")
     REQUIRE(v[0] == "; after clear");
   }
 }
+
+TEST_CASE("Section comment basic operations", "[section][comment]")
+{
+  using ini::comment;
+  ini::section sec;
+
+  SECTION("Initial comment should be empty")
+  {
+    REQUIRE(sec.comment().empty());
+  }
+
+  SECTION("Set single-line comment")
+  {
+    comment cmt;
+    cmt.add("; This is a section comment");
+    sec.set_comment(cmt);
+    REQUIRE_FALSE(sec.comment().empty());
+    REQUIRE(sec.comment().view().size() == 1);
+    REQUIRE(sec.comment().view().front() == "; This is a section comment");
+  }
+
+  SECTION("Set multi-line comment")
+  {
+    comment cmt;
+    cmt.add("; line1");
+    cmt.add("; line2");
+    cmt.add("; line3");
+    sec.set_comment(cmt);
+    const auto &cmts = sec.comment();
+    REQUIRE(cmts.view().size() == 3);
+    REQUIRE(cmts.view()[1] == "; line2");
+  }
+
+  SECTION("Clear comment")
+  {
+    comment cmt;
+    cmt.add("; to be cleared");
+    sec.set_comment(cmt);
+    sec.clear_comment();
+    REQUIRE(sec.comment().empty());
+  }
+
+  SECTION("Overwrite existing comment")
+  {
+    comment first;
+    first.add("; first");
+    sec.set_comment(first);
+    REQUIRE(sec.comment().view().size() == 1);
+    REQUIRE(sec.comment().view()[0] == "; first");
+
+    comment second;
+    second.add("; overwritten");
+    second.add("; second line");
+    sec.set_comment(second);
+    REQUIRE(sec.comment().view().size() == 2);
+    REQUIRE(sec.comment().view()[0] == "; overwritten");
+  }
+
+  SECTION("Set empty comment explicitly")
+  {
+    comment empty;
+    sec.set_comment(empty);
+    REQUIRE(sec.comment().empty());
+  }
+
+  SECTION("Move comment into section")
+  {
+    comment movable;
+    movable.add("; move this");
+    movable.add("; and this");
+    sec.set_comment(std::move(movable));
+    REQUIRE(sec.comment().view().size() == 2);
+    // 原 comment 已被移出，状态未定义，但容器实现应可容忍空 vector
+  }
+
+  SECTION("Copy comment object preserves content")
+  {
+    comment cmt;
+    cmt.add("; copy me");
+    ini::section sec2;
+    sec2.set_comment(cmt);
+
+    REQUIRE(sec2.comment().view().size() == 1);
+    REQUIRE(sec2.comment().view()[0] == "; copy me");
+    REQUIRE(cmt.view().size() == 1);  // 原 comment 未被破坏
+  }
+}
+
+TEST_CASE("Section comment does not affect field comments", "[section][comment]")
+{
+  using ini::comment;
+  ini::section sec;
+  comment sec_comment;
+  sec_comment.add("; section level");
+  sec.set_comment(sec_comment);
+
+  sec["key"] = "value";
+  REQUIRE(sec["key"].comment().empty());
+
+  comment field_comment;
+  field_comment.add("# field level");  // 默认是 ';'
+  sec["key"].set_comment(field_comment);
+
+  REQUIRE(sec["key"].comment().view().size() == 1);
+  REQUIRE(sec["key"].comment().view()[0] == "; # field level");
+
+  sec["key"].clear_comment();
+  REQUIRE(sec["key"].comment().view().empty());
+  sec["key"].add_comment("; added field comment");
+  REQUIRE(sec["key"].comment().view()[0] == "; added field comment");
+
+  // 清除 section 注释不影响 field
+  sec.clear_comment();
+  REQUIRE(sec.comment().empty());
+  REQUIRE_FALSE(sec["key"].comment().empty());
+}
+
+TEST_CASE("Section comment robustness under swap and assignment", "[section][comment][swap]")
+{
+  using ini::comment;
+  using ini::section;
+
+  SECTION("Swap swaps comments")
+  {
+    section sec1, sec2;
+
+    sec1.add_comment("; sec1 comment");
+    sec2.add_comment("; sec2 comment");
+
+    std::swap(sec1, sec2);
+
+    REQUIRE(sec1.comment().view().size() == 1);
+    REQUIRE(sec1.comment().view()[0] == "; sec2 comment");
+
+    REQUIRE(sec2.comment().view().size() == 1);
+    REQUIRE(sec2.comment().view()[0] == "; sec1 comment");
+  }
+
+  SECTION("Self swap does not corrupt comment")
+  {
+    section sec;
+    sec.add_comment("; self-swap test");
+    std::swap(sec, sec);
+
+    REQUIRE(sec.comment().view().size() == 1);
+    REQUIRE(sec.comment().view()[0] == "; self-swap test");
+  }
+
+  SECTION("Copy assignment preserves comment")
+  {
+    section src, dst;
+    src.add_comment("; source comment");
+    dst = src;
+
+    REQUIRE(dst.comment().view().size() == 1);
+    REQUIRE(dst.comment().view()[0] == "; source comment");
+    REQUIRE(src.comment().view()[0] == "; source comment");
+  }
+
+  SECTION("Self copy assignment is safe")
+  {
+    section sec;
+    sec.add_comment("; self-assign test");
+    sec = sec;
+
+    REQUIRE(sec.comment().view().size() == 1);
+    REQUIRE(sec.comment().view()[0] == "; self-assign test");
+  }
+
+  SECTION("Move assignment preserves comment")
+  {
+    section src;
+    src.add_comment("; moved comment");
+    section dst;
+    dst = std::move(src);
+
+    REQUIRE(dst.comment().view().size() == 1);
+    REQUIRE(dst.comment().view()[0] == "; moved comment");
+  }
+
+  SECTION("Self move assignment is safe")
+  {
+    section sec;
+    sec.add_comment("; self-move test");
+    sec = std::move(sec);  // technically UB if not guarded internally
+
+    // 要求实现中做了自移动保护（例如 if (this != &other)）
+    REQUIRE(sec.comment().view().size() == 1);
+    REQUIRE(sec.comment().view()[0] == "; self-move test");
+  }
+}
+
+TEST_CASE("Field and Section swap, self-swap, assignment", "[section][comment][swap]")
+{
+  using ini::comment;
+  using ini::section;
+
+  SECTION("Field swap swaps comments")
+  {
+    section sec1, sec2;
+
+    sec1["key1"] = "value1";
+    sec2["key2"] = "value2";
+
+    sec1["key1"].add_comment("; key1 comment");
+    sec2["key2"].add_comment("; key2 comment");
+
+    std::swap(sec1["key1"], sec2["key2"]);
+
+    REQUIRE(sec1["key1"].comment().view().size() == 1);
+    REQUIRE(sec1["key1"].comment().view()[0] == "; key2 comment");
+
+    REQUIRE(sec2["key2"].comment().view().size() == 1);
+    REQUIRE(sec2["key2"].comment().view()[0] == "; key1 comment");
+  }
+
+  SECTION("Self swap for field does not corrupt comment")
+  {
+    section sec;
+
+    sec["key"].add_comment("; self-swap key comment");
+    std::swap(sec["key"], sec["key"]);
+
+    REQUIRE(sec["key"].comment().view().size() == 1);
+    REQUIRE(sec["key"].comment().view()[0] == "; self-swap key comment");
+  }
+
+  SECTION("Self swap does not corrupt section comment")
+  {
+    section sec;
+    sec.add_comment("; self-swap section comment");
+
+    std::swap(sec, sec);
+
+    REQUIRE(sec.comment().view().size() == 1);
+    REQUIRE(sec.comment().view()[0] == "; self-swap section comment");
+  }
+
+  SECTION("Self assignment for field does not corrupt comment")
+  {
+    section sec;
+    sec["key"].add_comment("; self-assign field comment");
+    sec["key"] = sec["key"];
+
+    REQUIRE(sec["key"].comment().view().size() == 1);
+    REQUIRE(sec["key"].comment().view()[0] == "; self-assign field comment");
+  }
+
+  SECTION("Self assignment for section does not corrupt comment")
+  {
+    section sec;
+    sec.add_comment("; self-assign section comment");
+    sec = sec;
+
+    REQUIRE(sec.comment().view().size() == 1);
+    REQUIRE(sec.comment().view()[0] == "; self-assign section comment");
+  }
+
+  SECTION("Move assignment for field preserves comment")
+  {
+    section sec1, sec2;
+
+    sec1["key1"] = "value1";
+    sec1["key1"].add_comment("; moved field comment");
+
+    sec2 = std::move(sec1);
+
+    REQUIRE(sec1.size() == 0);  // sec1 should be empty after move
+    REQUIRE(sec2.size() == 1);
+    REQUIRE(sec2.at("key1").as<std::string>() == "value1");
+
+    REQUIRE(sec2.at("key1").comment().view().size() == 1);
+    REQUIRE(sec2.at("key1").comment().view()[0] == "; moved field comment");
+  }
+
+  SECTION("Move assignment for section preserves comment")
+  {
+    section sec1, sec2;
+
+    sec1.add_comment("; moved section comment");
+    sec2 = std::move(sec1);
+
+    REQUIRE(sec2.comment().view().size() == 1);
+    REQUIRE(sec2.comment().view()[0] == "; moved section comment");
+  }
+
+  SECTION("Self move assignment for field is safe")
+  {
+    section sec;
+    sec["key"].add_comment("; self-move key comment");
+    sec["key"] = std::move(sec["key"]);
+
+    REQUIRE(sec["key"].comment().view().size() == 1);
+    REQUIRE(sec["key"].comment().view()[0] == "; self-move key comment");
+  }
+
+  SECTION("Self move assignment for section is safe")
+  {
+    section sec;
+    sec.add_comment("; self-move section comment");
+    sec = std::move(sec);
+
+    REQUIRE(sec.comment().view().size() == 1);
+    REQUIRE(sec.comment().view()[0] == "; self-move section comment");
+  }
+}
+
+TEST_CASE("test move assignment of section", "[basic_section]")
+{
+  ini::section sec1;
+  sec1["key1"] = ini::field("value1");
+
+  // Move sec1 to sec2
+  ini::section sec2;
+  sec2 = std::move(sec1);  // 触发移动赋值
+
+  REQUIRE(sec2["key1"].as<std::string>() == "value1");
+  REQUIRE(sec1["key1"].as<std::string>().empty());  // sec1 已经被清空
+}
+
+TEST_CASE("test move constructor of section", "[basic_section]")
+{
+  ini::section sec1;
+  sec1["key1"] = ini::field("value1");
+
+  // Move construct sec2 from sec1
+  ini::section sec2(std::move(sec1));
+
+  REQUIRE(sec2["key1"].as<std::string>() == "value1");
+  REQUIRE(sec1["key1"].as<std::string>().empty());  // sec1 已经被清空
+}
+
+TEST_CASE("Test comments in basic_inifile", "[ini][comments]")
+{
+  ini::inifile inifile;
+
+  SECTION("Add comment to section")
+  {
+    // 添加一个 section，并设置一个注释
+    inifile["section1"].add_comment("; This is a section comment");
+
+    // 检查 section 的注释
+    REQUIRE(inifile["section1"].comment().view().size() == 1);
+    REQUIRE(inifile["section1"].comment().view()[0] == "; This is a section comment");
+  }
+
+  SECTION("Add comment to field")
+  {
+    // 在 section 中添加一个字段并附加注释
+    inifile["section1"]["key1"] = "value1";
+    inifile["section1"]["key1"].add_comment("; This is a field comment");
+
+    // 检查字段的注释
+    REQUIRE(inifile["section1"]["key1"].comment().view().size() == 1);
+    REQUIRE(inifile["section1"]["key1"].comment().view()[0] == "; This is a field comment");
+  }
+
+  SECTION("Move assignment transfers field comment")
+  {
+    ini::inifile new_inifile;
+
+    // 设置一个字段并附加注释
+    inifile["section1"]["key1"] = "value1";
+    inifile["section1"]["key1"].add_comment("; This is a field comment");
+
+    // 移动到新对象
+    new_inifile = std::move(inifile);
+
+    // 检查新对象的注释是否正确转移
+    REQUIRE(new_inifile["section1"]["key1"].comment().view().size() == 1);
+    REQUIRE(new_inifile["section1"]["key1"].comment().view()[0] == "; This is a field comment");
+  }
+
+  SECTION("Comments are cleared after move assignment")
+  {
+    ini::inifile new_inifile;
+
+    // 设置一个字段并附加注释
+    inifile["section1"]["key1"] = "value1";
+    inifile["section1"]["key1"].add_comment("; This is a field comment");
+
+    // 移动到新对象
+    new_inifile = std::move(inifile);
+
+    // 检查原对象中的注释是否已清空
+    REQUIRE(inifile["section1"]["key1"].comment().view().empty());
+  }
+
+  SECTION("Write and read ini file with comments")
+  {
+    // 添加注释和字段
+    inifile["section1"].add_comment("; Section comment");
+    inifile["section1"]["key1"] = "value1";
+    inifile["section1"]["key1"].add_comment("; Field comment");
+
+    // 将 ini 数据保存到字符串
+    std::string ini_data = inifile.to_string();
+
+    // 清空 inifile，并从字符串加载数据
+    ini::inifile loaded_inifile;
+    loaded_inifile.from_string(ini_data);
+
+    // 检查注释是否正确加载
+    REQUIRE(loaded_inifile["section1"].comment().view().size() == 1);
+    REQUIRE(loaded_inifile["section1"].comment().view()[0] == "; Section comment");
+    REQUIRE(loaded_inifile["section1"]["key1"].comment().view().size() == 1);
+    REQUIRE(loaded_inifile["section1"]["key1"].comment().view()[0] == "; Field comment");
+  }
+
+  SECTION("Remove section and check if comments are removed")
+  {
+    // 添加注释和字段
+    inifile["section1"].add_comment("; Section comment");
+    inifile["section1"]["key1"] = "value1";
+    inifile["section1"]["key1"].add_comment("; Field comment");
+
+    // 删除 section
+    inifile.remove("section1");
+
+    // 检查 section 是否被移除，注释应被清除
+    REQUIRE_THROWS_AS(inifile.at("section1"), std::out_of_range);
+  }
+
+  SECTION("Write and read ini file with comments")
+  {
+    // 添加注释和字段
+    inifile["section1"].add_comment("; Section comment");
+    inifile["section1"]["key1"] = "value1";
+    inifile["section1"]["key1"].add_comment("; Field comment");
+
+    // 将 ini 数据保存到字符串
+    std::string ini_data = inifile.to_string();
+
+    // 清空 inifile，并从字符串加载数据
+    ini::inifile loaded_inifile;
+    loaded_inifile.from_string(ini_data);
+
+    // 检查注释是否正确加载
+    REQUIRE(loaded_inifile["section1"].comment().view().size() == 1);
+    REQUIRE(loaded_inifile["section1"].comment().view()[0] == "; Section comment");
+    REQUIRE(loaded_inifile["section1"]["key1"].comment().view().size() == 1);
+    REQUIRE(loaded_inifile["section1"]["key1"].comment().view()[0] == "; Field comment");
+  }
+
+  SECTION("Swap two ini files with comments")
+  {
+    // 添加注释和字段
+    inifile["section1"].add_comment("; Section comment");
+    inifile["section1"]["key1"] = "value1";
+    inifile["section1"]["key1"].add_comment("; Field comment");
+
+    // 将 ini 数据保存到字符串
+    std::string ini_data = inifile.to_string();
+
+    // 清空 inifile2，并从字符串加载数据
+    ini::inifile inifile2;
+    inifile2.from_string(ini_data);
+
+    // 执行 swap 操作
+    inifile.swap(inifile2);
+
+    // 检查 swap 后的内容
+    REQUIRE(inifile["section1"].comment().view().size() == 1);
+    REQUIRE(inifile["section1"].comment().view()[0] == "; Section comment");
+    REQUIRE(inifile["section1"]["key1"].comment().view().size() == 1);
+    REQUIRE(inifile["section1"]["key1"].comment().view()[0] == "; Field comment");
+  }
+
+  SECTION("Copy ini file with comments")
+  {
+    // 添加注释和字段
+    inifile["section1"].add_comment("; Section comment");
+    inifile["section1"]["key1"] = "value1";
+    inifile["section1"]["key1"].add_comment("; Field comment");
+
+    // 使用拷贝构造
+    ini::inifile copied_inifile = inifile;
+
+    // 检查拷贝后的内容
+    REQUIRE(copied_inifile["section1"].comment().view().size() == 1);
+    REQUIRE(copied_inifile["section1"].comment().view()[0] == "; Section comment");
+    REQUIRE(copied_inifile["section1"]["key1"].comment().view().size() == 1);
+    REQUIRE(copied_inifile["section1"]["key1"].comment().view()[0] == "; Field comment");
+  }
+
+  SECTION("Move ini file with comments")
+  {
+    // 添加注释和字段
+    inifile["section1"].add_comment("; Section comment");
+    inifile["section1"]["key1"] = "value1";
+    inifile["section1"]["key1"].add_comment("; Field comment");
+
+    // 使用移动构造
+    ini::inifile moved_inifile = std::move(inifile);
+
+    // 检查移动后的内容
+    REQUIRE(moved_inifile["section1"].comment().view().size() == 1);
+    REQUIRE(moved_inifile["section1"].comment().view()[0] == "; Section comment");
+    REQUIRE(moved_inifile["section1"]["key1"].comment().view().size() == 1);
+    REQUIRE(moved_inifile["section1"]["key1"].comment().view()[0] == "; Field comment");
+
+    // 确保原 inifile 为空
+    REQUIRE(inifile.size() == 0);
+  }
+
+  SECTION("Move assignment for ini file with comments")
+  {
+    // 添加注释和字段
+    inifile["section1"].add_comment("; Section comment");
+    inifile["section1"]["key1"] = "value1";
+    inifile["section1"]["key1"].add_comment("; Field comment");
+
+    // 使用移动赋值
+    ini::inifile moved_inifile;
+    moved_inifile = std::move(inifile);
+
+    // 检查移动赋值后的内容
+    REQUIRE(moved_inifile["section1"].comment().view().size() == 1);
+    REQUIRE(moved_inifile["section1"].comment().view()[0] == "; Section comment");
+    REQUIRE(moved_inifile["section1"]["key1"].comment().view().size() == 1);
+    REQUIRE(moved_inifile["section1"]["key1"].comment().view()[0] == "; Field comment");
+
+    // 确保原 inifile 为空
+    REQUIRE(inifile.size() == 0);
+  }
+}
+
+TEST_CASE("INI file comment preservation across copy, move, and swap")
+{
+  // 构造原始 ini 文件
+  ini::inifile original;
+  original["database"].add_comment("DB section");
+  original["database"]["host"] = "localhost";
+  original["database"]["host"].add_comment("; DB host");
+  original["database"]["port"] = 5432;
+  original["database"]["port"].add_comment("DB port");
+
+  // 验证 to_string 和 from_string
+  std::string ini_str = original.to_string();
+  ini::inifile from_text;
+  from_text.from_string(ini_str);
+
+  REQUIRE(from_text["database"]["host"].as<std::string>() == "localhost");
+  REQUIRE(from_text["database"]["host"].comment().view()[0] == "; DB host");
+
+  // 拷贝构造
+  ini::inifile copied = from_text;
+  REQUIRE(copied["database"]["port"].as<std::string>() == "5432");
+  REQUIRE(copied["database"]["port"].comment().view()[0] == "; DB port");
+
+  // 拷贝赋值
+  ini::inifile assigned;
+  assigned = copied;
+  REQUIRE(assigned["database"]["host"].as<std::string>() == "localhost");
+  REQUIRE(assigned["database"]["host"].comment().view()[0] == "; DB host");
+
+  // 移动构造
+  ini::inifile moved = std::move(assigned);
+  REQUIRE(moved["database"]["port"].as<std::string>() == "5432");
+  REQUIRE(moved["database"]["port"].comment().view()[0] == "; DB port");
+
+  // 移动赋值
+  ini::inifile moved2;
+  moved2 = std::move(moved);
+  REQUIRE(moved2["database"]["host"].as<std::string>() == "localhost");
+  REQUIRE(moved2["database"]["host"].comment().view()[0] == "; DB host");
+
+  // swap 两个不同的数据
+  ini::inifile another;
+  another["server"].add_comment("; server section");
+  another["server"]["ip"] = "10.0.0.1";
+  another["server"]["ip"].add_comment("; server ip");
+
+  moved2.swap(another);
+
+  // 验证 swap 后的数据内容
+  REQUIRE(moved2["server"]["ip"].as<std::string>() == "10.0.0.1");
+  REQUIRE(moved2["server"]["ip"].comment().view()[0] == "; server ip");
+  REQUIRE(another["database"]["port"].as<std::string>() == "5432");
+  REQUIRE(another["database"]["port"].comment().view()[0] == "; DB port");
+}
+
+TEST_CASE("INI file save and load with numeric fields and comments")
+{
+  const std::string path = "test_numeric.ini";
+
+  // 构造 ini 数据
+  ini::inifile out;
+  out["numbers"].add_comment("numeric section");
+  out["numbers"]["int_val"] = 42;
+  out["numbers"]["int_val"].add_comment("int value");
+
+  out["numbers"]["float_val"] = 3.14f;
+  out["numbers"]["float_val"].add_comment("float value", '#');
+
+  out["numbers"]["double_val"] = 2.718281828;
+  out["numbers"]["double_val"].add_comment("double value");
+
+  // 保存到文件
+  REQUIRE_NOTHROW(out.save(path));
+
+  // 从文件读取
+  ini::inifile in;
+  REQUIRE_NOTHROW(in.load(path));
+
+  // 验证值是否保持一致
+  REQUIRE(in["numbers"]["int_val"].as<int>() == 42);
+  REQUIRE(in["numbers"]["float_val"].as<float>() == Approx(3.14f));
+  REQUIRE(in["numbers"]["double_val"].as<double>() == Approx(2.718281828));
+
+  // 验证注释
+  REQUIRE(in["numbers"].comment().view()[0] == "; numeric section");
+  REQUIRE(in["numbers"]["int_val"].comment().view()[0] == "; int value");
+  REQUIRE(in["numbers"]["float_val"].comment().view()[0] == "# float value");
+  REQUIRE(in["numbers"]["double_val"].comment().view()[0] == "; double value");
+
+  // 清理临时文件
+  std::remove(path.c_str());
+}
+
+TEST_CASE("INI file comment with special characters", "[ini][comments][special]")
+{
+  ini::inifile inifile;
+
+  // 添加特殊字符的注释
+  inifile["section1"].add_comment("; Special characters: !@#$%^&*()_+");
+  inifile["section1"]["key1"] = "value1";
+  inifile["section1"]["key1"].add_comment("; Special chars in field: ~`|\\{}[]:\";'<>?,./");
+
+  // 检查注释是否正确
+  REQUIRE(inifile["section1"].comment().view()[0] == "; Special characters: !@#$%^&*()_+");
+  REQUIRE(inifile["section1"]["key1"].comment().view()[0] == "; Special chars in field: ~`|\\{}[]:\";'<>?,./");
+}
+TEST_CASE("INI file comment with empty and whitespace-only lines", "[ini][comments][whitespace]")
+{
+  ini::inifile inifile;
+
+  // 添加空行和仅包含空格的行
+  inifile["section1"].add_comment("; ");
+  inifile["section1"].add_comment(";    ");
+  inifile["section1"]["key1"] = "value1";
+  inifile["section1"]["key1"].add_comment("; \t \n");
+
+  // 检查注释是否正确
+  REQUIRE(inifile["section1"].comment().view()[0] == ";");
+  REQUIRE(inifile["section1"].comment().view()[1] == ";");
+  REQUIRE(inifile["section1"]["key1"].comment().view()[0] == ";");
+}
+TEST_CASE("INI file comment with non-ASCII characters", "[ini][comments][non-ascii]")
+{
+  ini::inifile inifile;
+
+  // 添加非 ASCII 字符的注释
+  inifile["section1"].add_comment("; 中文注释");
+  inifile["section1"]["key1"] = "value1";
+  inifile["section1"]["key1"].add_comment("; 日本語のコメント");
+
+  // 检查注释是否正确
+  REQUIRE(inifile["section1"].comment().view()[0] == "; 中文注释");
+  REQUIRE(inifile["section1"]["key1"].comment().view()[0] == "; 日本語のコメント");
+}
+
+TEST_CASE("Copy and move inifile with comments and other operations", "[ini][copy][move][comments]")
+{
+  SECTION("Copy and move inifile with comments")
+  {
+    ini::inifile a;
+    a["s"].add_comment("; copied section");
+    a["s"]["k"] = 1;
+    a["s"]["k"].add_comment("; copied key");
+
+    ini::inifile b(a);              // 拷贝构造
+    ini::inifile c = std::move(a);  // 移动构造
+
+    REQUIRE(b["s"].comment().view()[0] == "; copied section");
+    REQUIRE(b["s"]["k"].comment().view()[0] == "; copied key");
+
+    REQUIRE(c["s"].comment().view()[0] == "; copied section");
+    REQUIRE(c["s"]["k"].comment().view()[0] == "; copied key");
+  }
+  SECTION("Swap inifile with comments")
+  {
+    ini::inifile a, b;
+
+    a["x"].add_comment("; comment a");
+    a["x"]["ka"] = 1;
+    a["x"]["ka"].add_comment("; field a");
+
+    b["y"].add_comment("; comment b");
+    b["y"]["kb"] = 2;
+    b["y"]["kb"].add_comment("; field b");
+
+    swap(a, b);
+
+    REQUIRE(a["y"].comment().view()[0] == "; comment b");
+    REQUIRE(a["y"]["kb"].comment().view()[0] == "; field b");
+
+    REQUIRE(b["x"].comment().view()[0] == "; comment a");
+    REQUIRE(b["x"]["ka"].comment().view()[0] == "; field a");
+  }
+  SECTION("INI without comments should not crash")
+  {
+    ini::inifile ini;
+    ini["s"]["k"] = 123;
+
+    std::string str = ini.to_string();
+    ini::inifile loaded;
+    loaded.from_string(str);
+
+    REQUIRE(loaded["s"]["k"].as<int>() == 123);
+    REQUIRE(loaded["s"].comment().view().empty());
+    REQUIRE(loaded["s"]["k"].comment().view().empty());
+  }
+  SECTION("Multi-line comment round-trip")
+  {
+    ini::inifile ini;
+    ini["sec"].comment().add("; first line");
+    ini["sec"].comment().add("; second line");
+
+    ini["sec"]["key"].comment().add("; k1");
+    ini["sec"]["key"].comment().add("; k2");
+
+    std::string str = ini.to_string();
+
+    ini::inifile loaded;
+    loaded.from_string(str);
+
+    const auto &sec_comments = loaded["sec"].comment().view();
+    REQUIRE(sec_comments.size() == 2);
+    REQUIRE(sec_comments[0] == "; first line");
+    REQUIRE(sec_comments[1] == "; second line");
+
+    const auto &field_comments = loaded["sec"]["key"].comment().view();
+    REQUIRE(field_comments.size() == 2);
+    REQUIRE(field_comments[0] == "; k1");
+    REQUIRE(field_comments[1] == "; k2");
+  }
+  SECTION("Comments with special characters")
+  {
+    ini::inifile ini;
+    ini["a"].comment().add("; semicolon");
+    ini["a"].comment().add("# hash", '#');
+    ini["a"].comment().add("    ; leading spaces");
+
+    std::string str = ini.to_string();
+    ini::inifile loaded;
+    loaded.from_string(str);
+
+    REQUIRE(loaded["a"].comment().view().size() == 3);
+    REQUIRE(loaded["a"].comment().view()[1] == "# hash");
+  }
+  SECTION("Comment add without needing prefix")
+  {
+    ini::inifile ini;
+    ini["s"].comment().add("section comment");
+    ini["s"]["k"] = 1;
+    ini["s"]["k"].comment().add("field comment");
+
+    std::string str = ini.to_string();
+
+    // 检查生成的字符串中自动加上了 "; "
+    REQUIRE(str.find("; section comment") != std::string::npos);
+    REQUIRE(str.find("; field comment") != std::string::npos);
+  }
+  SECTION("Avoid double comment prefix")
+  {
+    ini::inifile ini;
+    ini["a"].comment().add("; already has semicolon");
+    ini["b"].comment().add("# already has hash");
+
+    std::string str = ini.to_string();
+
+    // 不应该变成 ;; 或 ;# 开头
+    REQUIRE(str.find(";;") == std::string::npos);
+    REQUIRE(str.find(";#") == std::string::npos);
+  }
+}
