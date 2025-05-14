@@ -3236,3 +3236,142 @@ TEST_CASE("add function with whitespace between lines", "[comment]")
     REQUIRE(c.to_vector() == std::vector<std::string>{"; Line 1", "; Line 2", "; Line 3"});
   }
 }
+
+TEST_CASE("comment::add with string", "[comment]") {
+  ini::comment c;
+  c.add("line1\nline2", ';');
+  auto vec = c.to_vector();
+
+  REQUIRE(vec.size() == 2);
+  REQUIRE(vec[0] == "; line1");
+  REQUIRE(vec[1] == "; line2");
+}
+
+TEST_CASE("comment::add with initializer_list", "[comment]") {
+  ini::comment c;
+  c.add({"foo", "bar"}, '#');
+  auto vec = c.to_vector();
+
+  REQUIRE(vec.size() == 2);
+  REQUIRE(vec[0] == "# foo");
+  REQUIRE(vec[1] == "# bar");
+}
+
+TEST_CASE("comment::add comment by copy and move", "[comment]") {
+  ini::comment a;
+  a.add({"x", "y"});
+
+  SECTION("copy add") {
+    ini::comment b;
+    b.add(a);
+    REQUIRE(b.view().size() == 2);
+    REQUIRE(b.to_vector() == a.to_vector());
+  }
+
+  SECTION("move add") {
+    ini::comment b;
+    b.add(std::move(a));
+    REQUIRE(b.to_vector().size() == 2);
+    REQUIRE(a.empty());
+  }
+}
+
+TEST_CASE("comment::set and clear", "[comment]") {
+  ini::comment c;
+  c.set("set\ncomment", '#');
+  REQUIRE(c.to_vector()[0] == "# set");
+  REQUIRE(c.to_vector()[1] == "# comment");
+
+  c.clear();
+  REQUIRE(c.empty());
+
+  c.set({"one", "two"}, ';');
+  REQUIRE(c.to_vector()[0] == "; one");
+  REQUIRE(c.to_vector()[1] == "; two");
+}
+
+TEST_CASE("comment::set by comment object", "[comment]") {
+  ini::comment c1;
+  c1.set("c1-line");
+
+  ini::comment c2;
+  c2.set(c1);
+  REQUIRE(c2.to_vector() == c1.to_vector());
+
+  ini::comment c3;
+  c3.set(std::move(c2));
+  REQUIRE(c3.to_vector()[0] == "; c1-line");
+  REQUIRE(c2.empty());
+}
+
+TEST_CASE("comment::view and to_vector", "[comment]") {
+  ini::comment c;
+  c.set("v1\nv2");
+
+  const auto &ref = c.view();
+  REQUIRE(ref.size() == 2);
+  REQUIRE(ref[0] == "; v1");
+
+  auto copy = c.to_vector();
+  REQUIRE(copy == ref);
+}
+
+TEST_CASE("comment::equality", "[comment]") {
+  ini::comment a;
+  a.set("a");
+
+  ini::comment b;
+  b.set("a");
+
+  ini::comment c;
+  c.set("c");
+
+  REQUIRE(a == b);
+  REQUIRE(a != c);
+}
+
+TEST_CASE("comment iterators", "[comment]") {
+  ini::comment c;
+  c.add({"first", "second"});
+
+  size_t count = 0;
+  for (const auto &line : c)
+  {
+    REQUIRE_FALSE(line.empty());
+    ++count;
+  }
+  REQUIRE(count == 2);
+
+  count = 0;
+  for (auto it = c.rbegin(); it != c.rend(); ++it)
+  {
+    REQUIRE_FALSE(it->empty());
+    ++count;
+  }
+  REQUIRE(count == 2);
+}
+
+TEST_CASE("comment::view returns correct reference", "[comment][view]") {
+  ini::comment c;
+  c.set("first\nsecond");
+
+  const auto &view1 = c.view();
+
+  REQUIRE(view1.size() == 2);
+  REQUIRE(view1[0] == "; first");
+  REQUIRE(view1[1] == "; second");
+
+  // 修改原始数据再观察 view 的变化
+  c.add("third");
+  const auto &view2 = c.view();
+
+  REQUIRE(view2.size() == 3);
+  REQUIRE(view2[2] == "; third");
+
+  // 清空后 view 应为空引用容器
+  c.clear();
+  const auto view3 = c.view();
+  REQUIRE(view3.empty());
+  // REQUIRE(view3.data() != nullptr);  // 不建议断言 data() != nullptr, 兼容性不好
+}
+
