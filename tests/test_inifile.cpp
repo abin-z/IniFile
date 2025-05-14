@@ -3237,7 +3237,8 @@ TEST_CASE("add function with whitespace between lines", "[comment]")
   }
 }
 
-TEST_CASE("comment::add with string", "[comment]") {
+TEST_CASE("comment::add with string", "[comment]")
+{
   ini::comment c;
   c.add("line1\nline2", ';');
   auto vec = c.to_vector();
@@ -3247,7 +3248,8 @@ TEST_CASE("comment::add with string", "[comment]") {
   REQUIRE(vec[1] == "; line2");
 }
 
-TEST_CASE("comment::add with initializer_list", "[comment]") {
+TEST_CASE("comment::add with initializer_list", "[comment]")
+{
   ini::comment c;
   c.add({"foo", "bar"}, '#');
   auto vec = c.to_vector();
@@ -3257,18 +3259,21 @@ TEST_CASE("comment::add with initializer_list", "[comment]") {
   REQUIRE(vec[1] == "# bar");
 }
 
-TEST_CASE("comment::add comment by copy and move", "[comment]") {
+TEST_CASE("comment::add comment by copy and move", "[comment]")
+{
   ini::comment a;
   a.add({"x", "y"});
 
-  SECTION("copy add") {
+  SECTION("copy add")
+  {
     ini::comment b;
     b.add(a);
     REQUIRE(b.view().size() == 2);
     REQUIRE(b.to_vector() == a.to_vector());
   }
 
-  SECTION("move add") {
+  SECTION("move add")
+  {
     ini::comment b;
     b.add(std::move(a));
     REQUIRE(b.to_vector().size() == 2);
@@ -3276,7 +3281,8 @@ TEST_CASE("comment::add comment by copy and move", "[comment]") {
   }
 }
 
-TEST_CASE("comment::set and clear", "[comment]") {
+TEST_CASE("comment::set and clear", "[comment]")
+{
   ini::comment c;
   c.set("set\ncomment", '#');
   REQUIRE(c.to_vector()[0] == "# set");
@@ -3290,7 +3296,8 @@ TEST_CASE("comment::set and clear", "[comment]") {
   REQUIRE(c.to_vector()[1] == "; two");
 }
 
-TEST_CASE("comment::set by comment object", "[comment]") {
+TEST_CASE("comment::set by comment object", "[comment]")
+{
   ini::comment c1;
   c1.set("c1-line");
 
@@ -3304,7 +3311,8 @@ TEST_CASE("comment::set by comment object", "[comment]") {
   REQUIRE(c2.empty());
 }
 
-TEST_CASE("comment::view and to_vector", "[comment]") {
+TEST_CASE("comment::view and to_vector", "[comment]")
+{
   ini::comment c;
   c.set("v1\nv2");
 
@@ -3316,7 +3324,8 @@ TEST_CASE("comment::view and to_vector", "[comment]") {
   REQUIRE(copy == ref);
 }
 
-TEST_CASE("comment::equality", "[comment]") {
+TEST_CASE("comment::equality", "[comment]")
+{
   ini::comment a;
   a.set("a");
 
@@ -3330,7 +3339,8 @@ TEST_CASE("comment::equality", "[comment]") {
   REQUIRE(a != c);
 }
 
-TEST_CASE("comment iterators", "[comment]") {
+TEST_CASE("comment iterators", "[comment]")
+{
   ini::comment c;
   c.add({"first", "second"});
 
@@ -3351,7 +3361,8 @@ TEST_CASE("comment iterators", "[comment]") {
   REQUIRE(count == 2);
 }
 
-TEST_CASE("comment::view returns correct reference", "[comment][view]") {
+TEST_CASE("comment::view returns correct reference", "[comment][view]")
+{
   ini::comment c;
   c.set("first\nsecond");
 
@@ -3360,6 +3371,7 @@ TEST_CASE("comment::view returns correct reference", "[comment][view]") {
   REQUIRE(view1.size() == 2);
   REQUIRE(view1[0] == "; first");
   REQUIRE(view1[1] == "; second");
+  REQUIRE(view1 == c.to_vector());
 
   // 修改原始数据再观察 view 的变化
   c.add("third");
@@ -3375,3 +3387,199 @@ TEST_CASE("comment::view returns correct reference", "[comment][view]") {
   // REQUIRE(view3.data() != nullptr);  // 不建议断言 data() != nullptr, 兼容性不好
 }
 
+TEST_CASE("ini::field comment operations", "[ini][field][comment]")
+{
+  using ini::comment;
+  using ini::field;
+
+  SECTION("default constructed field has empty comment")
+  {
+    field f;
+    REQUIRE(f.comment().view().empty());
+  }
+
+  SECTION("set comment by string")
+  {
+    field f;
+    f.set_comment("this is a comment");
+    const auto &v = f.comment().view();
+    REQUIRE(v.size() == 1);
+    REQUIRE(v[0] == "; this is a comment");
+  }
+
+  SECTION("set comment by string with custom symbol")
+  {
+    field f;
+    f.set_comment("commented", '#');
+    const auto &v = f.comment().view();
+    REQUIRE(v.size() == 1);
+    REQUIRE(v[0] == "# commented");
+  }
+
+  SECTION("set comment by multiline string")
+  {
+    field f;
+    f.set_comment("line1\nline2\nline3");
+    const auto &v = f.comment().view();
+    REQUIRE(v.size() == 3);
+    REQUIRE(v[0] == "; line1");
+    REQUIRE(v[1] == "; line2");
+    REQUIRE(v[2] == "; line3");
+  }
+
+  SECTION("set comment by initializer list")
+  {
+    field f;
+    f.set_comment({"a", "b", "c"});
+    const auto &v = f.comment().view();
+    REQUIRE(v.size() == 3);
+    REQUIRE(v[0] == "; a");
+    REQUIRE(v[1] == "; b");
+    REQUIRE(v[2] == "; c");
+  }
+
+  SECTION("add comment by string")
+  {
+    field f;
+    f.add_comment("first");
+    f.add_comment("second");
+    const auto &v = f.comment().view();
+    REQUIRE(v.size() == 2);
+    REQUIRE(v[0] == "; first");
+    REQUIRE(v[1] == "; second");
+  }
+
+  SECTION("add comment from another comment (copy)")
+  {
+    field f1, f2;
+    f1.set_comment("origin");
+    f2.add_comment(f1.comment());
+    const auto &v = f2.comment().view();
+    REQUIRE(v.size() == 1);
+    REQUIRE(v[0] == "; origin");
+  }
+
+  SECTION("add comment from another comment (move)")
+  {
+    field f1, f2;
+    f1.set_comment("moved");
+    f2.add_comment(std::move(f1.comment()));
+    const auto &v = f2.comment().view();
+    REQUIRE(v.size() == 1);
+    REQUIRE(v[0] == "; moved");
+    // moved-from object should now be empty
+    REQUIRE(f1.comment().view().empty());
+  }
+
+  SECTION("clear comment")
+  {
+    field f;
+    f.set_comment("erase me");
+    REQUIRE_FALSE(f.comment().view().empty());
+    f.clear_comment();
+    REQUIRE(f.comment().view().empty());
+  }
+
+  SECTION("comment access is consistent")
+  {
+    field f;
+    auto &c1 = f.comment();
+    auto &c2 = f.comment();
+    c1.set("line1");
+    REQUIRE(c2.view().size() == 1);
+    REQUIRE(c2.view()[0] == "; line1");
+  }
+}
+
+TEST_CASE("ini::field comment edge cases", "[ini][field][comment][edge]")
+{
+  using ini::comment;
+  using ini::field;
+
+  SECTION("set comment with empty string")
+  {
+    field f;
+    f.set_comment("");
+    const auto &v = f.comment().view();
+    REQUIRE(v.size() == 0);  // 空字符串也会生成一行注释
+  }
+
+  SECTION("set comment with only newlines")
+  {
+    field f;
+    f.set_comment("\n\n");
+    const auto &v = f.comment().view();
+    REQUIRE(v.size() == 0);
+  }
+
+  SECTION("set comment with mix of LF and CRLF")
+  {
+    field f;
+    f.set_comment("line1\r\nline2\nline3\r\n");
+    const auto &v = f.comment().view();
+    REQUIRE(v.size() == 3);
+    REQUIRE(v[0] == "; line1");
+    REQUIRE(v[1] == "; line2");
+    REQUIRE(v[2] == "; line3");
+  }
+
+  SECTION("use invalid comment symbol should fallback or reject")
+  {
+    field f;
+    // 如果实现限制了只能是 ';' 或 '#'
+    // 应该忽略非法符号或默认使用 ';'
+    f.set_comment("hello", '*');  // 不支持的符号
+    const auto &v = f.comment().view();
+    REQUIRE(v.size() == 1);
+    // 实际行为依你的实现而定，以下假设 fallback 到 `;`
+    REQUIRE(v[0] == "; hello");
+  }
+
+  SECTION("repeated set_comment should replace previous one")
+  {
+    field f;
+    f.set_comment("first");
+    f.set_comment("second");
+    const auto &v = f.comment().view();
+    REQUIRE(v.size() == 1);
+    REQUIRE(v[0] == "; second");
+  }
+
+  SECTION("repeated add_comment should append")
+  {
+    field f;
+    f.add_comment("first");
+    f.add_comment("second");
+    f.add_comment("third");
+    const auto &v = f.comment().view();
+    REQUIRE(v.size() == 3);
+    REQUIRE(v[0] == "; first");
+    REQUIRE(v[1] == "; second");
+    REQUIRE(v[2] == "; third");
+  }
+
+  SECTION("add_comment with initializer list mixes correctly")
+  {
+    field f;
+    f.set_comment("base");
+    f.add_comment({"a", "b"}, '#');
+    const auto &v = f.comment().view();
+    REQUIRE(v.size() == 3);
+    REQUIRE(v[0] == "; base");
+    REQUIRE(v[1] == "# a");
+    REQUIRE(v[2] == "# b");
+  }
+
+  SECTION("clear then reuse comment")
+  {
+    field f;
+    f.set_comment("start");
+    f.clear_comment();
+    REQUIRE(f.comment().view().empty());
+
+    f.set_comment("after clear");
+    const auto &v = f.comment().view();
+    REQUIRE(v.size() == 1);
+    REQUIRE(v[0] == "; after clear");
+  }
+}
