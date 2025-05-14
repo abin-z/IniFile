@@ -603,7 +603,7 @@ struct case_insensitive_equal
 
 }  // namespace detail
 
-/// @brief ini line-comment class
+/// @brief Represents a comment block for INI-style configuration, supporting multiple lines.
 class comment
 {
   using comment_container = std::vector<std::string>;  // 注释容器
@@ -614,18 +614,24 @@ class comment
   comment() = default;
   ~comment() = default;
 
+  /// @brief Constructs a comment from a single string (can be multi-line).
+  /// @param str Input string, lines separated by '\n'.
+  /// @param symbol Comment symbol to use (';' or '#').
   explicit comment(const std::string &str, char symbol = ';')
   {
     add(str, symbol);
   }
+  /// @brief Constructs a comment from a vector of lines.
   explicit comment(const std::vector<std::string> &vec, char symbol = ';')
   {
     for (const auto &item : vec) add(item, symbol);
   }
+  /// @brief Constructs a comment from an initializer list of lines.
   explicit comment(std::initializer_list<std::string> list, char symbol = ';')
   {
     for (const auto &item : list) add(item, symbol);
   }
+  /// @brief Swaps the internal comment data with another instance.
   void swap(comment &other) noexcept
   {
     using std::swap;
@@ -635,56 +641,59 @@ class comment
   {
     lhs.swap(rhs);
   }
-  // copy constructor
+  /// @brief Copy constructor.
   comment(const comment &other) :
-    comments_(other.comments_ ? std::unique_ptr<comment_container>(new comment_container(*other.comments_)) : nullptr)
+    comments_(other.comments_ ? std::unique_ptr<comment_container>(new comment_container{*other.comments_}) : nullptr)
   {
   }
-  // move constructor
+  /// @brief Move constructor.
   comment(comment &&other) noexcept : comments_(std::move(other.comments_))
   {
     other.comments_.reset();  // 显式清空, 跨平台行为一致
   }
-  // copy assignment
+  /// @brief Copy assignment.
   comment &operator=(const comment &rhs)
   {
     comment temp(rhs);  // copy ctor
     swap(temp);         // noexcept swap
     return *this;
   }
-  // move assignment
+  /// @brief Move assignment.
   comment &operator=(comment &&rhs) noexcept
   {
     comment temp(std::move(rhs));  // move ctor
     swap(temp);                    // noexcept swap
     return *this;
   }
-
+  /// @brief Checks if the comment is empty.
   bool empty() const noexcept
   {
     return !comments_ || comments_->empty();
   }
-
+  /// @brief Clears the comment.
   void clear() noexcept
   {
     comments_.reset();
   }
-
+  /// @brief Returns a copy of the internal comment lines.
   std::vector<std::string> to_vector() const
   {
     return comments_ ? *comments_ : comment_container{};
   }
+  /// @brief Returns a const reference to the internal comment lines.
   const std::vector<std::string> &view() const
   {
     return comments_ ? *comments_ : empty_comments();  // 避免返回空引用
   }
 
+  /// @brief Appends comment content from a string (multi-line supported).
   void add(const std::string &str, char symbol = ';')
   {
     if (detail::is_all_whitespace(str)) return;
     ensure_comments_initialized();
     add_comments_from_string(str, symbol);
   }
+  /// @brief Appends comment lines from another comment.
   void add(const comment &other)
   {
     if (other.empty()) return;
@@ -692,6 +701,7 @@ class comment
     comments_->insert(comments_->end(), other.comments_->begin(), other.comments_->end());
   }
 
+  /// @brief Moves comment lines from another comment.
   void add(comment &&other) noexcept
   {
     if (other.empty()) return;
@@ -700,11 +710,12 @@ class comment
                       std::make_move_iterator(other.comments_->end()));
     other.clear();  // 清空 other 的 comments_，防止重复使用
   }
+  /// @brief Appends comment lines from an initializer list.
   void add(std::initializer_list<std::string> list, char symbol = ';')
   {
     for (const auto &item : list) add(item, symbol);
   }
-
+  /// @brief Replaces current comment content with a string.
   void set(const std::string &str, char symbol = ';')
   {
     if (!detail::is_all_whitespace(str))
@@ -718,22 +729,25 @@ class comment
       comments_.reset();  // 不需要保留空注释
     }
   }
+  /// @brief Replaces current comment content with another comment (copy).
   void set(const comment &other)
   {
     comment temp(other);  // copy
     swap(temp);           // noexcept swap
   }
+  /// @brief Replaces current comment content with another comment (move).
   void set(comment &&other) noexcept
   {
     comment temp(std::move(other));  // move
     swap(temp);                      // noexcept swap
   }
+  /// @brief Replaces current comment content with an initializer list.
   void set(std::initializer_list<std::string> list, char symbol = ';')
   {
     set(comment(list, symbol));
   }
 
-  /// @brief 迭代器相关函数, 仅提供只读访问
+  // Iterators for read-only access
   const_iterator begin() const
   {
     return comments_ ? comments_->cbegin() : empty_comments().cbegin();
@@ -766,12 +780,13 @@ class comment
   {
     return rend();
   }
-
+  /// @brief Compares two comments for equality.
   bool operator==(const comment &rhs) const
   {
     if (comments_ && rhs.comments_) return *comments_ == *rhs.comments_;
     return !comments_ && !rhs.comments_;
   }
+  /// @brief Compares two comments for inequality.
   bool operator!=(const comment &rhs) const
   {
     return !(*this == rhs);
@@ -781,7 +796,7 @@ class comment
   /// @brief 初始化 comments_, 确保不为nullptr
   void ensure_comments_initialized()
   {
-    if (!comments_) comments_.reset(new comment_container());
+    if (!comments_) comments_.reset(new comment_container{});
   }
 
   static std::string format_comment_line(std::string comment, char symbol)
@@ -951,49 +966,63 @@ class field
   }
 
   /// @brief Set `key=value` comment, overwriting the original comment.
-  /// @param str Comment content, Multi-line comments are allowed, lines separated by `\n`.
-  /// @param symbol Comment symbol, default is `;`, only supports `;` and `#`
+  /// @param str Comment content. Multi-line input is allowed, lines separated by `\n`.
+  /// @param symbol Comment symbol, default is `;`. Only `;` and `#` are supported.
   void set_comment(const std::string &str, char symbol = ';')
   {
     comments_.set(str, symbol);
   }
+  /// @brief Overwrite the current comment with another comment (copy).
   void set_comment(const comment &other)
   {
     comments_.set(other);
   }
+  /// @brief Overwrite the current comment with another comment (move).
   void set_comment(comment &&other) noexcept
   {
     comments_.set(std::move(other));
   }
+  /// @brief Set the comment from an initializer list of strings.
+  /// @param list List of comment lines.
+  /// @param symbol Comment symbol, default is `;`. Only `;` and `#` are supported.
   void set_comment(std::initializer_list<std::string> list, char symbol = ';')
   {
     comments_.set(list, symbol);
   }
 
-  /// @brief Add `key=value` comments and then append them.
-  /// @param str Comment content, Multi-line comments are allowed, lines separated by `\n`.
-  /// @param symbol Comment symbol, default is `;`, only supports `;` and `#`
+  /// @brief Add `key=value` comments by appending to the existing ones.
+  /// @param str Comment content. Multi-line input is allowed, lines separated by `\n`.
+  /// @param symbol Comment symbol, default is `;`. Only `;` and `#` are supported.
   void add_comment(const std::string &str, char symbol = ';')
   {
     comments_.add(str, symbol);
   }
+  /// @brief Append comments from another comment object (copy).
   void add_comment(const comment &other)
   {
     comments_.add(other);
   }
+  /// @brief Append comments from another comment object (move).
   void add_comment(comment &&other) noexcept
   {
     comments_.add(std::move(other));
   }
+  /// @brief Append comments from an initializer list of strings.
+  /// @param list List of comment lines.
+  /// @param symbol Comment symbol, default is `;`. Only `;` and `#` are supported.
   void add_comment(std::initializer_list<std::string> list, char symbol = ';')
   {
     comments_.add(list, symbol);
   }
 
+  /// @brief Get a const reference to the comment associated with this field.
+  /// @return Const reference to the internal `comment` object.
   const ini::comment &comment() const
   {
     return comments_;
   }
+  /// @brief Get a mutable reference to the comment associated with this field.
+  /// @return Reference to the internal `comment` object.
   ini::comment &comment()
   {
     return comments_;
@@ -1267,19 +1296,24 @@ class basic_section
 
   /// @brief Set `[section]` comment, overwriting the original comment.
   /// @param str Comment content, Multi-line comments are allowed, lines separated by `\n`.
-  /// @param symbol Comment symbol, default is `;`, only supports `;` and `#`
+  /// @param symbol Comment symbol, default is `;`, Only `;` and `#` are supported.
   void set_comment(const std::string &str, char symbol = ';')
   {
     comments_.set(str, symbol);
   }
+  /// @brief Overwrite the current comment with another comment (copy).
   void set_comment(const comment &other)
   {
     comments_.set(other);
   }
+  /// @brief Overwrite the current comment with another comment (move).
   void set_comment(comment &&other) noexcept
   {
     comments_.set(std::move(other));
   }
+  /// @brief Set the comment from an initializer list of strings.
+  /// @param list List of comment lines.
+  /// @param symbol Comment symbol, default is `;`. Only `;` and `#` are supported.
   void set_comment(std::initializer_list<std::string> list, char symbol = ';')
   {
     comments_.set(list, symbol);
@@ -1287,28 +1321,37 @@ class basic_section
 
   /// @brief Add `[section]` comments and then append them.
   /// @param str Comment content, Multi-line comments are allowed, lines separated by `\n`.
-  /// @param symbol Comment symbol, default is `;`, only supports `;` and `#`
+  /// @param symbol Comment symbol, default is `;`, Only `;` and `#` are supported.
   void add_comment(const std::string &str, char symbol = ';')
   {
     comments_.add(str, symbol);
   }
+  /// @brief Append comments from another comment object (copy).
   void add_comment(const comment &other)
   {
     comments_.add(other);
   }
+  /// @brief Append comments from another comment object (move).
   void add_comment(comment &&other) noexcept
   {
     comments_.add(std::move(other));
   }
+  /// @brief Append comments from an initializer list of strings.
+  /// @param list List of comment lines.
+  /// @param symbol Comment symbol, default is `;`. Only `;` and `#` are supported.
   void add_comment(std::initializer_list<std::string> list, char symbol = ';')
   {
     comments_.add(list, symbol);
   }
 
+  /// @brief Get a const reference to the comment associated with this field.
+  /// @return Const reference to the internal `comment` object.
   const ini::comment &comment() const
   {
     return comments_;
   }
+  /// @brief Get a mutable reference to the comment associated with this field.
+  /// @return Reference to the internal `comment` object.
   ini::comment &comment()
   {
     return comments_;
