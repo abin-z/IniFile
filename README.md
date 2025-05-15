@@ -202,7 +202,15 @@ int main()
 
 #### Comment feature
 
-This library supports setting line-level comments for `[section]` and `key=value` (end-of-line comments are not supported), and the comment symbols can be `;` and `#`; it can also retain the comment content from the data source.
+This library supports setting line-level comments for `[section]` and `key=value` (end-of-line comments are not supported), and the comment symbols can be `;` and `#`; it can also retain the comment content from the data source. [View example](./examples/inifile_comment.cpp)
+
+The following methods are **fully functionally equivalent**, and which one you choose depends largely on your style preference:
+
+| Short form           | Full form              | Description                                                  |
+| -------------------- | ---------------------- | ------------------------------------------------------------ |
+| `f.set_comment(...)` | `f.comment().set(...)` | Set comment, override original comment (supports multiple lines) |
+| `f.add_comment(...)` | `f.comment().add(...)` | Append comments (supports multiple lines)                    |
+| `f.clear_comment()`  | `f.comment().clear()`  | Clear all comments                                           |
 
 ```cpp
 #include "inifile.h"
@@ -214,13 +222,22 @@ int main()
   inif["section"]["key1"] = 3.141592;
   inif["section"]["key2"] = "value";
 
-  // Add comments if necessary
+  // Set comments if necessary
   inif["section"].set_comment("This is a section comment.");                     // set section comment, Overwrite Mode
   inif["section"]["key1"].set_comment("This is a key-value pairs comment", '#'); // set key=value pairs comment
-
-  inif["section"].clear_comment();                                     // clear section comments
+	
+  // Clear section comment
+  inif["section"].clear_comment();
+  
+  // Add section comment
   inif["section"].add_comment("section comment01");                    // add section comment, Append Mode
   inif["section"].add_comment("section comment02\nsection comment03"); // Multi-line comments are allowed, lines separated by `\n`
+  
+  // Get the comment object reference
+  ini::comment &cmt = inif["section"]["key"].comment();  // get reference to comment
+  
+  // Read comment content
+  const std::vector<std::string> &view = cmt.view();  // view (non-owning)
   
   bool isok = inif.save("config.ini");
 }
@@ -241,7 +258,7 @@ key2=value
 
 #### Case insensitivity feature
 
-This library supports case insensitivity for `section` and `key`, use **`ini::case_insensitive_inifile`**, please [Click to view details](./examples/inifile_case_insensitive.cpp)
+This library supports case insensitivity for `section` and `key`, use **`ini::case_insensitive_inifile`**, please [View example](./examples/inifile_case_insensitive.cpp)
 
 ```cpp
 #include "inifile.h"
@@ -356,7 +373,7 @@ struct INIFILE_TYPE_CONVERTER<CustomClass>  // User-defined type `CustomClass`
 
 > To facilitate writing `encode` and `decode` functions, this library provides `ini::join`, `ini::split()` and `ini::trim()` utility functions
 
-**Example 1**: The following is an example of converting a user-defined class `Person` object to an ini field.   [Click to view details](./examples/inifile_custom.cpp)
+**Example 1**: The following is an example of converting a user-defined class `Person` object to an ini field.   [View example](./examples/inifile_custom.cpp)
 
 ```cpp
 /// @brief User-defined classes

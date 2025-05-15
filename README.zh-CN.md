@@ -206,7 +206,15 @@ int main()
 
 #### 注释功能
 
-本库支持设置`[section]`和`key=value`的行级注释(不支持行尾注释), 注释符号可选`;`和`#`两种; 也能从数据源中保留注释内容.
+本库支持设置`[section]`和`key=value`的行级注释(不支持行尾注释), 注释符号可选`;`和`#`两种; 也能从数据源中保留注释内容. [查看案例](./examples/inifile_comment.cpp)
+
+以下方法是**功能完全等价**的，选择哪一种主要取决于你的风格偏好：
+
+| 简写形式             | 完整形式               | 说明                                       |
+| -------------------- | ---------------------- | ------------------------------------------ |
+| `f.set_comment(...)` | `f.comment().set(...)` | 设置注释, 覆盖原有的注释（支持单行或多行） |
+| `f.add_comment(...)` | `f.comment().add(...)` | 追加注释（支持单行或多行）                 |
+| `f.clear_comment()`  | `f.comment().clear()`  | 清除所有注释                               |
 
 ```cpp
 #include "inifile.h"
@@ -218,13 +226,22 @@ int main()
   inif["section"]["key1"] = 3.141592;
   inif["section"]["key2"] = "value";
 
-  // Add comments if necessary
+  // Set comments if necessary
   inif["section"].set_comment("This is a section comment.");                     // set section comment, Overwrite Mode
   inif["section"]["key1"].set_comment("This is a key-value pairs comment", '#'); // set key=value pairs comment
-
-  inif["section"].clear_comment();                                     // clear section comments
+	
+  // Clear section comment
+  inif["section"].clear_comment();
+  
+  // Add section comment
   inif["section"].add_comment("section comment01");                    // add section comment, Append Mode
   inif["section"].add_comment("section comment02\nsection comment03"); // Multi-line comments are allowed, lines separated by `\n`
+  
+  // Get the comment object reference
+  ini::comment &cmt = inif["section"]["key"].comment();  // get reference to comment
+  
+  // Read comment content
+  const std::vector<std::string> &view = cmt.view();  // view (non-owning)
   
   bool isok = inif.save("config.ini");
 }
@@ -245,7 +262,7 @@ key2=value
 
 #### 大小写不敏感功能
 
-本库支持`section`和`key`的大小写不敏感功能, 使用`ini::case_insensitive_inifile`即可, 具体案例请[点击查看](./examples/inifile_case_insensitive.cpp)
+本库支持`section`和`key`的大小写不敏感功能, 使用`ini::case_insensitive_inifile`即可, [查看案例](./examples/inifile_case_insensitive.cpp)
 
 ```cpp
 #include "inifile.h"
@@ -362,7 +379,7 @@ struct INIFILE_TYPE_CONVERTER<CustomClass>  // User-defined type `CustomClass`
 
 > 为了方便编写 `encode` 和 `decode` 函数, 本库提供了 `ini::join`, `ini::split()` 和 `ini::trim()` 工具函数 
 
-**案例1**: 下面是将一个用户自定义类`Person`对象转为ini字段案例. [点击查看详情](./examples/inifile_custom.cpp)
+**案例1**: 下面是将一个用户自定义类`Person`对象转为ini字段案例. [查看案例](./examples/inifile_custom.cpp)
 
 ```cpp
 /// @brief User-defined classes
