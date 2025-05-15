@@ -607,10 +607,11 @@ struct case_insensitive_equal
 class comment
 {
   using comment_container = std::vector<std::string>;  // 注释容器
+
+ public:
   using const_iterator = typename comment_container::const_iterator;
   using const_reverse_iterator = typename comment_container::const_reverse_iterator;
 
- public:
   comment() = default;
   ~comment() = default;
 
