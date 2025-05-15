@@ -24,3 +24,6 @@ target_link_libraries(inifile_case_insensitive PRIVATE inifile)
 
 add_executable(inifile_utility inifile_utility.cpp)
 target_link_libraries(inifile_utility PRIVATE inifile)
+
+add_executable(inifile_comment inifile_comment.cpp)
+target_link_libraries(inifile_comment PRIVATE inifile)
