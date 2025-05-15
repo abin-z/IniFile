@@ -478,6 +478,27 @@ int main()
 | ini::case_insensitive_inifile | The `section` and `key` are case-insensitive; all other features are the same as `ini::inifile`. |
 | ini::case_insensitive_section | The `key` are case-insensitive; all other features are the same as `ini::section`. |
 | ini::field                    | corresponds to the value field in the ini data, supports multiple data types, supports automatic type conversion. |
+| ini::comment                  | ini file comment class, manage section and key-value comments. |
+
+#### ini::field API Description
+
+<details>
+  <summary>click to expand</summary>
+
+| function name | function signature                                           | function description                             |
+| ------------- | ------------------------------------------------------------ | ------------------------------------------------ |
+| comment       | `comment(const std::string &str, char symbol = ';')`         | Constructor                                      |
+| comment       | `comment(const std::vector<std::string> &vec, char symbol = ';')` | Constructor                                      |
+| comment       | `comment(std::initializer_list<std::string> list, char symbol = ';')` | Constructor                                      |
+| swap          | `void swap(comment &other) noexcept`                         | Swap Function                                    |
+| empty         | `bool empty() const noexcept`                                | Is it empty                                      |
+| clear         | `void clear() noexcept`                                      | Clear Comments                                   |
+| set           | `void set(const std::string &str, char symbol = ';')`        | Set Comment (Overwrite Mode)                     |
+| add           | `void add(const std::string &str, char symbol = ';')`        | Adding comments (append mode)                    |
+| view          | `const std::vector<std::string> &view() const`               | Returns the comment container constant reference |
+| to_vector     | `std::vector<std::string> to_vector() const`                 | Returns a copy of the comment container          |
+
+</details>
 
 #### ini::field API Description
 
@@ -493,9 +514,11 @@ The following functions will throw an exception if the type conversion fails or 
 | operator=     | `field &operator=(const T &rhs)`                             | Set field value, convert T type to field value.              |
 | operator T    | `operator T() const`                                         | Converting field types to T type                             |
 | as            | `T as() const`                                               | Converting field types to T type                             |
+| swap          | `void swap(field &other) noexcept`                           | Swap Function                                                |
 | set_comment   | `void set_comment(const std::string &str, char symbol = ';')` | Set the key-value comment, overwrite mode                    |
 | add_comment   | `void add_comment(const std::string &str, char symbol = ';')` | Add key-value comments, append mode                          |
 | clear_comment | `void clear_comment()`                                       | Clear the comments of key-value                              |
+| comment       | `ini::comment &comment()`                                    | Get the comment content of key-value (reference)             |
 
 </details>
 
@@ -510,6 +533,7 @@ The following functions will throw an exception if the type conversion fails or 
 | set           | `void set(std::string key, T &&value)`                       | Inserts or updates a field with the specified key            |
 | contains      | `bool contains(std::string key) const`                       | Determine if the key exists                                  |
 | at            | `field &at(std::string key)`                                 | Returns a reference to the field value of the element with the specified key. Throws std::out_of_range exception if element does not exist |
+| swap          | `void swap(section &other) noexcept`                         | Swap Function                                                |
 | get           | `field get(std::string key, field default_value = field{}) const` | Get the value (copy) of the key, if the key does not exist, then return the default value of default_value. |
 | find          | `iterator find(const key_type &key)`                         | Find the iterator of the specified key value, if it does not exist, return the end iterator |
 | erase         | `iterator erase(iterator pos)`                               | Delete the key-value pair of the specified iterator          |
@@ -526,6 +550,7 @@ The following functions will throw an exception if the type conversion fails or 
 | set_comment   | `void set_comment(const std::string &str, char symbol = ';')` | Set section comment, overwrite mode, comment string allows line breaks `\n` |
 | add_comment   | `void add_comment(const std::string &str, char symbol = ';')` | Add section comments, append mode, comment string allows line breaks `\n` |
 | clear_comment | `void clear_comment()`                                       | Clear section comments                                       |
+| comment       | `ini::comment &comment()`                                    | Get the comment content of section(reference)                |
 
 </details>
 
@@ -541,6 +566,7 @@ The following functions will throw an exception if the type conversion fails or 
 | contains      | `bool contains(std::string section) const`                   | Determines if the specified section exists.                  |
 | contains      | `bool contains(std::string section, std::string key) const`  | Determines if the specified key exists in the specified section. |
 | at            | `section &at(std::string section)`                           | Returns a reference to the specified section. If no such element exists, an exception of type std::out_of_range is thrown |
+| swap          | `void swap(inifile &other) noexcept`                         | Swap Function                                                |
 | get           | `field get(std::string sec, std::string key, field default_value = field{}) const` | Returns the field value of the specified key for the specified section, or the default value default_value if section or key does not exist |
 | find          | `iterator find(const key_type &key)`                         | Find the iterator of the specified section, if it does not exist, return the end iterator |
 | erase         | `iterator erase(iterator pos)`                               | Deletes the section of the specified iterator (including all its elements) |

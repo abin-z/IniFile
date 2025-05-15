@@ -486,6 +486,27 @@ int main()
 | ini::case_insensitive_inifile | 对`section`和`key`大小写不敏感, 其他功能和`ini::inifile`一致 |
 | ini::case_insensitive_section | 对`key`大小写不敏感, 其他功能和`ini::section`一致            |
 | ini::field                    | 对应ini文件中的 value 字段, 支持多种数据类型,  支持自动类型转换 |
+| ini::comment                  | ini文件中注释类, 管理section和key-value的注释                |
+
+#### ini::comment类API说明
+
+<details>
+  <summary>点击展开</summary>
+
+| 函数名    | 函数签名                                                     | 功能描述           |
+| --------- | ------------------------------------------------------------ | ------------------ |
+| comment   | `comment(const std::string &str, char symbol = ';')`         | 构造函数           |
+| comment   | `comment(const std::vector<std::string> &vec, char symbol = ';')` | 构造函数           |
+| comment   | `comment(std::initializer_list<std::string> list, char symbol = ';')` | 构造函数           |
+| swap      | `void swap(comment &other) noexcept`                         | 交换函数           |
+| empty     | `bool empty() const noexcept`                                | 是否为空           |
+| clear     | `void clear() noexcept`                                      | 清空注释           |
+| set       | `void set(const std::string &str, char symbol = ';')`        | 设置注释(覆盖模式) |
+| add       | `void add(const std::string &str, char symbol = ';')`        | 添加注释(追加模式) |
+| view      | `const std::vector<std::string> &view() const`               | 返回注释容器常引用 |
+| to_vector | `std::vector<std::string> to_vector() const`                 | 返回注释容器的拷贝 |
+
+</details>
 
 #### ini::field类API说明
 
@@ -501,9 +522,11 @@ int main()
 | operator=     | `field &operator=(const T &rhs)`                             | 设置field值, 将T类型转为field值   |
 | operator T    | `operator T() const`                                         | 将field类型转为T类型              |
 | as            | `T as() const`                                               | 将field类型转为T类型              |
+| swap          | `void swap(field &other) noexcept`                           | 交换函数                          |
 | set_comment   | `void set_comment(const std::string &str, char symbol = ';')` | 设置key-value的注释, 覆盖模式     |
 | add_comment   | `void add_comment(const std::string &str, char symbol = ';')` | 添加key-value的注释, 追加模式     |
 | clear_comment | `void clear_comment()`                                       | 清除key-value的注释               |
+| comment       | `ini::comment &comment()`                                    | 获取key-value的注释内容(引用)     |
 
 </details>
 
@@ -518,6 +541,7 @@ int main()
 | set           | `void set(std::string key, T &&value)`                       | 插入或更新指定key的field                                     |
 | contains      | `bool contains(std::string key) const`                       | 判断key是否存在                                              |
 | at            | `field &at(std::string key)`                                 | 返回指定key键的元素的字段值的引用。如果元素不存则抛 std::out_of_range异常 |
+| swap          | `void swap(basic_section &other) noexcept`                   | 交换函数                                                     |
 | get           | `field get(std::string key, field default_value = field{}) const` | 获取key对应的值(副本), 若key不存在则返回default_value默认值  |
 | find          | `iterator find(const key_type &key)`                         | 查找指定key值的迭代器, 不存在返回end迭代器                   |
 | erase         | `iterator erase(iterator pos)`                               | 删除指定迭代器的key-value键值对                              |
@@ -534,6 +558,7 @@ int main()
 | set_comment   | `void set_comment(const std::string &str, char symbol = ';')` | 设置section的注释, 覆盖模式, 注释字符串允许换行`\n`          |
 | add_comment   | `void add_comment(const std::string &str, char symbol = ';')` | 添加section的注释, 追加模式, 注释字符串允许换行`\n`          |
 | clear_comment | `void clear_comment()`                                       | 清除section的注释                                            |
+| comment       | `ini::comment &comment()`                                    | 获取section的注释内容(引用)                                  |
 
 </details>
 
@@ -549,6 +574,7 @@ int main()
 | contains    | `bool contains(std::string section) const`                   | 判断指定的section是否存在                                    |
 | contains    | `bool contains(std::string section, std::string key) const`  | 判断指定section下指定的key是否存在                           |
 | at          | `section &at(std::string section)`                           | 返回指定section的引用。如果不存在这样的元素，则会抛出 std::out_of_range 类型的异常 |
+| swap        | `void swap(inifile &other) noexcept`                         | 交换函数                                                     |
 | get         | `field get(std::string sec, std::string key, field default_value = field{}) const` | 返回指定section的指定key键的字段值, 若section或key不存在则返回默认值default_value |
 | find        | `iterator find(const key_type &key)`                         | 查找指定section的迭代器, 不存在返回end迭代器                 |
 | erase       | `iterator erase(iterator pos)`                               | 删除指定迭代器的section(包括其所有元素)                      |
