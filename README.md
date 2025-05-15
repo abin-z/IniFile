@@ -495,7 +495,7 @@ int main()
 | ini::field                    | corresponds to the value field in the ini data, supports multiple data types, supports automatic type conversion. |
 | ini::comment                  | ini file comment class, manage section and key-value comments. |
 
-#### ini::field API Description
+#### ini::comment API Description
 
 <details>
   <summary>click to expand</summary>
