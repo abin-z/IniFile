@@ -473,7 +473,20 @@ int main()
 }
 ```
 
+#### 案例列表
 
+| 案例说明                     | 案例链接                                                     |
+| ---------------------------- | ------------------------------------------------------------ |
+| `inifile`的基本使用案例      | [inifile_basic.cpp](./examples/inifile_basic.cpp)            |
+| `inifile`大小写不敏感案例    | [inifile_case_insensitive.cpp](./examples/inifile_case_insensitive.cpp) |
+| `inifile`保存ini文件案例     | [inifile_save.cpp](./examples/inifile_save.cpp)              |
+| `inifile`加载ini文件案例     | [inifile_load.cpp](./examples/inifile_load.cpp)              |
+| `inifile`读取流中的ini配置   | [inifile_read.cpp](./examples/inifile_read.cpp)              |
+| `inifile`写入ini配置到流中   | [inifile_write](./examples/inifile_write.cpp)                |
+| `inifile`注释功能案例        | [inifile_comment.cpp](./examples/inifile_comment.cpp)        |
+| `inifile`读写用户自定义类型  | [inifile_custom.cpp](./examples/inifile_custom.cpp)          |
+| `inifile`读写用户自定义类型2 | [inifile_custom2.cpp](./examples/inifile_custom2.cpp)        |
+| `ini`工具函数的使用          | [inifile_utility.cpp](./examples/inifile_utility.cpp)        |
 
 ### 📄 常用API说明
 

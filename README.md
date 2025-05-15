@@ -467,6 +467,21 @@ int main()
 }
 ```
 
+#### Example List
+
+| Description                          | Link                                                         |
+| ------------------------------------ | ------------------------------------------------------------ |
+| Basic usage of `inifile`             | [inifile_basic.cpp](./examples/inifile_basic.cpp) |
+| Case-insensitive `inifile` example   | [inifile_case_insensitive.cpp](./examples/inifile_case_insensitive.cpp) |
+| Saving INI file with `inifile`       | [inifile_save.cpp](./examples/inifile_save.cpp) |
+| Loading INI file with `inifile`      | [inifile_load.cpp](./examples/inifile_load.cpp) |
+| Reading INI config from stream       | [inifile_read.cpp](./examples/inifile_read.cpp) |
+| Writing INI config to stream         | [inifile_write](./examples/inifile_write.cpp) |
+| Comment feature of `inifile`         | [inifile_comment.cpp](./examples/inifile_comment.cpp) |
+| Reading/writing user-defined types   | [inifile_custom.cpp](./examples/inifile_custom.cpp) |
+| Reading/writing user-defined types 2 | [inifile_custom2.cpp](./examples/inifile_custom2.cpp) |
+| Usage of `ini` utility functions     | [inifile_utility.cpp](./examples/inifile_utility.cpp) |
+
 ### 📄 Common  API  Descriptions
 
 #### class Description
