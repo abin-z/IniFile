@@ -1,3 +1,15 @@
+/*
+ *  Sample: write_and_serialize_ini
+ *  -------------------------------
+ *  Demonstrates writing various typed key-value pairs and comments into an INI structure,
+ *  then serializing the INI data to a string stream for output.
+ *
+ *  示例：写入并序列化 INI 文件
+ *  -------------------------------
+ *  演示如何写入不同类型的键值对和注释到 INI 结构中，
+ *  并将 INI 数据序列化到字符串流以便输出。
+ */
+
 #include <inifile/inifile.h>
 
 int main()

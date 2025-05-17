@@ -1,3 +1,15 @@
+/*
+ *  Sample: string_utilities_demo
+ *  -----------------------------
+ *  Demonstrates usage of ini::trim, ini::split (by char and string), and ini::join
+ *  with various container types, showcasing common string utility functions.
+ *
+ *  示例：字符串工具函数演示
+ *  ------------------------
+ *  演示 ini::trim、ini::split（按字符和字符串）和 ini::join
+ *  对不同容器类型的使用，展示常用字符串工具函数。
+ */
+
 #include <inifile/inifile.h>
 
 #include <iostream>

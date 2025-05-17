@@ -1,3 +1,21 @@
+/*
+ *  Sample: comment_features
+ *  ------------------------
+ *  Demonstrates how to use `ini::inifile` to manage comments:
+ *    - Set, add, and clear comments for sections and keys
+ *    - Support for single-line and multi-line comments
+ *    - Access and inspect comment objects
+ *    - Save and load INI files with preserved comments
+ *
+ *  示例：comment_features
+ *  -----------------------
+ *  演示如何使用 `ini::inifile` 管理注释：
+ *    - 设置、追加、清除 section 与 key 的注释
+ *    - 支持单行与多行注释
+ *    - 获取与查看 comment 对象内容
+ *    - 注释随 INI 文件保存与加载持久化
+ */
+
 #include <inifile/inifile.h>
 
 int main()

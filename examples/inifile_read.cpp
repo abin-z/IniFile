@@ -1,3 +1,13 @@
+/*
+ *  Sample: read_from_stream
+ *  ------------------------
+ *  Reads INI data from a string stream and prints all sections and key-value pairs.
+ *
+ *  示例：read_from_stream
+ *  ------------------------
+ *  从字符串流读取 INI 数据，并打印所有 section 及其键值对内容。
+ */
+
 #include <inifile/inifile.h>
 
 int main()

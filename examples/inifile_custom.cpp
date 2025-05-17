@@ -1,3 +1,17 @@
+
+/*
+ *  Sample: custom_type_conversion_demo
+ *  -----------------------------------
+ *  Demonstrates how to define and use custom type conversion
+ *  for user-defined classes with ini::inifile via
+ *  INIFILE_TYPE_CONVERTER specialization.
+ *
+ *  示例：自定义类型转换演示
+ *  ---------------------
+ *  演示如何为用户自定义类通过 INIFILE_TYPE_CONVERTER
+ *  模板特化，实现与 ini::inifile 的读写转换支持。
+ */
+
 #include <inifile/inifile.h>
 
 /// @brief User-defined classes

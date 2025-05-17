@@ -1,3 +1,29 @@
+/*
+ *  inifile_basic Sample Program
+ *  ----------------------------
+ *  This sample demonstrates how to use the `ini::inifile` class to perform basic INI file operations, including:
+ *
+ *    - Setting key-value pairs (supports bool, double, and string types)
+ *    - Adding comments (both section and key-value level, with custom comment characters)
+ *    - Saving to and loading from files
+ *    - Reading from and writing to strings
+ *    - Using standard input/output streams
+ *    - Implicit and explicit type conversions
+ *    - Basic exception handling
+ *
+ *  inifile_basic 示例程序
+ *  ------------------------
+ *  本示例演示如何使用 ini::inifile 类进行 INI 配置文件的基本操作，包括：
+ *
+ *    - 设置键值对（支持 bool、double、string 类型）
+ *    - 添加注释（支持 section 注释与 key-value 注释，可选注释符号）
+ *    - 保存到文件与从文件加载
+ *    - 从字符串加载和转为字符串
+ *    - 使用标准输入输出流读写配置
+ *    - 支持隐式与显式类型转换
+ *    - 异常处理示例
+ */
+
 #include <inifile/inifile.h>
 
 constexpr char path[] = "basic.ini";

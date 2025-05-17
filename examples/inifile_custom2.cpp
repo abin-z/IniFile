@@ -1,3 +1,17 @@
+/*
+ *  Sample: vector_type_conversion_demo
+ *  -----------------------------------
+ *  Demonstrates how to specialize INIFILE_TYPE_CONVERTER for std::vector<T>
+ *  to support automatic serialization and deserialization of vectors
+ *  to/from delimited strings in ini::inifile.
+ *
+ *  示例：std::vector<T> 类型转换演示
+ *  ------------------------------
+ *  演示如何为 std::vector<T> 特化 INIFILE_TYPE_CONVERTER，
+ *  支持 vector 与字符串的自动序列化和反序列化，
+ *  方便通过 ini::inifile 读写vector数据。
+ */
+
 #include <inifile/inifile.h>
 
 /// @brief Specialization of INIFILE_TYPE_CONVERTER for std::vector<T>.

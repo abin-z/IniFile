@@ -1,3 +1,13 @@
+/*
+ *  Sample: load_and_print
+ *  ----------------------
+ *  Loads an INI file from disk and prints its content to stdout.
+ *
+ *  示例：load_and_print
+ *  ---------------------
+ *  从磁盘加载 INI 文件并将其内容输出到标准输出。
+ */
+
 #include <inifile/inifile.h>
 
 int main()

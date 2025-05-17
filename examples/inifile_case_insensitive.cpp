@@ -1,3 +1,19 @@
+/*
+ *  Sample: case_insensitive_inifile
+ *  --------------------------------
+ *  Demonstrates usage of `ini::case_insensitive_inifile`:
+ *    - Case-insensitive access to sections and keys
+ *    - Value retrieval and string conversion
+ *    - Comparison of modified vs original content
+ *
+ *  示例：case_insensitive_inifile
+ *  ------------------------------
+ *  演示 `ini::case_insensitive_inifile` 的用法：
+ *    - Section 和 key 的大小写无关访问
+ *    - 键值读取与字符串转换
+ *    - 修改后与原始内容的对比
+ */
+
 #include <inifile/inifile.h>
 
 int main()

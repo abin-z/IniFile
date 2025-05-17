@@ -1,3 +1,15 @@
+/*
+ *  Sample: write_various_values
+ *  ----------------------------
+ *  Demonstrates how to write various value types (string, int, float, double, bool, char) 
+ *  into an INI file, and how to set comments for sections and keys.
+ *
+ *  示例：write_various_values
+ *  ----------------------------
+ *  演示如何将不同类型的值（字符串、整型、浮点、布尔、字符）写入 INI 文件，
+ *  以及如何为 section 和 key 添加注释。
+ */
+
 #include <inifile/inifile.h>
 
 int main()
