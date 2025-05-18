@@ -466,25 +466,25 @@ struct convert<T, typename std::enable_if<std::is_integral<T>::value && is_to_st
 
 // 通用浮点字符串解析模板
 template <typename T>
-T parse_string_to_floating_point(const char *str, char **end_ptr)
+inline T parse_string_to_floating_point(const char *str, char **end_ptr)
 {
   return static_cast<T>(std::strtold(str, end_ptr));
 }
 // 特化 float
 template <>
-float parse_string_to_floating_point<float>(const char *str, char **end_ptr)
+inline float parse_string_to_floating_point<float>(const char *str, char **end_ptr)
 {
   return std::strtof(str, end_ptr);
 }
 // 特化 double
 template <>
-double parse_string_to_floating_point<double>(const char *str, char **end_ptr)
+inline double parse_string_to_floating_point<double>(const char *str, char **end_ptr)
 {
   return std::strtod(str, end_ptr);
 }
 // 特化 long double
 template <>
-long double parse_string_to_floating_point<long double>(const char *str, char **end_ptr)
+inline long double parse_string_to_floating_point<long double>(const char *str, char **end_ptr)
 {
   return std::strtold(str, end_ptr);
 }
