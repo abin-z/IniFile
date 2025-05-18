@@ -1734,7 +1734,7 @@ class basic_inifile
   /// @brief 写注释内容
   /// @param os 输出流
   /// @param comments 注释内容
-  void write_comment(std::ostream &os, const comment &comments) const
+  static void write_comment(std::ostream &os, const comment &comments)
   {
     if (!comments.empty())
     {
