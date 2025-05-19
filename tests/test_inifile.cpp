@@ -4361,10 +4361,12 @@ TEST_CASE("Copy and move inifile with comments and other operations", "[ini][cop
   }
 }
 
-TEST_CASE("comment constructors behave correctly and unambiguously", "[comment][constructor]") {
+TEST_CASE("comment constructors behave correctly and unambiguously", "[comment][constructor]")
+{
   using ini::comment;
 
-  SECTION("Construct from std::string with default symbol") {
+  SECTION("Construct from std::string with default symbol")
+  {
     std::string input = "line one\nline two";
     comment c(input);  // uses ';' as default
     auto view = c.view();
@@ -4374,7 +4376,8 @@ TEST_CASE("comment constructors behave correctly and unambiguously", "[comment][
     REQUIRE(view[1] == "; line two");
   }
 
-  SECTION("Construct from std::string with custom symbol '#'") {
+  SECTION("Construct from std::string with custom symbol '#'")
+  {
     std::string input = "a\nb";
     comment c(input, '#');
     auto view = c.view();
@@ -4384,7 +4387,8 @@ TEST_CASE("comment constructors behave correctly and unambiguously", "[comment][
     REQUIRE(view[1] == "# b");
   }
 
-  SECTION("Construct from std::vector<std::string>") {
+  SECTION("Construct from std::vector<std::string>")
+  {
     std::vector<std::string> vec = {"hello", "world"};
     comment c(vec);  // uses default symbol ';'
     auto view = c.view();
@@ -4394,7 +4398,8 @@ TEST_CASE("comment constructors behave correctly and unambiguously", "[comment][
     REQUIRE(view[1] == "; world");
   }
 
-  SECTION("Construct from std::vector<std::string> with '#'") {
+  SECTION("Construct from std::vector<std::string> with '#'")
+  {
     std::vector<std::string> vec = {"foo", "bar"};
     comment c(vec, '#');
     auto view = c.view();
@@ -4404,7 +4409,8 @@ TEST_CASE("comment constructors behave correctly and unambiguously", "[comment][
     REQUIRE(view[1] == "# bar");
   }
 
-  SECTION("Construct from initializer_list<std::string> (non-explicit)") {
+  SECTION("Construct from initializer_list<std::string> (non-explicit)")
+  {
     comment c{"init1", "init2"};  // should match initializer_list overload
     auto view = c.view();
 
@@ -4413,8 +4419,9 @@ TEST_CASE("comment constructors behave correctly and unambiguously", "[comment][
     REQUIRE(view[1] == "; init2");
   }
 
-  SECTION("Construct from initializer_list with custom symbol") {
-    comment c({ "x", "y" }, '#');
+  SECTION("Construct from initializer_list with custom symbol")
+  {
+    comment c({"x", "y"}, '#');
     auto view = c.view();
 
     REQUIRE(view.size() == 2);
@@ -4422,8 +4429,9 @@ TEST_CASE("comment constructors behave correctly and unambiguously", "[comment][
     REQUIRE(view[1] == "# y");
   }
 
-  SECTION("Ambiguity test: string literal should not match initializer_list constructor") {
-    const char* str = "single line";
+  SECTION("Ambiguity test: string literal should not match initializer_list constructor")
+  {
+    const char *str = "single line";
     std::string s{str};
     comment c(s);  // should use std::string constructor, not initializer_list
 
@@ -4432,7 +4440,8 @@ TEST_CASE("comment constructors behave correctly and unambiguously", "[comment][
     REQUIRE(view[0] == "; single line");
   }
 
-  SECTION("Empty input produces empty comment") {
+  SECTION("Empty input produces empty comment")
+  {
     comment c1(std::string{});
     REQUIRE(c1.empty());
 
