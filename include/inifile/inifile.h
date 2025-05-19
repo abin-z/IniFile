@@ -628,7 +628,7 @@ class comment
     for (const auto &item : vec) add(item, symbol);
   }
   /// @brief Constructs a comment from an initializer list of lines.
-  explicit comment(std::initializer_list<std::string> list, char symbol = ';')
+  comment(std::initializer_list<std::string> list, char symbol = ';')
   {
     for (const auto &item : list) add(item, symbol);
   }
