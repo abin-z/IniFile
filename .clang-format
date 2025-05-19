@@ -9,7 +9,7 @@ BreakConstructorInitializers: AfterColon  # 构造函数初始化列表换行
 ConstructorInitializerIndentWidth: 2      # 构造函数初始化列表缩进
 ConstructorInitializerAllOnOneLineOrOnePerLine: true # 构造函数初始化列表一行或者一行一个
 ContinuationIndentWidth: 2  # 换行缩进宽度2
-; AlignConsecutiveAssignments: true  # 启用连续赋值对齐
+# AlignConsecutiveAssignments: true  # 启用连续赋值对齐
 
 BreakBeforeBraces: Custom   # 使用自定义大括号规则
 BraceWrapping:
