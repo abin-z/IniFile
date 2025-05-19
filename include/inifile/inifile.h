@@ -89,7 +89,7 @@ inline bool is_all_whitespace(const std::string &str)
 /// @param delimiter 分割字符串(支持多字符)
 /// @param skip_empty 是否忽略空字符串
 /// @return 分割后的内容
-std::vector<std::string> split(const std::string &str, const std::string &delimiter, bool skip_empty = false)
+inline std::vector<std::string> split(const std::string &str, const std::string &delimiter, bool skip_empty = false)
 {
   std::vector<std::string> tokens;
   std::string::size_type start = 0, pos = 0;
@@ -172,7 +172,7 @@ class is_ostreamable
 /// @param separator 用于连接每个元素之间的分隔字符串
 /// @return 拼接后的字符串结果
 template <typename Iterable>
-std::string join(const Iterable &iterable, const std::string &separator)
+inline std::string join(const Iterable &iterable, const std::string &separator)
 {
   // 断言 iterable 支持 begin() 和 end(), 不是 map 类型, 元素类型不是指针并且元素类型可通过 << 输出到 std::ostream
   using value_type = typename Iterable::value_type;
