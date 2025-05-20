@@ -8,7 +8,8 @@ AllowShortFunctionsOnASingleLine: Empty   # 允许短函数一行显示, Empty�
 BreakConstructorInitializers: AfterColon  # 构造函数初始化列表换行
 ConstructorInitializerIndentWidth: 2      # 构造函数初始化列表缩进
 ConstructorInitializerAllOnOneLineOrOnePerLine: true # 构造函数初始化列表一行或者一行一个
-ContinuationIndentWidth: 2  # 换行缩进宽度2
+ContinuationIndentWidth: 2    # 换行缩进宽度2
+IndentCaseLabels: false       # 控制 case: label 本身是否缩进（你没设置，默认为 false）
 # AlignConsecutiveAssignments: true  # 启用连续赋值对齐
 
 BreakBeforeBraces: Custom   # 使用自定义大括号规则
