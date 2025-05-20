@@ -122,8 +122,7 @@ class has_begin_end
   template <typename U>
   static auto test(int) -> decltype(std::begin(std::declval<U &>()),  // 检查是否支持 std::begin
                                     std::end(std::declval<U &>()),    // 检查是否支持 std::end
-                                    std::true_type{}                  // 如果能编译成功, 返回 std::true_type
-  );
+                                    std::true_type{});                // 如果能编译成功, 返回 std::true_type
 
   // 如果不支持 std::begin() 或 std::end(), 会匹配到这个重载, 返回 std::false_type
   template <typename>
@@ -249,7 +248,7 @@ struct convert<bool>
    *  - 空字符串 `""` 解析为 `false`
    *  - 其他情况一律解析为 `true`
    */
-  void decode(const std::string &value, bool &result)
+  static void decode(const std::string &value, bool &result)
   {
     std::string str(value);  // 复制字符串, 避免修改原始数据
     std::transform(str.begin(), str.end(), str.begin(), [](unsigned char c) { return std::tolower(c); });
@@ -262,7 +261,7 @@ struct convert<bool>
    * @param value 布尔值
    * @param result 输出字符串:"true" 或 "false"
    */
-  void encode(const bool value, std::string &result)
+  static void encode(const bool value, std::string &result)
   {
     result = value ? "true" : "false";
   }
@@ -271,7 +270,7 @@ struct convert<bool>
 template <>
 struct convert<char>
 {
-  void decode(const std::string &value, char &result)
+  static void decode(const std::string &value, char &result)
   {
     if (value.empty())
     {
@@ -279,7 +278,7 @@ struct convert<char>
     }
     result = value[0];
   }
-  void encode(const char value, std::string &result)
+  static void encode(const char value, std::string &result)
   {
     result = std::string(1, value);
   }
@@ -288,7 +287,7 @@ struct convert<char>
 template <>
 struct convert<unsigned char>
 {
-  void decode(const std::string &value, unsigned char &result)
+  static void decode(const std::string &value, unsigned char &result)
   {
     if (value.empty())
     {
@@ -297,7 +296,7 @@ struct convert<unsigned char>
     result = static_cast<unsigned char>(value[0]);
   }
 
-  void encode(const unsigned char value, std::string &result)
+  static void encode(const unsigned char value, std::string &result)
   {
     result = std::string(1, value);
   }
@@ -306,7 +305,7 @@ struct convert<unsigned char>
 template <>
 struct convert<signed char>
 {
-  void decode(const std::string &value, signed char &result)
+  static void decode(const std::string &value, signed char &result)
   {
     if (value.empty())
     {
@@ -315,7 +314,7 @@ struct convert<signed char>
     result = static_cast<signed char>(value[0]);
   }
 
-  void encode(const signed char value, std::string &result)
+  static void encode(const signed char value, std::string &result)
   {
     result = std::string(1, value);
   }
@@ -325,12 +324,12 @@ struct convert<signed char>
 template <>
 struct convert<std::string>
 {
-  void decode(const std::string &value, std::string &result)
+  static void decode(const std::string &value, std::string &result)
   {
     result = value;
   }
 
-  void encode(const std::string &value, std::string &result)
+  static void encode(const std::string &value, std::string &result)
   {
     result = value;
   }
@@ -340,12 +339,12 @@ struct convert<std::string>
 template <>
 struct convert<const char *>
 {
-  void decode(const std::string &value, const char *&result)
+  static void decode(const std::string &value, const char *&result)
   {
     result = value.c_str();
   }
 
-  void encode(const char *value, std::string &result)
+  static void encode(const char *value, std::string &result)
   {
     result = value;
   }
@@ -355,7 +354,7 @@ struct convert<const char *>
 template <>
 struct convert<char *>
 {
-  void encode(char *value, std::string &result)
+  static void encode(char *value, std::string &result)
   {
     result = value;
   }
@@ -365,7 +364,7 @@ struct convert<char *>
 template <std::size_t N>
 struct convert<char[N]>
 {
-  void encode(const char (&value)[N], std::string &result)
+  static void encode(const char (&value)[N], std::string &result)
   {
     result = value;
   }
@@ -410,7 +409,7 @@ struct convert<T, typename std::enable_if<std::is_integral<T>::value && is_to_st
    * - 确保转换值在 `T` 的范围内
    * - 检查 `end_ptr` 以确保完整转换
    */
-  void decode(const std::string &value, T &result)
+  static void decode(const std::string &value, T &result)
   {
     if (value.empty())
     {
@@ -458,7 +457,7 @@ struct convert<T, typename std::enable_if<std::is_integral<T>::value && is_to_st
    *
    * - 直接调用 `std::to_string()` 进行转换
    */
-  void encode(const T value, std::string &result)
+  static void encode(const T value, std::string &result)
   {
     result = std::to_string(value);
   }
@@ -509,7 +508,7 @@ struct convert<T, typename std::enable_if<std::is_floating_point<T>::value>::typ
    * - 确保转换值在 `T` 的范围内
    * - 检查 `end_ptr` 以确保完整转换
    */
-  void decode(const std::string &value, T &result)
+  static void decode(const std::string &value, T &result)
   {
     if (value.empty())
     {
@@ -556,7 +555,7 @@ struct convert<T, typename std::enable_if<std::is_floating_point<T>::value>::typ
    * - 不使用 `std::to_string()` 进行转换, `std::to_string()` 会影响浮点数精度;
    * - 对于高精度需求可使用 `std::stringstream`;
    */
-  void encode(const T value, std::string &result)
+  static void encode(const T value, std::string &result)
   {
     std::ostringstream oss;
     oss << std::setprecision(std::numeric_limits<T>::max_digits10) << value;
@@ -568,12 +567,12 @@ struct convert<T, typename std::enable_if<std::is_floating_point<T>::value>::typ
 template <>
 struct convert<std::string_view>
 {
-  void decode(const std::string &value, std::string_view &result)
+  static void decode(const std::string &value, std::string_view &result)
   {
     result = value;
   }
 
-  void encode(const std::string_view value, std::string &result)
+  static void encode(const std::string_view value, std::string &result)
   {
     result = value;
   }
