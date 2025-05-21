@@ -357,20 +357,20 @@ int main()
 
 1. 使用`INIFILE_TYPE_CONVERTER`宏**特化**自定义的类型(必须提供默认构造函数);
 
-2. **定义`encode`函数**, 作用是定义如何将自定义类型转为ini存储字符串(存储字符串不能包含换行符);
+2. **定义`static void encode`函数**, 作用是定义如何将自定义类型转为ini存储字符串(存储字符串不能包含换行符);
 
-3. **定义`decode`函数**, 作用是定义如何将ini存储字符串转为自定义类型;
+3. **定义`static void decode`函数**, 作用是定义如何将ini存储字符串转为自定义类型;
 
 ```cpp
 /// Specialized type conversion template
 template <>
 struct INIFILE_TYPE_CONVERTER<CustomClass>  // User-defined type `CustomClass`
 {
-  void encode(const CustomClass &obj, std::string &value)  // pass by reference
+  static void encode(const CustomClass &obj, std::string &value)  // pass by reference
   {
     // Convert the CustomClass object `obj` to ini storage string `value`
   }
-  void decode(const std::string &value, CustomClass &obj)
+  static void decode(const std::string &value, CustomClass &obj)  // must be static
   {
     // Convert the ini storage string `value` to a CustomClass object `obj`
   }
@@ -397,7 +397,7 @@ template <>
 struct INIFILE_TYPE_CONVERTER<Person>
 {
   // "Encode" the Person object into a value string
-  void encode(const Person &obj, std::string &value)
+  static void encode(const Person &obj, std::string &value)
   {
     const char delimiter = ',';
     // Format: id,age,name; Note: Please do not include line breaks in the value string
@@ -405,7 +405,7 @@ struct INIFILE_TYPE_CONVERTER<Person>
   }
 
   // "Decode" the value string into a Person object
-  void decode(const std::string &value, Person &obj)
+  static void decode(const std::string &value, Person &obj)
   {
     const char delimiter = ',';
     std::vector<std::string> info = ini::split(value, delimiter);

@@ -352,19 +352,19 @@ Supported types for automatic conversions:
 You can provide a special template class for automatic type conversion for user-defined types, which allows the inifile library to automatically convert according to the rules you define, so that it can store custom classes in ini fields, which can greatly reduce code duplication. The following are custom rules and templates:
 
 1. Use the `INIFILE_TYPE_CONVERTER` macro to **specialize** the custom type (Must have a default constructor);
-2. **Define `encode` function**, which is used to define how to convert custom types into ini storage strings (the storage string cannot contain newlines);
-3. **Define `decode` function**, which is used to define how to convert the ini storage string into a custom type;
+2. **Define `static void encode` function**, which is used to define how to convert custom types into ini storage strings (the storage string cannot contain newlines);
+3. **Define `static void decode` function**, which is used to define how to convert the ini storage string into a custom type;
 
 ```cpp
 /// Specialized type conversion template
 template <>
 struct INIFILE_TYPE_CONVERTER<CustomClass>  // User-defined type `CustomClass`
 {
-  void encode(const CustomClass &obj, std::string &value)  // pass by reference
+  static void encode(const CustomClass &obj, std::string &value)  // pass by reference
   {
     // Convert the CustomClass object `obj` to ini storage string `value`
   }
-  void decode(const std::string &value, CustomClass &obj)
+  static void decode(const std::string &value, CustomClass &obj)  // must be static
   {
     // Convert the ini storage string `value` to a CustomClass object `obj`
   }
@@ -391,7 +391,7 @@ template <>
 struct INIFILE_TYPE_CONVERTER<Person>
 {
   // "Encode" the Person object into a value string
-  void encode(const Person &obj, std::string &value)
+  static void encode(const Person &obj, std::string &value)
   {
     const char delimiter = ',';
     // Format: id,age,name; Note: Please do not include line breaks in the value string
@@ -399,7 +399,7 @@ struct INIFILE_TYPE_CONVERTER<Person>
   }
 
   // "Decode" the value string into a Person object
-  void decode(const std::string &value, Person &obj)
+  static void decode(const std::string &value, Person &obj)
   {
     const char delimiter = ',';
     std::vector<std::string> info = ini::split(value, delimiter);
