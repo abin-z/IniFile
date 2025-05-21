@@ -35,7 +35,7 @@ template <>
 struct INIFILE_TYPE_CONVERTER<Person>
 {
   // "Encode" the Person object into a value string
-  void encode(const Person &obj, std::string &value)
+  static void encode(const Person &obj, std::string &value)
   {
     const char delimiter = ',';
     // Format: id,age,name; Note: Please do not include line breaks in the value string
@@ -43,7 +43,7 @@ struct INIFILE_TYPE_CONVERTER<Person>
   }
 
   // "Decode" the value string into a Person object
-  void decode(const std::string &value, Person &obj)
+  static void decode(const std::string &value, Person &obj)
   {
     const char delimiter = ',';
     std::vector<std::string> info = ini::split(value, delimiter);

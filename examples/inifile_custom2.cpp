@@ -20,7 +20,7 @@ template <typename T>
 struct INIFILE_TYPE_CONVERTER<std::vector<T>>
 {
   /// @brief Encodes a vector into a delimited string.
-  void encode(const std::vector<T> &vec, std::string &value)
+  static void encode(const std::vector<T> &vec, std::string &value)
   {
     constexpr char delimiter = ',';  // Delimiter used to separate elements in the string
     std::string encoded_item;
@@ -34,7 +34,7 @@ struct INIFILE_TYPE_CONVERTER<std::vector<T>>
   }
 
   /// @brief Decodes a delimited string into a vector.
-  void decode(const std::string &value, std::vector<T> &vec)
+  static void decode(const std::string &value, std::vector<T> &vec)
   {
     constexpr char delimiter = ',';                                // Delimiter used to separate elements in the string
     std::vector<std::string> info = ini::split(value, delimiter);  // Split the string
