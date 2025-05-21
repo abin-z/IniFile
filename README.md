@@ -352,7 +352,9 @@ Supported types for automatic conversions:
 You can provide a special template class for automatic type conversion for user-defined types, which allows the inifile library to automatically convert according to the rules you define, so that it can store custom classes in ini fields, which can greatly reduce code duplication. The following are custom rules and templates:
 
 1. Use the `INIFILE_TYPE_CONVERTER` macro to **specialize** the custom type (Must have a default constructor);
+
 2. **Define `static void encode` function**, which is used to define how to convert custom types into ini storage strings (the storage string cannot contain newlines);
+
 3. **Define `static void decode` function**, which is used to define how to convert the ini storage string into a custom type;
 
 ```cpp
