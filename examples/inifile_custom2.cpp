@@ -26,9 +26,8 @@ struct INIFILE_TYPE_CONVERTER<std::vector<T>>
     std::string encoded_item;
     for (const auto &v : vec)
     {
-      INIFILE_TYPE_CONVERTER<T> conv;
-      conv.encode(v, encoded_item);       // Encode each element of the vector
-      value += encoded_item + delimiter;  // Append the encoded element and delimiter
+      INIFILE_TYPE_CONVERTER<T>::encode(v, encoded_item);  // Encode each element of the vector
+      value += encoded_item + delimiter;                   // Append the encoded element and delimiter
     }
     if (value.back() == delimiter) value.pop_back();  // Remove the trailing delimiter
   }
@@ -41,9 +40,8 @@ struct INIFILE_TYPE_CONVERTER<std::vector<T>>
     T encoded_item;
     for (const auto &v : info)
     {
-      INIFILE_TYPE_CONVERTER<T> conv;
-      conv.decode(v, encoded_item);               // Decode each part of the string
-      vec.emplace_back(std::move(encoded_item));  // Add the decoded element to the vector
+      INIFILE_TYPE_CONVERTER<T>::decode(v, encoded_item);  // Decode each part of the string
+      vec.emplace_back(std::move(encoded_item));           // Add the decoded element to the vector
     }
   }
 };
