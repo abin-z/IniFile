@@ -913,8 +913,7 @@ class field
   template <typename T>
   field(const T &other)
   {
-    detail::convert<T> conv;     // 创建一个转换器对象,处理 T 类型到字符串的转换
-    conv.encode(other, value_);  // 将传入的值编码成字符串并存储到 value_ 中
+    detail::convert<T>::encode(other, value_);  // 将传入的值编码成字符串并存储到 value_ 中
   }
 
   /// @brief Template copy assignment operator. Allows values ​​of other types to be assigned to `field` objects.
@@ -924,9 +923,8 @@ class field
   template <typename T>
   field &operator=(const T &rhs)
   {
-    detail::convert<T> conv;   // 创建一个转换器对象,处理 T 类型到字符串的转换
-    conv.encode(rhs, value_);  // 将右侧值编码成字符串并存储到 value_ 中
-    return *this;              // 返回当前对象的引用,支持链式赋值
+    detail::convert<T>::encode(rhs, value_);  // 将右侧值编码成字符串并存储到 value_ 中
+    return *this;                             // 返回当前对象的引用,支持链式赋值
   }
 
   /// @brief Converts an ini field to target type T. If the conversion fails, exception will be thrown.
@@ -937,10 +935,9 @@ class field
   template <typename T>
   T as() const
   {
-    detail::convert<T> conv;      // 创建一个转换器对象
-    T result;                     // 用于存储转换后的结果
-    conv.decode(value_, result);  // 将 value_ 字符串解码为目标类型 T
-    return result;                // 返回转换结果
+    T result;                                    // 用于存储转换后的结果
+    detail::convert<T>::decode(value_, result);  // 将 value_ 字符串解码为目标类型 T
+    return result;                               // 返回转换结果
   }
 
   /// @brief Type conversion operator: allows field objects to be converted to the target type T.
@@ -961,8 +958,7 @@ class field
   template <typename T>
   void set(const T &value)
   {
-    detail::convert<T> conv;  // 使用一个转换器(假设为 detail::convert<T>)将给定的值编码为字符串.
-    conv.encode(value, value_);
+    detail::convert<T>::encode(value, value_);  // 将传入的值编码成字符串并存储到 value_ 中
   }
 
   /// @brief Set `key=value` comment, overwriting the original comment.
