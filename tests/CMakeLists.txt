@@ -6,6 +6,11 @@ endif()
 # 添加测试可执行文件，将 test_inifile.cpp 作为源文件
 add_executable(initest test_inifile.cpp)
 
+# 在 MSVC 下启用 /bigobj，以支持段数较多的大型对象文件
+if (MSVC)
+  target_compile_options(initest PRIVATE /bigobj)
+endif()
+
 # 设置 initest 目标的头文件搜索路径
 # 这里包含 Catch2 头文件，以便 test_inifile.cpp 能够使用 Catch2 进行单元测试
 target_include_directories(initest PRIVATE ${CATCH2_INCLUDE_DIR})
