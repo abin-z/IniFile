@@ -20,6 +20,74 @@ TEST_CASE("basic test")
 #endif
 }
 
+TEST_CASE("dynamic allocation stress test - memory leak check", "[inifile][dynamic]")
+{
+  // 动态分配 inifile 实例
+  ini::inifile *inif = new ini::inifile();
+
+  // 动态创建 100 个 section，每个 section 插入多个键值
+  for (int s = 0; s < 100; ++s)
+  {
+    std::string section_name = "section_" + std::to_string(s);
+    ini::section &sec = (*inif)[section_name];
+
+    // 插入各种形式的 key-value，部分使用 field API
+    for (int k = 0; k < 50; ++k)
+    {
+      std::string key = "key_" + std::to_string(k);
+      std::string value = "value_" + std::to_string(s) + "_" + std::to_string(k);
+
+      ini::field &fld = sec[key];
+      fld = value;
+
+      // 设置注释并修改值
+      fld.set_comment("comment for " + key);
+      fld = value + "_modified";
+    }
+
+    // 测试 section 的注释处理
+    sec.set_comment("section comment");
+  }
+
+  // 添加空 section、空 key、空值、特殊字符
+  (*inif)[""][""] = "";
+  (*inif)[""]["\t\n\r"] = "  \t ";
+  (*inif)["specialchars"]["💡🚀"] = "emoji✅";
+  (*inif)["specialchars"]["!@#$%^&*()"] = "<symbols>";
+
+  // 设置重复覆盖，field 的多次赋值
+  auto &fld = (*inif)["repeat"]["key"];
+  fld = "first";
+  fld = "second";
+  fld = "final";
+
+  // 保存再读取（内存行为测试重点在前面，此处为完整性验证）
+  const char *path = "./test_dynamic_memory.ini";
+  inif->save(path);
+
+  // 可选：删除原始对象后重新加载看是否崩溃
+  delete inif;
+  inif = nullptr;
+
+  ini::inifile *reloaded = new ini::inifile();
+  reloaded->load(path);
+
+  CHECK(reloaded->contains("section_0", "key_0"));
+  CHECK((*reloaded)["repeat"]["key"].as<std::string>() == "final");
+  CHECK((*reloaded)["specialchars"]["💡🚀"].as<std::string>() == "emoji✅");
+
+  // 释放内存，观察是否泄漏（结合 valgrind/VS 工具）
+  delete reloaded;
+}
+
+TEST_CASE("dynamic allocation stress test - memory leak check new", "[inifile][dynamic][new]")
+{
+  ini::inifile *inif = new ini::inifile();
+  ini::comment *cmt = new ini::comment();
+  ini::field *fld = new ini::field();
+  ini::section *sec = new ini::section();
+}
+
 TEST_CASE("Field basic functionality", "[field]")
 {
   using namespace ini;
