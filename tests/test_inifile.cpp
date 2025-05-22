@@ -86,6 +86,11 @@ TEST_CASE("dynamic allocation stress test - memory leak check new", "[inifile][d
   ini::comment *cmt = new ini::comment();
   ini::field *fld = new ini::field();
   ini::section *sec = new ini::section();
+
+  delete inif;
+  delete cmt;
+  delete fld;
+  delete sec;
 }
 
 TEST_CASE("Field basic functionality", "[field]")
