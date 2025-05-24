@@ -133,7 +133,7 @@ class has_begin_end
   static constexpr bool value = decltype(test<T>(0))::value;
 };
 
-// 2. 检查容器是否是 map 类型（如 std::map 或 std::unordered_map）
+// 2. 检查容器是否是 map 类型(如 std::map 或 std::unordered_map)
 template <typename T>
 class is_map
 {
@@ -861,7 +861,7 @@ class field
   /// 默认构造函数,使用编译器生成的默认实现.
   field() = default;
 
-  /// 参数构造函数：通过传入字符串初始化 value_。
+  /// 参数构造函数：通过传入字符串初始化 value_
   /// 使用 pass-by-value 统一接收左值/右值，结合 std::move 实现高效构造
   field(std::string value) : value_(std::move(value)) {}
 
