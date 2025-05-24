@@ -1715,7 +1715,7 @@ class basic_inifile
   /// @brief Save ini information to ini file
   /// @param filename Save file path
   /// @return Whether the save is successful, return `true` if successful
-  bool save(const std::string &filename)
+  bool save(const std::string &filename) const
   {
     std::ofstream os(filename);
     if (!os) return false;
