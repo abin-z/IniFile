@@ -604,6 +604,39 @@ The following functions will throw an exception if the type conversion fails or 
 
 </details>
 
+### ⚙️ Build the Project
+
+This project uses **CMake** and requires **C++11** or later. Please ensure the following dependencies are installed:
+
+- Git
+- CMake version ≥ 3.20
+- A C++11-compatible compiler (e.g., GCC, Clang, or MSVC)
+
+**Step 1: Clone the Repository**
+
+```sh
+git clone --recurse-submodules https://github.com/abin-z/IniFile.git
+```
+
+> If you already cloned the repository without `--recurse-submodules`, run the following to initialize submodules:
+>
+> ```sh
+> git submodule update --init --recursive
+> ```
+
+**Step 2: Build the Project**
+
+```sh
+cmake -B build         # Generate the project
+cmake --build build    # Build the project
+```
+
+**Step 3: Run**
+
+```sh
+./initest
+```
+
 ### 💡 Contribution Guidelines
 
 We welcome contributions! Feel free to submit **Issues** and **Pull Requests** to improve this project.
