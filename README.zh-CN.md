@@ -631,8 +631,8 @@ git clone --recurse-submodules https://github.com/abin-z/IniFile.git
 **步骤二: 构建项目**
 
 ```sh
- cmake -B build			# 生成项目
- cmake --build build	# 构建项目
+ cmake -B build	        # 生成项目
+ cmake --build build    # 构建项目
 ```
 
 **步骤三: 运行**
