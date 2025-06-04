@@ -4590,3 +4590,66 @@ TEST_CASE("field: as_to throws on invalid conversion", "[field][as_to][exception
   double out_double = 0.0;
   REQUIRE_THROWS_AS(f.as_to(out_double), std::invalid_argument);
 }
+
+struct MyType
+{
+  int id;
+  int age;
+  std::string name;
+
+  bool operator==(const MyType &other) const
+  {
+    return id == other.id && age == other.age && name == other.name;
+  }
+};
+
+template <>
+struct INIFILE_TYPE_CONVERTER<MyType>
+{
+  // Encode MyType object into a string like "id,age,name"
+  static void encode(const MyType &obj, std::string &value)
+  {
+    value = std::to_string(obj.id) + "," + std::to_string(obj.age) + "," + obj.name;
+  }
+
+  // Decode string "id,age,name" into MyType object
+  static void decode(const std::string &value, MyType &obj)
+  {
+    size_t pos1 = value.find(',');
+    size_t pos2 = value.find(',', pos1 + 1);
+
+    if (pos1 == std::string::npos || pos2 == std::string::npos)
+    {
+      throw std::invalid_argument("Invalid format for MyType decoding");
+    }
+
+    obj.id = std::stoi(value.substr(0, pos1));
+    obj.age = std::stoi(value.substr(pos1 + 1, pos2 - pos1 - 1));
+    obj.name = value.substr(pos2 + 1);
+  }
+};
+
+TEST_CASE("field: as_to converts to MyType correctly", "[field][as_to][MyType]")
+{
+  ini::inifile f;
+
+  // 先用 encode 编码一个字符串，赋值给 field 的 value_
+  MyType original{42, 30, "Tom"};
+  f["key"]["value"] = original;  // 使用 INIFILE_TYPE_CONVERTER<MyType> 自动转换
+
+  // 测试 as_to 转换
+  MyType result{};
+  MyType t1 = f["key"]["value"];
+  REQUIRE(t1 == original);  // 确认转换正确
+
+  auto t2 = f["key"]["value"].as<MyType>();
+  REQUIRE(t2 == original);  // 确认 as<MyType> 转换正确
+
+  MyType &ref = f["key"]["value"].as_to(result);
+  REQUIRE(ref.id == original.id);
+  REQUIRE(ref.age == original.age);
+  REQUIRE(ref.name == original.name);
+
+  // 确认返回的引用就是传入的 result 对象
+  REQUIRE(&ref == &result);
+}
