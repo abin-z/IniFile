@@ -4526,3 +4526,67 @@ TEST_CASE("comment constructors behave correctly and unambiguously", "[comment][
     comment c("some string");
   }
 }
+
+TEST_CASE("field: construct from string and convert to types", "[field][conversion]")
+{
+  ini::field f("42");
+
+  REQUIRE(f.as<int>() == 42);
+  REQUIRE(f.as<std::string>() == "42");
+
+  double d = 0.0;
+  f.as_to(d);
+  REQUIRE(d == Approx(42.0));
+}
+TEST_CASE("field: invalid conversion throws exception", "[field][conversion][exception]")
+{
+  ini::field f("not_a_number");
+
+  REQUIRE_THROWS_AS(f.as<int>(), std::invalid_argument);
+}
+TEST_CASE("field: copy constructor and assignment", "[field][copy]")
+{
+  ini::field f1("abc");
+  f1.set_comment("hello");
+
+  ini::field f2 = f1;  // copy constructor
+  REQUIRE(f2.as<std::string>() == "abc");
+  REQUIRE(f2.comment().view() == f1.comment().view());
+
+  ini::field f3;
+  f3 = f1;  // copy assignment
+  REQUIRE(f3.as<std::string>() == "abc");
+  REQUIRE(f3.comment().view() == f1.comment().view());
+}
+
+TEST_CASE("field: as_to converts string to target type correctly", "[field][as_to]")
+{
+  ini::field f_int("123");
+  int out_int = 0;
+  int &ref_int = f_int.as_to(out_int);
+  REQUIRE(ref_int == 123);
+  REQUIRE(&ref_int == &out_int);  // 返回引用必须是传入的引用
+
+  ini::field f_double("3.14159");
+  double out_double = 0.0;
+  double &ref_double = f_double.as_to(out_double);
+  REQUIRE(ref_double == Approx(3.14159));
+  REQUIRE(&ref_double == &out_double);
+
+  ini::field f_str("hello");
+  std::string out_str;
+  std::string &ref_str = f_str.as_to(out_str);
+  REQUIRE(ref_str == "hello");
+  REQUIRE(&ref_str == &out_str);
+}
+
+TEST_CASE("field: as_to throws on invalid conversion", "[field][as_to][exception]")
+{
+  ini::field f("not_a_number");
+
+  int out_int = 0;
+  REQUIRE_THROWS_AS(f.as_to(out_int), std::invalid_argument);
+
+  double out_double = 0.0;
+  REQUIRE_THROWS_AS(f.as_to(out_double), std::invalid_argument);
+}
