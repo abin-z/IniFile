@@ -941,6 +941,19 @@ class field
     return result;                               // 返回转换结果
   }
 
+  /// @brief Converts an ini field to target type T and stores the result in the given output variable.
+  /// @tparam T Target type T
+  /// @param out Output variable to receive the converted value
+  /// @return Reference to the output variable after conversion
+  /// @throws `std::invalid_argument` If the field cannot be converted to type T.
+  /// @throws `std::out_of_range` If the field is out of the valid range for type T.
+  template <typename T>
+  T &as_to(T &out) const
+  {
+    detail::convert<T>::decode(value_, out);  // 将 value_ 字符串解码为目标类型 T, 并存储到 out 中
+    return out;                               // 返回转换后的引用
+  }
+
   /// @brief Type conversion operator: allows field objects to be converted to the target type T.
   //         If the conversion fails, exception will be thrown.
   /// @tparam T Target type to be converted
