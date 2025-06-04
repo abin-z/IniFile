@@ -840,7 +840,7 @@ class comment
 
 inline std::ostream &operator<<(std::ostream &os, const comment &c)
 {
-  for (const auto &line : c.to_vector())
+  for (const auto &line : c.view())
   {
     os << line << '\n';
   }
