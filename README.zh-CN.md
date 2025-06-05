@@ -542,6 +542,7 @@ int main()
 | operator=     | `field &operator=(const T &rhs)`                             | 设置field值, 将T类型转为field值   |
 | operator T    | `operator T() const`                                         | 将field类型转为T类型              |
 | as            | `T as() const`                                               | 将field类型转为T类型              |
+| as_to         | `T &as_to(T &out) const`                                     | 将field类型转为给定的T类型对象    |
 | swap          | `void swap(field &other) noexcept`                           | 交换函数                          |
 | set_comment   | `void set_comment(const std::string &str, char symbol = ';')` | 设置key-value的注释, 覆盖模式     |
 | add_comment   | `void add_comment(const std::string &str, char symbol = ';')` | 添加key-value的注释, 追加模式     |

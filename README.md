@@ -538,6 +538,7 @@ The following functions will throw an exception if the type conversion fails or 
 | operator=     | `field &operator=(const T &rhs)`                             | Set field value, convert T type to field value.              |
 | operator T    | `operator T() const`                                         | Converting field types to T type                             |
 | as            | `T as() const`                                               | Converting field types to T type                             |
+| as_to         | `T &as_to(T &out) const`                                     | Convert the field type to the given T type object            |
 | swap          | `void swap(field &other) noexcept`                           | Swap Function                                                |
 | set_comment   | `void set_comment(const std::string &str, char symbol = ';')` | Set the key-value comment, overwrite mode                    |
 | add_comment   | `void add_comment(const std::string &str, char symbol = ';')` | Add key-value comments, append mode                          |
