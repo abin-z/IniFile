@@ -90,6 +90,13 @@ int main()
   bool        bb = inif["section"]["key0"].as<bool>();
   double      dd = inif["section"]["key1"].as<double>();
   std::string ss = inif["section"]["key2"].as<std::string>();
+  
+  bool bbb;
+  double ddd;
+  std::string sss;
+  inif["section"]["key0"].as_to(bbb);  // Explicit type conversion
+  inif["section"]["key1"].as_to(ddd);  // Explicit type conversion
+  inif["section"]["key2"].as_to(sss);  // Explicit type conversion
 }
 ```
 
