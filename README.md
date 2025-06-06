@@ -8,6 +8,16 @@
 
 This is a lightweight, cross-platform, efficient and **header-only** INI configuration parsing library designed for C++ projects. It provides a concise, intuitive and elegant API, supports parsing, modifying and writing INI configuration information from files, `std::istream` or `std::string`, and has line-level comment retention function to ensure that the original comments are not lost, making configuration management easier and more efficient.
 
+### 🎯 Design Philosophy 
+
+A C++ INI configuration library that **pursues elegance and utility**, **attention to detail**, and zero dependencies -- **lightweight**, yet **powerful enough**.
+
+- **Ultimate simplicity, out-of-the-box**: Header-only, zero dependencies, only C++11, easy to integrate any project.
+- **Focus on experience, close to the practical**: support for annotation retention, automatic type conversion, custom parsing, focus on improving the developer's daily experience.
+- **Cross-platform, Maintainable, Reliable**: Compatible with mainstream platforms, combined with unit testing and memory checking to ensure long-term stable operation.
+
+We do not seek to cover all scenarios, but are committed to become a **practical, elegant and stable** modern C++ solution.
+
 ### 🚀 Features
 
 - **Lightweight & Dependency-Free**: Only relies on the C++11 standard library, no additional dependencies required.
