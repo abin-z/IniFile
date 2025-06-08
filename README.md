@@ -16,7 +16,7 @@ A C++ INI configuration library that **pursues elegance and utility**, **attenti
 - **Focus on experience, close to the practical**: support for annotation retention, automatic type conversion, custom parsing, focus on improving the developer's daily experience.
 - **Cross-platform, Maintainable, Reliable**: Compatible with mainstream platforms, combined with unit testing and memory checking to ensure long-term stable operation.
 
-We do not seek to cover all scenarios, but are committed to become a **practical, elegant and stable** modern C++ solution.
+If you are looking for a **simple, functional, elegant, stable** modern C++ solution, then this library is for you. If you know how to use `std::map`, you are ready.
 
 ### 🚀 Features
 
