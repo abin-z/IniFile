@@ -8,6 +8,8 @@
 
 This is a lightweight, cross-platform, efficient and **header-only** INI configuration parsing library designed for C++ projects. It provides a concise, intuitive and elegant API, supports parsing, modifying and writing INI configuration information from files, `std::istream` or `std::string`, and has line-level comment retention function to ensure that the original comments are not lost, making configuration management easier and more efficient.
 
+---
+
 ### 🎯 Design Philosophy 
 
 A C++ INI configuration library that **pursues elegance and utility**, **attention to detail**, and zero dependencies -- **lightweight**, yet **powerful enough**.
@@ -17,6 +19,8 @@ A C++ INI configuration library that **pursues elegance and utility**, **attenti
 - **Cross-platform, Maintainable, Reliable**: Compatible with mainstream platforms, combined with unit testing and memory checking to ensure long-term stable operation.
 
 If you are looking for a **simple, functional, elegant, stable** modern C++ solution, then this library is for you. If you know how to use `std::map`, you are ready.
+
+---
 
 ### 🚀 Features
 
@@ -40,6 +44,8 @@ key = value
 ```
 
 > Note: The library uses `std::string` to encapsulate filed values internally, which is very compatible with `UTF-8` encoding, but other encoding specifics may be different.
+
+---
 
 ### 📦 Usage
 
