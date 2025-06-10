@@ -12,7 +12,7 @@ This is a lightweight, cross-platform, efficient and **header-only** INI configu
 
 ### 🎯 Design Philosophy 
 
-A C++ INI configuration library that **pursues elegance and utility**, **attention to detail**, and zero dependencies -- **lightweight**, yet **powerful enough**.
+There are countless INI parsing libraries, and each library even has its own reason for existence. Our design philosophy is:
 
 - **Ultimate simplicity, out-of-the-box**: Header-only, zero dependencies, only C++11, easy to integrate any project.
 - **Focus on experience, close to the practical**: support for annotation retention, automatic type conversion, custom parsing, focus on improving the developer's daily experience.
