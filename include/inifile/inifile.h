@@ -1555,17 +1555,20 @@ class basic_inifile
     return data_.empty();
   }
 
-  iterator find(const key_type &key)
+  iterator find(key_type key)
   {
+    detail::trim(key);
     return data_.find(key);
   }
-  const_iterator find(const key_type &key) const
+  const_iterator find(key_type key) const
   {
+    detail::trim(key);
     return data_.find(key);
   }
 
-  size_type count(const key_type &key) const
+  size_type count(key_type key) const
   {
+    detail::trim(key);
     return data_.count(key);
   }
 
@@ -1581,8 +1584,9 @@ class basic_inifile
   {
     return data_.erase(first, last);
   }
-  size_type erase(const key_type &key)
+  size_type erase(key_type key)
   {
+    detail::trim(key);
     return data_.erase(key);
   }
 
