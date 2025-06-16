@@ -5133,3 +5133,60 @@ TEST_CASE("basic_section key trimming and interface tests", "[basic_section]")
     REQUIRE(erased == 0);
   }
 }
+
+TEST_CASE("basic_inifile section trimming and interface tests", "[basic_inifile]")
+{
+  ini::inifile ini;
+
+  SECTION("set sets field in trimmed section")
+  {
+    ini.set("  mySec ", "key", "val");
+    REQUIRE(ini.contains("mySec"));
+    REQUIRE(ini.contains("  mySec  "));
+    REQUIRE(ini.get("\tmySec", "key\t").as<std::string>() == "val");
+  }
+
+  SECTION("contains checks for trimmed section name")
+  {
+    ini.set(" secA ", "k", "v");
+    REQUIRE(ini.contains("secA"));
+    REQUIRE(ini.contains("  secA  \t"));
+    REQUIRE_FALSE(ini.contains("missing"));
+  }
+
+  SECTION("find returns iterator to trimmed section")
+  {
+    ini.set("\tabc\n", "k", "v");
+    auto it = ini.find("abc");
+    bool found = (it != ini.end());
+    REQUIRE(found);
+    if (found)
+    {
+      REQUIRE(it->first == "abc");
+      REQUIRE(it->second.count("k") == 1);
+    }
+
+    auto missing = ini.find("no_such_section");
+    bool not_found = (missing == ini.end());
+    REQUIRE(not_found);
+  }
+
+  SECTION("count returns 1 or 0 based on trimmed name")
+  {
+    ini.set(" secX ", "k", "v");
+    REQUIRE(ini.count("secX") == 1);
+    REQUIRE(ini.count("  \tsecX  ") == 1);
+    REQUIRE(ini.count("missing") == 0);
+  }
+
+  SECTION("erase removes trimmed section name")
+  {
+    ini.set(" to_erase ", "k", "v");
+    REQUIRE(ini.count("to_erase") == 1);
+    size_t erased = ini.erase("  to_erase\t");
+    REQUIRE(erased == 1);
+    REQUIRE(ini.count("to_erase") == 0);
+    erased = ini.erase("missing");
+    REQUIRE(erased == 0);
+  }
+}
