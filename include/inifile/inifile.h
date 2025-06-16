@@ -1134,11 +1134,12 @@ class basic_section
   /// @tparam T field value type
   /// @param key key
   /// @param value field value
+  /// @return Reference to the inserted or updated field
   template <typename T>
-  void set(std::string key, T &&value)
+  field &set(std::string key, T &&value)
   {
     detail::trim(key);
-    data_[std::move(key)] = std::forward<T>(value);
+    return data_[std::move(key)] = std::forward<T>(value);
   }
   /// @brief Set multiple key-value pairs
   /// @param args initializer_list of multiple key-value pairs
