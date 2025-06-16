@@ -2534,11 +2534,12 @@ TEST_CASE("basic_section: swap with empty section", "[basic_section][swap_empty]
   ini::section s1;
   ini::section s2;
   s2.set("key1", "value1");
-  s2.set("key2", "value2");
+  s2.set("key2", "value2").set_comment("comment");
 
   // 交换前检查 s1 和 s2 的状态
   REQUIRE(s1.size() == 0);  // 空 section
   REQUIRE(s2.size() == 2);  // 有数据的 section
+  REQUIRE(s2.at("key2").comment().view()[0] == "; comment");  // 验证comment
 
   // 使用成员函数 swap 交换 s1 和 s2
   s1.swap(s2);
@@ -2546,6 +2547,7 @@ TEST_CASE("basic_section: swap with empty section", "[basic_section][swap_empty]
   // 交换后检查 s1 和 s2 的状态
   REQUIRE(s1.size() == 2);  // 交换后 s1 包含数据
   REQUIRE(s2.size() == 0);  // 交换后 s2 变为空
+  REQUIRE(s1.at("key2").comment().view()[0] == "; comment");  // 验证comment
 }
 
 TEST_CASE("basic_section: swap with self", "[basic_section][swap_self]")
