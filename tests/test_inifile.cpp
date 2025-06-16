@@ -4917,3 +4917,136 @@ TEST_CASE("inifile: automatic trim on set and contains", "[inifile][trim][set][c
     }
   }
 }
+
+TEST_CASE("inifile::section set with initializer_list doesn't trim keys", "[section][trim][bug]")
+{
+  ini::section sec;
+
+  SECTION("insert key with leading/trailing spaces via initializer_list")
+  {
+    sec.set({{"  key1  ", "value1"}, {"key2", "value2"}});
+
+    // 检查 key1 是否能被正常找到（应失败）
+    REQUIRE(sec.contains("key1"));      // 没有 trim 就会失败
+    REQUIRE(sec.contains("  key1  "));  // 实际保存的是带空格的 key
+
+    // key2 是正常的
+    REQUIRE(sec.contains("key2"));
+
+    // 输出实际 key 以验证问题（可选）
+    for (const auto &kv : sec)
+    {
+      INFO("actual key: [" << kv.first << "]");
+    }
+  }
+
+  SECTION("retrieve value using trimmed key")
+  {
+    sec.set({{"  key  ", "abc"}});
+
+    // 查找失败
+    REQUIRE(sec.contains("key"));
+
+    // 获取失败（可能抛异常或断言错误，具体看你的实现）
+    // auto val = sec["key"];  // 若你支持[]访问，注意是否会 crash
+  }
+}
+
+TEST_CASE("ini_section contains() trims keys correctly", "[contains][trim]")
+{
+  ini::section sec;
+
+  // 插入一个带空白的 key（set 会自动 trim）
+  sec.set("  key1  ", ini::field("value1"));
+
+  SECTION("contains with exact key")
+  {
+    REQUIRE(sec.contains("key1") == true);
+  }
+
+  SECTION("contains with key having leading/trailing spaces")
+  {
+    REQUIRE(sec.contains("  key1") == true);
+    REQUIRE(sec.contains("key1  ") == true);
+    REQUIRE(sec.contains("  key1  ") == true);
+  }
+
+  SECTION("contains with wrong key")
+  {
+    REQUIRE(sec.contains("key2") == false);
+    REQUIRE(sec.contains("  key2  ") == false);
+  }
+}
+
+TEST_CASE("inifile operator[] trims section names", "[inifile][trim]")
+{
+  ini::inifile ini;
+
+  // 使用带空格的 section name 插入字段
+  ini["  user  "].set(" name ", "Abin");
+
+  SECTION("access with trimmed section name")
+  {
+    REQUIRE(ini.contains("user"));
+    REQUIRE(ini["user"].contains("name"));
+    REQUIRE(ini["user"].at("name").as<std::string>() == "Abin");
+  }
+
+  SECTION("access with original untrimmed section name")
+  {
+    REQUIRE(ini.contains("  user  "));
+    REQUIRE(ini["  user  "].contains(" name "));
+    REQUIRE(ini["  user  "].at("name").as<std::string>() == "Abin");
+  }
+
+  SECTION("access with different section name should fail")
+  {
+    REQUIRE_FALSE(ini.contains("other"));
+  }
+}
+
+TEST_CASE("section key interface: trim correctness", "[section][operator[]][set][contains]")
+{
+  ini::section sec;
+
+  SECTION("operator[] trims key")
+  {
+    sec["  key1  "] = "value1";
+    REQUIRE(sec.contains("key1"));
+    REQUIRE(sec["key1"].as<std::string>() == "value1");
+    REQUIRE(sec["  key1  "].as<std::string>() == "value1");  // 保证行为一致
+  }
+
+  SECTION("set<T> trims key")
+  {
+    sec.set("  key2  ", "value2");
+    REQUIRE(sec.contains("key2"));
+    REQUIRE(sec["key2"].as<std::string>() == "value2");
+  }
+
+  SECTION("set(initializer_list) trims key")
+  {
+    sec.set({{"  key3  ", "value3"}, {"key4", "value4"}});
+    REQUIRE(sec.contains("key3"));
+    REQUIRE(sec.contains("key4"));
+    REQUIRE(sec["key3"].as<std::string>() == "value3");
+    REQUIRE(sec["  key3  "].as<std::string>() == "value3");
+    REQUIRE(sec["key4"].as<std::string>() == "value4");
+  }
+
+  SECTION("contains trims key before check")
+  {
+    sec.set("  key5  ", "value5");
+    REQUIRE(sec.contains("key5"));
+    REQUIRE(sec.contains("  key5  "));
+    REQUIRE_FALSE(sec.contains("nonexistent"));
+  }
+
+  SECTION("operator[] auto inserts default field if missing")
+  {
+    REQUIRE(sec.contains("not_exist") == false);
+    auto &f = sec["not_exist"];
+    REQUIRE(f.as<std::string>().empty());
+    REQUIRE(sec.contains("not_exist"));  // 插入成功
+  }
+}
