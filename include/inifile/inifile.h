@@ -1448,10 +1448,11 @@ class basic_inifile
   /// @param sec Section name
   /// @param key Key
   /// @param value Field value
+  /// @return Reference to the inserted or updated field
   template <typename T>
-  void set(const std::string &sec, const std::string &key, T &&value)
+  field &set(const std::string &sec, const std::string &key, T &&value)
   {
-    data_[sec][key] = std::forward<T>(value);
+    return data_[sec][key] = std::forward<T>(value);
   }
 
   /// @brief Check if the specified section exists
