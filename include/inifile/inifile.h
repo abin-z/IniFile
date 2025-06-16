@@ -966,13 +966,15 @@ class field
     return this->as<T>();  // 使用 as<T> 方法将值转换为目标类型 T, 转换失败抛异常: std::invalid_argument
   }
 
-  /// @brief Setting field value
-  /// @tparam T field value type
-  /// @param value field value
+  /// @brief Sets the field value from a given typed value.
+  /// @tparam T Type of the input value.
+  /// @param value The value to be stored.
+  /// @return Reference to the current field (for chaining).
   template <typename T>
-  void set(const T &value)
+  field &set(const T &value)
   {
-    detail::convert<T>::encode(value, value_);  // 将传入的值编码成字符串并存储到 value_ 中
+    detail::convert<T>::encode(value, value_);  // 将值编码为字符串存储到 value_ 中
+    return *this;
   }
 
   /// @brief Set `key=value` comment, overwriting the original comment.
