@@ -1147,7 +1147,9 @@ class basic_section
   {
     for (auto &&pair : args)
     {
-      data_[std::move(pair.first)] = std::move(pair.second);
+      std::string key = pair.first;  // 拷贝 key，准备去除空白
+      detail::trim(key);             // trim 去除前后空白，避免 key 带空格导致查找异常
+      data_[std::move(key)] = std::move(pair.second);  // 插入键值对
     }
   }
 
