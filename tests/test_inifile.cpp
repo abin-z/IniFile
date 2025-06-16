@@ -5050,3 +5050,86 @@ TEST_CASE("section key interface: trim correctness", "[section][operator[]][set]
     REQUIRE(sec.contains("not_exist"));  // 插入成功
   }
 }
+
+TEST_CASE("basic_section key trimming and interface tests", "[basic_section]")
+{
+  ini::section section;
+
+  SECTION("operator[] inserts and trims keys")
+  {
+    section["  foo "] = "bar";
+    REQUIRE(section.contains("foo"));
+    REQUIRE(section.contains("  foo  "));
+    REQUIRE(section["foo"].as<std::string>() == "bar");
+    REQUIRE(section["  foo  "].as<std::string>() == "bar");
+  }
+
+  SECTION("set(T&&) inserts and trims keys")
+  {
+    section.set("  key1  ", "val1");
+    REQUIRE(section.contains("key1"));
+    REQUIRE(section.contains("  key1  "));
+    REQUIRE(section.get("key1").as<std::string>() == "val1");
+  }
+
+  SECTION("set(initializer_list) inserts multiple keys trimmed")
+  {
+    section.set({{" a ", "A"}, {" b ", "B"}, {" c ", "C"}});
+    REQUIRE(section.contains("a"));
+    REQUIRE(section.contains("b"));
+    REQUIRE(section.contains("c"));
+    REQUIRE(section.get("a").as<std::string>() == "A");
+    REQUIRE(section.get("b").as<std::string>() == "B");
+    REQUIRE(section.get("c").as<std::string>() == "C");
+  }
+
+  SECTION("contains finds keys with trimming")
+  {
+    section.set("  keyX ", "valueX");
+    REQUIRE(section.contains("keyX"));
+    REQUIRE(section.contains("  keyX  "));
+    REQUIRE_FALSE(section.contains("keyY"));
+  }
+
+  SECTION("at throws on missing keys, trims keys")
+  {
+    section.set("keyAt", "valAt");
+    REQUIRE(section.at(" keyAt ").as<std::string>() == "valAt");
+    REQUIRE_THROWS_AS(section.at(" missing "), std::out_of_range);
+  }
+
+  SECTION("get returns default if not found, trims keys")
+  {
+    section.set("keyGet", "valGet");
+    REQUIRE(section.get(" keyGet ").as<std::string>() == "valGet");
+    REQUIRE(section.get(" missing ", "default").as<std::string>() == "default");
+  }
+
+  SECTION("find returns iterator, trims keys")
+  {
+    section.set("findMe", "found");
+    auto it = section.find("\t findMe \n");
+    REQUIRE((it != section.end()));
+    REQUIRE(it->second.as<std::string>() == "found");
+    it = section.find(" missing ");
+    REQUIRE((it == section.end()));
+  }
+
+  SECTION("count returns 1 or 0, trims keys")
+  {
+    section.set("countKey", "val");
+    REQUIRE(section.count(" countKey ") == 1);
+    REQUIRE(section.count(" missing ") == 0);
+  }
+
+  SECTION("erase removes keys, trims keys")
+  {
+    section.set("eraseKey", "val");
+    REQUIRE(section.contains("eraseKey"));
+    size_t erased = section.erase(" eraseKey \t");
+    REQUIRE(erased == 1);
+    REQUIRE_FALSE(section.contains("eraseKey"));
+    erased = section.erase(" missing ");
+    REQUIRE(erased == 0);
+  }
+}
