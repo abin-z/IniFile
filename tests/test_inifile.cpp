@@ -2537,16 +2537,16 @@ TEST_CASE("basic_section: swap with empty section", "[basic_section][swap_empty]
   s2.set("key2", "value2").set_comment("comment");
 
   // 交换前检查 s1 和 s2 的状态
-  REQUIRE(s1.size() == 0);  // 空 section
-  REQUIRE(s2.size() == 2);  // 有数据的 section
+  REQUIRE(s1.size() == 0);                                    // 空 section
+  REQUIRE(s2.size() == 2);                                    // 有数据的 section
   REQUIRE(s2.at("key2").comment().view()[0] == "; comment");  // 验证comment
 
   // 使用成员函数 swap 交换 s1 和 s2
   s1.swap(s2);
 
   // 交换后检查 s1 和 s2 的状态
-  REQUIRE(s1.size() == 2);  // 交换后 s1 包含数据
-  REQUIRE(s2.size() == 0);  // 交换后 s2 变为空
+  REQUIRE(s1.size() == 2);                                    // 交换后 s1 包含数据
+  REQUIRE(s2.size() == 0);                                    // 交换后 s2 变为空
   REQUIRE(s1.at("key2").comment().view()[0] == "; comment");  // 验证comment
 }
 
@@ -4662,4 +4662,223 @@ TEST_CASE("field: as_to converts to MyType correctly", "[field][as_to][MyType]")
 
   // 确认返回的引用就是传入的 result 对象
   REQUIRE(&ref == &result);
+}
+
+TEST_CASE("section: set single key-value", "[section][set]")
+{
+  ini::section s;
+
+  auto &f1 = s.set("key1", 123);
+  auto &f2 = s.set("key2", 3.14f);
+  auto &f3 = s.set("key3", std::string("hello"));
+
+  REQUIRE(s.size() == 3);
+  REQUIRE(s.at("key1").as<int>() == 123);
+  REQUIRE(s.at("key2").as<float>() == Approx(3.14f));
+  REQUIRE(s.at("key3").as<std::string>() == "hello");
+
+  // 验证返回引用是否等价
+  REQUIRE(&s.at("key1") == &f1);
+  REQUIRE(&s.at("key2") == &f2);
+  REQUIRE(&s.at("key3") == &f3);
+}
+
+TEST_CASE("section: set multiple fields from initializer list", "[section][set_initializer_list]")
+{
+  ini::section s;
+
+  s.set({{"alpha", ini::field("42")}, {"beta", ini::field("true")}, {"gamma", ini::field("pi")}, {"isok", true}});
+  s["gamma"].comment().set("π值");
+
+  REQUIRE(s.size() == 4);
+  REQUIRE(s.at("alpha").as<int>() == 42);
+  REQUIRE(s.at("beta").as<bool>() == true);
+  REQUIRE(s.at("gamma").as<std::string>() == "pi");
+  REQUIRE(s.at("gamma").comment().view()[0] == "; π值");
+}
+
+TEST_CASE("section: chaining set and comment", "[section][set][chaining]")
+{
+  ini::section s;
+
+  s.set("key", 999).set_comment("important value");
+
+  REQUIRE(s.size() == 1);
+  REQUIRE(s.at("key").as<int>() == 999);
+  REQUIRE(s.at("key").comment().view()[0] == "; important value");
+}
+
+TEST_CASE("field: set and retrieve values", "[field][set][as]")
+{
+  ini::field f;
+
+  SECTION("set and retrieve integer")
+  {
+    f.set(123);
+    REQUIRE(f.as<int>() == 123);
+    REQUIRE(static_cast<int>(f) == 123);
+  }
+
+  SECTION("set and retrieve float")
+  {
+    f.set(3.14f);
+    REQUIRE(f.as<float>() == Approx(3.14f));
+    float val = 0.0f;
+    REQUIRE(f.as_to(val) == Approx(3.14f));
+  }
+
+  SECTION("set and retrieve bool")
+  {
+    f.set(true);
+    REQUIRE(f.as<bool>() == true);
+    REQUIRE(static_cast<bool>(f) == true);
+  }
+
+  SECTION("set and retrieve string")
+  {
+    f.set(std::string("hello"));
+    REQUIRE(f.as<std::string>() == "hello");
+    std::string result;
+    REQUIRE(f.as_to(result) == "hello");
+  }
+
+  SECTION("set using constructor")
+  {
+    ini::field f2(42);
+    REQUIRE(f2.as<int>() == 42);
+  }
+
+  SECTION("set using assignment operator")
+  {
+    f = false;
+    REQUIRE(f.as<bool>() == false);
+
+    f = 99;
+    REQUIRE(static_cast<int>(f) == 99);
+  }
+
+  SECTION("chained set + comment")
+  {
+    f.set(100).set_comment("this is a comment");
+    REQUIRE(f.as<int>() == 100);
+    REQUIRE(f.comment().view()[0] == "; this is a comment");
+  }
+}
+
+TEST_CASE("field: comment manipulation", "[field][comment]")
+{
+  ini::field f;
+
+  SECTION("set multi-line comment with #")
+  {
+    f.set_comment("line1\nline2", '#');
+    const auto &c = f.comment().view();
+    REQUIRE(c.size() == 2);
+    REQUIRE(c[0] == "# line1");
+    REQUIRE(c[1] == "# line2");
+  }
+
+  SECTION("add comment lines")
+  {
+    f.set_comment("original");
+    f.add_comment("added\nmore");
+    const auto &lines = f.comment().view();
+    REQUIRE(lines.size() == 3);
+    REQUIRE(lines[0] == "; original");
+    REQUIRE(lines[1] == "; added");
+    REQUIRE(lines[2] == "; more");
+  }
+
+  SECTION("clear comment")
+  {
+    f.set_comment("to be cleared");
+    f.clear_comment();
+    REQUIRE(f.comment().view().empty());
+  }
+}
+
+TEST_CASE("field: copy and move behavior", "[field][copy][move]")
+{
+  ini::field original("value");
+  original.set_comment("copied");
+
+  SECTION("copy constructor")
+  {
+    ini::field copy(original);
+    REQUIRE(copy.as<std::string>() == "value");
+    REQUIRE(copy.comment().view()[0] == "; copied");
+  }
+
+  SECTION("move constructor")
+  {
+    ini::field moved(std::move(original));
+    REQUIRE(moved.as<std::string>() == "value");
+    REQUIRE(moved.comment().view()[0] == "; copied");
+    REQUIRE(original.empty());  // 明确行为一致
+  }
+
+  SECTION("copy assignment")
+  {
+    ini::field copy;
+    copy = original;
+    REQUIRE(copy.as<std::string>() == "value");
+  }
+
+  SECTION("move assignment")
+  {
+    ini::field dest;
+    dest = std::move(original);
+    REQUIRE(dest.as<std::string>() == "value");
+  }
+}
+
+TEST_CASE("inifile: set with value and comment chaining", "[inifile][set][comment]")
+{
+  ini::inifile inif;
+
+  SECTION("basic set and as")
+  {
+    inif.set("general", "version", 3);
+    REQUIRE(inif["general"]["version"].as<int>() == 3);
+  }
+
+  SECTION("set + set_comment chaining")
+  {
+    inif.set("user", "name", "ChatGPT").set_comment("AI assistant");
+
+    auto &f = inif["user"]["name"];
+    REQUIRE(f.as<std::string>() == "ChatGPT");
+    REQUIRE(f.comment().view().size() == 1);
+    REQUIRE(f.comment().view()[0] == "; AI assistant");
+  }
+
+  SECTION("set + add_comment chaining")
+  {
+    inif.set("config", "debug", true).add_comment("enabled in development");
+    inif["config"]["debug"].add_comment("; disable in production");
+
+    const auto &comments = inif["config"]["debug"].comment().view();
+    REQUIRE(comments.size() == 2);
+    REQUIRE(comments[0] == "; enabled in development");
+    REQUIRE(comments[1] == "; disable in production");
+  }
+
+  SECTION("multiple sections independent")
+  {
+    inif.set("sec1", "a", 1).set_comment("first");
+    inif.set("sec2", "b", 2).add_comment("second");
+
+    REQUIRE(inif["sec1"]["a"].as<int>() == 1);
+    REQUIRE(inif["sec1"]["a"].comment().view()[0] == "; first");
+
+    REQUIRE(inif["sec2"]["b"].as<int>() == 2);
+    REQUIRE(inif["sec2"]["b"].comment().view()[0] == "; second");
+  }
+
+  SECTION("contains section after set")
+  {
+    REQUIRE_FALSE(inif.contains("core"));
+    inif.set("core", "enabled", true);
+    REQUIRE(inif.contains("core"));
+  }
 }
