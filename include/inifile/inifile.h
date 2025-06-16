@@ -1453,6 +1453,7 @@ class basic_inifile
   template <typename T>
   field &set(const std::string &sec, const std::string &key, T &&value)
   {
+    // TODO 没有trim, 可能会导致行为不一致
     return data_[sec][key] = std::forward<T>(value);
   }
 
