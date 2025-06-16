@@ -1451,10 +1451,11 @@ class basic_inifile
   /// @param value Field value
   /// @return Reference to the inserted or updated field
   template <typename T>
-  field &set(const std::string &sec, const std::string &key, T &&value)
+  field &set(std::string sec, std::string key, T &&value)
   {
-    // TODO 没有trim, 可能会导致行为不一致
-    return data_[sec][key] = std::forward<T>(value);
+    detail::trim(sec);
+    detail::trim(key);
+    return data_[std::move(sec)][std::move(key)] = std::forward<T>(value);
   }
 
   /// @brief Check if the specified section exists
