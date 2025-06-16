@@ -1121,12 +1121,9 @@ class basic_section
   /// @brief Get or insert a field reference. If the key does not exist, insert a default constructed field object
   /// @param key key name
   /// @return Return the field reference corresponding to the key
-  field &operator[](const std::string &key)
+  field &operator[](std::string key)
   {
-    return data_[key];
-  }
-  field &operator[](std::string &&key)
-  {
+    detail::trim(key);
     return data_[std::move(key)];
   }
 
@@ -1437,12 +1434,9 @@ class basic_inifile
   /// @brief Get or insert a field. If section_name does not exist, insert a default constructed section object
   /// @param sec section name
   /// @return Returns the section reference corresponding to the key
-  section &operator[](const std::string &sec)
+  section &operator[](std::string sec)
   {
-    return data_[sec];
-  }
-  section &operator[](std::string &&sec)
-  {
+    detail::trim(sec);
     return data_[std::move(sec)];
   }
 
