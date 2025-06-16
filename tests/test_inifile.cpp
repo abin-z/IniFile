@@ -165,6 +165,15 @@ TEST_CASE("Field basic functionality", "[field]")
     REQUIRE(f.as<int>() == 42);
   }
 
+  SECTION("Setting a value 2")
+  {
+    field f;
+    f.set(42).set_comment("comment42");
+    f.set(32).comment().set("comment32");
+    REQUIRE(f.as<int>() == 32);
+    REQUIRE(f.comment().view()[0] == "; comment32");
+  }
+
   SECTION("Set comment")
   {
     field f("value");
