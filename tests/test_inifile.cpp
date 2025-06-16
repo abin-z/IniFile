@@ -1007,8 +1007,8 @@ TEST_CASE("member func test11", "[inifile]")
   inif.set("section", "key1", 101);
   inif.set("section", "key2", 102);
   inif.set("section", "key3", 103);
-  inif.set("section", "key4", 104);
-  inif.set("section", "key5", 105);
+  inif.set("section", "key4", 104).add_comment("field comment");
+  inif.set("section", "key5", 105).set_comment("field comment");
 
   inif.at("section").clear_comment();
   inif.at("section").set_comment("section注释信息");
@@ -4015,7 +4015,7 @@ TEST_CASE("Test comments in basic_inifile", "[ini][comments]")
   {
     // 在 section 中添加一个字段并附加注释
     inifile["section1"]["key1"] = "value1";
-    inifile["section1"]["key1"].add_comment("; This is a field comment");
+    inifile["section1"]["key1"].set("value1").add_comment("; This is a field comment");
 
     // 检查字段的注释
     REQUIRE(inifile["section1"]["key1"].comment().view().size() == 1);
@@ -4137,8 +4137,7 @@ TEST_CASE("Test comments in basic_inifile", "[ini][comments]")
   {
     // 添加注释和字段
     inifile["section1"].add_comment("; Section comment");
-    inifile["section1"]["key1"] = "value1";
-    inifile["section1"]["key1"].add_comment("; Field comment");
+    inifile.set("section1", "key1", "value1").set_comment("; Field comment");
 
     // 使用拷贝构造
     ini::inifile copied_inifile = inifile;
