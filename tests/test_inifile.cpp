@@ -4882,3 +4882,38 @@ TEST_CASE("inifile: set with value and comment chaining", "[inifile][set][commen
     REQUIRE(inif.contains("core"));
   }
 }
+
+TEST_CASE("inifile: automatic trim on set and contains", "[inifile][trim][set][contains]")
+{
+  ini::inifile inif;
+
+  SECTION("set with leading/trailing spaces should be trimmed")
+  {
+    inif.set(" section ", " key ", "value123");
+
+    // contains with trimmed names
+    REQUIRE(inif.contains("section"));         // ✅
+    REQUIRE(inif.contains("section", "key"));  // ✅
+
+    // contains with original (untrimmed) input — 也应兼容
+    REQUIRE(inif.contains(" section ", " key "));  // ✅
+
+    // 获取值并验证
+    REQUIRE(inif["section"]["key"].as<std::string>() == "value123");
+  }
+
+  SECTION("actual stored keys are trimmed")
+  {
+    inif.set("  test_section  ", "  real_key  ", "abc");
+
+    // 验证真实存在 key
+    auto &section = inif["test_section"];
+    REQUIRE(section.contains("real_key"));  // ✅ trimmed key
+
+    // 打印 key 以调试（如需要）
+    for (const auto &pair : section)
+    {
+      REQUIRE(pair.first == "real_key");  // 不应为 "  real_key  "
+    }
+  }
+}
