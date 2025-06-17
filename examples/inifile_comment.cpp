@@ -32,8 +32,8 @@ int main()
   inif["database"]["username"] = "admin";
 
   inif["network"]["ip"] = "127.0.0.1";
-  inif["network"]["port"] = 1024;
-  inif["network"]["timeout"] = 30;
+  inif.set("network", "port", 1024).set_comment("network-port");
+  inif["network"]["timeout"].set(30).set_comment("Timeout period, in seconds");
 
   // Set section comments
   inif["database"].set_comment("comment about database section", '#');
