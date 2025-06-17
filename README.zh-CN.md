@@ -574,13 +574,13 @@ int main()
 
 | 函数名        | 函数签名                                                     | 功能描述                                                     |
 | ------------- | ------------------------------------------------------------ | ------------------------------------------------------------ |
-| operator[]    | `field &operator[](const std::string &key)`                  | 返回ini::field引用, 不存在则插入空ini::field                 |
+| operator[]    | `field &operator[](std::string key)`                         | 返回ini::field引用, 不存在则插入空ini::field                 |
 | set           | `field &set(std::string key, T &&value)`                     | 插入或更新指定key的field                                     |
 | contains      | `bool contains(std::string key) const`                       | 判断key是否存在                                              |
 | at            | `field &at(std::string key)`                                 | 返回指定key键的元素的字段值的引用。如果元素不存则抛 std::out_of_range异常 |
 | swap          | `void swap(basic_section &other) noexcept`                   | 交换函数                                                     |
 | get           | `field get(std::string key, field default_value = field{}) const` | 获取key对应的值(副本), 若key不存在则返回default_value默认值  |
-| find          | `iterator find(const key_type &key)`                         | 查找指定key值的迭代器, 不存在返回end迭代器                   |
+| find          | `iterator find(key_type key)`                                | 查找指定key值的迭代器, 不存在返回end迭代器                   |
 | erase         | `iterator erase(iterator pos)`                               | 删除指定迭代器的key-value键值对                              |
 | remove        | `bool remove(std::string key)`                               | 删除指定的key-value键值对, 若不存在则什么都不做              |
 | empty         | `bool empty() const noexcept`                                | 判断key-value键值对是否为空, 为空返回true                    |
@@ -606,21 +606,21 @@ int main()
 
 | 函数名      | 函数签名                                                     | 功能描述                                                     |
 | ----------- | ------------------------------------------------------------ | ------------------------------------------------------------ |
-| operator[]  | `section &operator[](const std::string &section)`            | 返回ini::section引用, 不存在则插入空ini::section             |
+| operator[]  | `section &operator[](std::string sec)`                       | 返回ini::section引用, 不存在则插入空ini::section             |
 | set         | `field &set(std::string sec, std::string key, T &&value)`    | 设置section key-value                                        |
 | contains    | `bool contains(std::string section) const`                   | 判断指定的section是否存在                                    |
 | contains    | `bool contains(std::string section, std::string key) const`  | 判断指定section下指定的key是否存在                           |
 | at          | `section &at(std::string section)`                           | 返回指定section的引用。如果不存在这样的元素，则会抛出 std::out_of_range 类型的异常 |
 | swap        | `void swap(inifile &other) noexcept`                         | 交换函数                                                     |
 | get         | `field get(std::string sec, std::string key, field default_value = field{}) const` | 返回指定section的指定key键的字段值, 若section或key不存在则返回默认值default_value |
-| find        | `iterator find(const key_type &key)`                         | 查找指定section的迭代器, 不存在返回end迭代器                 |
+| find        | `iterator find(key_type key)`                                | 查找指定section的迭代器, 不存在返回end迭代器                 |
 | erase       | `iterator erase(iterator pos)`                               | 删除指定迭代器的section(包括其所有元素)                      |
 | remove      | `bool remove(std::string sec)`                               | 删除指定的section(包括其所有元素)                            |
 | empty       | `bool empty() const noexcept`                                | 判断是否没有section, 没有section空返回true                   |
 | clear       | `void clear() noexcept`                                      | 清空所有的section                                            |
 | size        | `size_type size() const noexcept`                            | 返回有多少section                                            |
 | sections    | `std::vector<key_type> sections() const`                     | 获取ini文件的所有section                                     |
-| count       | `size_type count(const key_type &key) const`                 | 返回有多少指定section-name的section                          |
+| count       | `size_type count(key_type key) const`                        | 返回有多少指定section-name的section                          |
 | begin       | `iterator begin() noexcept`                                  | 返回起始迭代器                                               |
 | end         | `iterator end() noexcept`                                    | 返回末尾迭代器                                               |
 | read        | `void read(std::istream &is)`                                | 从istream中读取ini信息                                       |

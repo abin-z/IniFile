@@ -570,13 +570,13 @@ The following functions will throw an exception if the type conversion fails or 
 
 | function name | function signature                                           | function description                                         |
 | ------------- | ------------------------------------------------------------ | ------------------------------------------------------------ |
-| operator[]    | `field &operator[](const std::string &key)`                  | Return an ini::field reference, or insert an empty ini::field if it doesn't exist. |
+| operator[]    | `field &operator[](std::string key)`                         | Return an ini::field reference, or insert an empty ini::field if it doesn't exist. |
 | set           | `field &set(std::string key, T &&value)`                     | Inserts or updates a field with the specified key            |
 | contains      | `bool contains(std::string key) const`                       | Determine if the key exists                                  |
 | at            | `field &at(std::string key)`                                 | Returns a reference to the field value of the element with the specified key. Throws std::out_of_range exception if element does not exist |
 | swap          | `void swap(section &other) noexcept`                         | Swap Function                                                |
 | get           | `field get(std::string key, field default_value = field{}) const` | Get the value (copy) of the key, if the key does not exist, then return the default value of default_value. |
-| find          | `iterator find(const key_type &key)`                         | Find the iterator of the specified key value, if it does not exist, return the end iterator |
+| find          | `iterator find(key_type key)`                                | Find the iterator of the specified key value, if it does not exist, return the end iterator |
 | erase         | `iterator erase(iterator pos)`                               | Delete the key-value pair of the specified iterator          |
 | remove        | `bool remove(std::string key)`                               | Removes the specified key-value key pair, or does nothing if it does not exist. |
 | empty         | `bool empty() const noexcept`                                | Determine whether the key-value pair is empty, and return true if it is empty |
@@ -602,21 +602,21 @@ The following functions will throw an exception if the type conversion fails or 
 
 | function name | function signature                                           | function description                                         |
 | ------------- | ------------------------------------------------------------ | ------------------------------------------------------------ |
-| operator[]    | `section &operator[](const std::string &section)`            | Returns a reference to ini::section, or inserts an empty ini::section if it does not exist. |
+| operator[]    | `section &operator[](std::string sec)`                       | Returns a reference to ini::section, or inserts an empty ini::section if it does not exist. |
 | set           | `field &set(std::string sec, std::string key, T &&value)`    | Set section key-value                                        |
 | contains      | `bool contains(std::string section) const`                   | Determines if the specified section exists.                  |
 | contains      | `bool contains(std::string section, std::string key) const`  | Determines if the specified key exists in the specified section. |
 | at            | `section &at(std::string section)`                           | Returns a reference to the specified section. If no such element exists, an exception of type std::out_of_range is thrown |
 | swap          | `void swap(inifile &other) noexcept`                         | Swap Function                                                |
 | get           | `field get(std::string sec, std::string key, field default_value = field{}) const` | Returns the field value of the specified key for the specified section, or the default value default_value if section or key does not exist |
-| find          | `iterator find(const key_type &key)`                         | Find the iterator of the specified section, if it does not exist, return the end iterator |
+| find          | `iterator find(key_type key)`                                | Find the iterator of the specified section, if it does not exist, return the end iterator |
 | erase         | `iterator erase(iterator pos)`                               | Deletes the section of the specified iterator (including all its elements) |
 | remove        | `bool remove(std::string sec)`                               | Removes the specified section (including all its elements).  |
 | empty         | `bool empty() const noexcept`                                | Determines whether there is no section, returns true if there is no section |
 | clear         | `void clear() noexcept`                                      | Clear all sections                                           |
 | size          | `size_type size() const noexcept`                            | Returns how many sections                                    |
 | sections      | `std::vector<key_type> sections() const`                     | Get all section names in the INI file.                       |
-| count         | `size_type count(const key_type &key) const`                 | Returns how many sections have the specified section-name    |
+| count         | `size_type count(key_type key) const`                        | Returns how many sections have the specified section-name    |
 | begin         | `iterator begin() noexcept`                                  | Returns the begin iterator.                                  |
 | end           | `iterator end() noexcept`                                    | Returns the end iterator.                                    |
 | read          | `void read(std::istream &is)`                                | Read ini information from istream                            |
