@@ -554,7 +554,7 @@ int main()
 | 函数名        | 函数签名                                                     | 功能描述                          |
 | ------------- | ------------------------------------------------------------ | --------------------------------- |
 | field         | `field(const T &other)`                                      | 构造field对象, 将T类型转为field值 |
-| set           | `void set(const T &value)`                                   | 设置field值, 将T类型转为field值   |
+| set           | `field &set(const T &value)`                                 | 设置field值, 将T类型转为field值   |
 | operator=     | `field &operator=(const T &rhs)`                             | 设置field值, 将T类型转为field值   |
 | operator T    | `operator T() const`                                         | 将field类型转为T类型              |
 | as            | `T as() const`                                               | 将field类型转为T类型              |
@@ -575,7 +575,7 @@ int main()
 | 函数名        | 函数签名                                                     | 功能描述                                                     |
 | ------------- | ------------------------------------------------------------ | ------------------------------------------------------------ |
 | operator[]    | `field &operator[](const std::string &key)`                  | 返回ini::field引用, 不存在则插入空ini::field                 |
-| set           | `void set(std::string key, T &&value)`                       | 插入或更新指定key的field                                     |
+| set           | `field &set(std::string key, T &&value)`                     | 插入或更新指定key的field                                     |
 | contains      | `bool contains(std::string key) const`                       | 判断key是否存在                                              |
 | at            | `field &at(std::string key)`                                 | 返回指定key键的元素的字段值的引用。如果元素不存则抛 std::out_of_range异常 |
 | swap          | `void swap(basic_section &other) noexcept`                   | 交换函数                                                     |
@@ -607,7 +607,7 @@ int main()
 | 函数名      | 函数签名                                                     | 功能描述                                                     |
 | ----------- | ------------------------------------------------------------ | ------------------------------------------------------------ |
 | operator[]  | `section &operator[](const std::string &section)`            | 返回ini::section引用, 不存在则插入空ini::section             |
-| set         | `void set(const std::string &section, const std::string &key, T &&value)` | 设置section key-value                                        |
+| set         | `field &set(std::string sec, std::string key, T &&value)`    | 设置section key-value                                        |
 | contains    | `bool contains(std::string section) const`                   | 判断指定的section是否存在                                    |
 | contains    | `bool contains(std::string section, std::string key) const`  | 判断指定section下指定的key是否存在                           |
 | at          | `section &at(std::string section)`                           | 返回指定section的引用。如果不存在这样的元素，则会抛出 std::out_of_range 类型的异常 |

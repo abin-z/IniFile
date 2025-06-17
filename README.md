@@ -550,7 +550,7 @@ The following functions will throw an exception if the type conversion fails or 
 | function name | function signature                                           | function description                                         |
 | ------------- | ------------------------------------------------------------ | ------------------------------------------------------------ |
 | field         | `field(const T &other)`                                      | Constructs a field object, converting a T type to a field value. |
-| set           | `void set(const T &value)`                                   | Set field value, convert T type to field value.              |
+| set           | `field &set(const T &value)`                                 | Set field value, convert T type to field value.              |
 | operator=     | `field &operator=(const T &rhs)`                             | Set field value, convert T type to field value.              |
 | operator T    | `operator T() const`                                         | Converting field types to T type                             |
 | as            | `T as() const`                                               | Converting field types to T type                             |
@@ -571,7 +571,7 @@ The following functions will throw an exception if the type conversion fails or 
 | function name | function signature                                           | function description                                         |
 | ------------- | ------------------------------------------------------------ | ------------------------------------------------------------ |
 | operator[]    | `field &operator[](const std::string &key)`                  | Return an ini::field reference, or insert an empty ini::field if it doesn't exist. |
-| set           | `void set(std::string key, T &&value)`                       | Inserts or updates a field with the specified key            |
+| set           | `field &set(std::string key, T &&value)`                     | Inserts or updates a field with the specified key            |
 | contains      | `bool contains(std::string key) const`                       | Determine if the key exists                                  |
 | at            | `field &at(std::string key)`                                 | Returns a reference to the field value of the element with the specified key. Throws std::out_of_range exception if element does not exist |
 | swap          | `void swap(section &other) noexcept`                         | Swap Function                                                |
@@ -603,7 +603,7 @@ The following functions will throw an exception if the type conversion fails or 
 | function name | function signature                                           | function description                                         |
 | ------------- | ------------------------------------------------------------ | ------------------------------------------------------------ |
 | operator[]    | `section &operator[](const std::string &section)`            | Returns a reference to ini::section, or inserts an empty ini::section if it does not exist. |
-| set           | `void set(const std::string &section, const std::string &key, T &&value)` | Set section key-value                                        |
+| set           | `field &set(std::string sec, std::string key, T &&value)`    | Set section key-value                                        |
 | contains      | `bool contains(std::string section) const`                   | Determines if the specified section exists.                  |
 | contains      | `bool contains(std::string section, std::string key) const`  | Determines if the specified key exists in the specified section. |
 | at            | `section &at(std::string section)`                           | Returns a reference to the specified section. If no such element exists, an exception of type std::out_of_range is thrown |
