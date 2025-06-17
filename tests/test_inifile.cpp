@@ -5190,3 +5190,191 @@ TEST_CASE("basic_inifile section trimming and interface tests", "[basic_inifile]
     REQUIRE(erased == 0);
   }
 }
+
+TEST_CASE("inifile: set and get basic fields with comment operations", "[inifile][field][comment]")
+{
+  ini::inifile inif;
+
+  inif["section"]["key"] = "value";
+  inif["section"]["flag"] = true;
+
+  inif["database"]["host"] = "localhost";
+  inif["database"]["port"] = 3306;
+  inif["database"]["username"] = "admin";
+
+  inif["network"]["ip"] = "127.0.0.1";
+  inif.set("network", "port", 1024).set_comment("network-port");
+  inif["network"]["timeout"].set(30).set_comment("Timeout period, in seconds");
+
+  REQUIRE(inif["network"]["port"].as<int>() == 1024);
+  REQUIRE(inif["network"]["port"].comment().view()[0] == "; network-port");
+  REQUIRE(inif["network"]["timeout"].as<int>() == 30);
+  REQUIRE(inif["network"]["timeout"].comment().view()[0] == "; Timeout period, in seconds");
+
+  inif["database"].set_comment("comment about database section", '#');
+  inif["network"].add_comment("network config");
+
+  REQUIRE(inif["database"].comment().view()[0] == "# comment about database section");
+  REQUIRE(inif["network"].comment().view()[0] == "; network config");
+
+  inif["database"]["host"].set_comment("database host");
+  inif["database"]["port"].set_comment("database port");
+  inif.at("database").at("username").set_comment("database username");
+
+  REQUIRE(inif["database"]["host"].comment().view()[0] == "; database host");
+  REQUIRE(inif["database"]["port"].comment().view()[0] == "; database port");
+  REQUIRE(inif["database"]["username"].comment().view()[0] == "; database username");
+
+  inif["section"]["key"].add_comment("Extra comment line1.");
+  inif["section"]["key"].comment().add("Extra comment line2.");
+
+  inif["section"].set_comment("section-comment line1\nsection-comment line2\nsection-comment line3", '#');
+
+  auto sec_cmt = inif["section"].comment().view();
+  REQUIRE(sec_cmt.size() == 3);
+  REQUIRE(sec_cmt[0] == "# section-comment line1");
+  REQUIRE(sec_cmt[1] == "# section-comment line2");
+  REQUIRE(sec_cmt[2] == "# section-comment line3");
+
+  inif["section"]["key"].comment().add(
+    {"Main key for the section.", "Can be any string value.", "Used in test cases."});
+  inif["section"]["key"].comment().add({"Another one.\nFinal line."});
+
+  auto key_comments = inif["section"]["key"].comment().view();
+  REQUIRE(std::any_of(key_comments.begin(), key_comments.end(), [](const std::string &line) {
+    return line.find("Main key for the section.") != std::string::npos;
+  }));
+
+  inif["network"]["ip"].clear_comment();
+  inif["network"]["port"].comment().clear();
+
+  REQUIRE(inif["network"]["ip"].comment().view().empty());
+  REQUIRE(inif["network"]["port"].comment().view().empty());
+}
+
+TEST_CASE("inifile: trim in set and contains should match", "[inifile][trim]")
+{
+  ini::inifile inif;
+
+  // set section/key with whitespace
+  inif.set("  section1  ", "  key1  ", 123).set_comment("trimmed test");
+
+  // contains should succeed if trim is correct
+  REQUIRE(inif.contains("section1"));
+  REQUIRE(inif.contains("  section1  "));
+
+  // value access should also trim
+  REQUIRE(inif["section1"]["key1"].as<int>() == 123);
+
+  // comment should be preserved and trimmed
+  REQUIRE(inif["section1"]["key1"].comment().view()[0] == "; trimmed test");
+}
+
+TEST_CASE("inifile: set and comment chaining", "[inifile][set][comment]")
+{
+  ini::inifile inif;
+
+  // 链式设置 value 和注释
+  inif.set("net", "ip", "127.0.0.1").set_comment("ip address");
+  inif.set("net", "port", 8080).comment().add("port comment line 1");
+
+  REQUIRE(inif["net"]["ip"].as<std::string>() == "127.0.0.1");
+  REQUIRE(inif["net"]["port"].as<int>() == 8080);
+  REQUIRE(inif["net"]["ip"].comment().view()[0] == "; ip address");
+  REQUIRE(inif["net"]["port"].comment().view().size() == 1);
+}
+
+TEST_CASE("inifile: comment object access and vector copy", "[inifile][comment]")
+{
+  ini::inifile inif;
+  inif["db"]["host"] = "localhost";
+  inif["db"]["host"].add_comment("primary database");
+
+  const auto &c1 = inif["db"]["host"].comment().view();
+  auto c2 = inif["db"]["host"].comment().to_vector();
+
+  REQUIRE(c1.size() == 1);
+  REQUIRE(c2.size() == 1);
+  REQUIRE(c2[0] == "; primary database");
+}
+
+TEST_CASE("inifile: multi-line comment set and append", "[inifile][comment][multi]")
+{
+  ini::inifile inif;
+  inif["app"]["key"].set("val").set_comment("line1\nline2", '#');
+  inif["app"]["key"].comment().add({"line3", "line4"});
+
+  const auto &cmt = inif["app"]["key"].comment().view();
+  REQUIRE(cmt[0] == "# line1");
+  REQUIRE(cmt[1] == "# line2");
+  REQUIRE(cmt[2] == "; line3");
+  REQUIRE(cmt[3] == "; line4");
+}
+
+TEST_CASE("inifile: clear comment test", "[inifile][comment][clear]")
+{
+  ini::inifile inif;
+  inif["mod"]["ver"] = "1.0";
+  inif["mod"]["ver"].add_comment("version");
+  REQUIRE_FALSE(inif["mod"]["ver"].comment().view().empty());
+
+  inif["mod"]["ver"].clear_comment();
+  REQUIRE(inif["mod"]["ver"].comment().view().empty());
+
+  inif["mod"]["ver"].add_comment("again");
+  inif["mod"]["ver"].comment().clear();
+  REQUIRE(inif["mod"]["ver"].comment().view().empty());
+}
+
+TEST_CASE("inifile: set vs contains - trim behavior", "[inifile][trim][consistency]")
+{
+  ini::inifile inif;
+
+  inif.set("  space_sec ", "key", 123);
+  REQUIRE(inif.contains("space_sec"));     // contains will trim
+  REQUIRE(inif.contains("  space_sec "));  // double trim is needed in set to match
+  REQUIRE(inif["space_sec"]["key"].as<int>() == 123);
+}
+
+TEST_CASE("inifile: set section and key with whitespace", "[inifile][trim]")
+{
+  ini::inifile inif;
+
+  // 直接插入带空格的 key，section 会被 trim，但 key 不会
+  inif["space"]["  key  "] = "value";
+  REQUIRE(inif["space"].contains("  key "));
+  REQUIRE(inif["space"]["  key "].as<std::string>() == "value");
+}
+
+TEST_CASE("inifile: comment multiple symbol support", "[inifile][comment][symbol]")
+{
+  ini::inifile inif;
+  inif["a"]["x"].set(1).set_comment("test1");
+  inif["a"]["y"].set(2).set_comment("test2", '#');
+  inif["a"]["x"].add_comment("additional");
+
+  const auto &cx = inif["a"]["x"].comment().view();
+  const auto &cy = inif["a"]["y"].comment().view();
+
+  REQUIRE(cx[0] == "; test1");
+  REQUIRE(cx[1] == "; additional");
+  REQUIRE(cy[0] == "# test2");
+}
+
+TEST_CASE("inifile: self assignment test", "[field][assignment]")
+{
+  ini::field f1("hello");
+  f1 = f1;  // should be safe
+  REQUIRE(f1.as<std::string>() == "hello");
+}
+
+TEST_CASE("inifile: save and reload preserves comment", "[inifile][io][comment]")
+{
+  ini::inifile out;
+  out["s"]["k"].set("v").set_comment("save-comment");
+  std::string str = out.to_string();
+
+  ini::inifile in;
+  in.from_string(str);
+  REQUIRE(in["s"]["k"].comment().view()[0] == "; save-comment");
+}
