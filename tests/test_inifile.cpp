@@ -5463,3 +5463,78 @@ TEST_CASE("inifile: roundtrip preserves content and trim key names", "[inifile][
   REQUIRE(in["my section"]["key name"].as<int>() == 123);
   REQUIRE(in["my section"]["key name"].comment().view()[0] == "; testing trim");
 }
+
+TEST_CASE("inifile: extreme section/key names with spaces", "[inifile][trim][edgecase]")
+{
+  ini::inifile ini;
+  ini.set("   spaced section   ", "   spaced key   ", "value").set_comment("  trimmed comment ");
+
+  REQUIRE(ini.contains("spaced section"));
+  REQUIRE(ini["spaced section"].contains("spaced key"));
+  REQUIRE(ini["spaced section"]["spaced key"].as<std::string>() == "value");
+  REQUIRE(ini["spaced section"]["spaced key"].comment().view()[0] == "; trimmed comment");
+}
+
+TEST_CASE("inifile: use # as comment prefix", "[inifile][comment][prefix]")
+{
+  ini::inifile ini;
+  ini["s"]["k"].set("v").set_comment("hash comment", '#');
+
+  REQUIRE(ini["s"]["k"].comment().view().size() == 1);
+  REQUIRE(ini["s"]["k"].comment().view()[0] == "# hash comment");
+
+  std::string str = ini.to_string();
+  REQUIRE(str.find("# hash comment") != std::string::npos);
+}
+
+TEST_CASE("inifile: multiple set_comment calls overwrite", "[inifile][comment][overwrite]")
+{
+  ini::inifile ini;
+  ini["a"]["b"].set("1").set_comment("old comment");
+  ini["a"]["b"].set_comment("new comment");
+
+  const auto &lines = ini["a"]["b"].comment().view();
+  REQUIRE(lines.size() == 1);
+  REQUIRE(lines[0] == "; new comment");
+}
+
+TEST_CASE("inifile: check full string output", "[inifile][to_string][comment][verify]")
+{
+  ini::inifile ini;
+  ini["s"].set_comment("section description");
+  ini["s"]["k"].set("v").set_comment("key comment");
+
+  std::string str = ini.to_string();
+  REQUIRE(str.find("; section description") != std::string::npos);
+  REQUIRE(str.find("; key comment") != std::string::npos);
+  REQUIRE(str.find("[s]") != std::string::npos);
+  REQUIRE(str.find("k=v") != std::string::npos);
+}
+
+TEST_CASE("inifile: set returns same field for chaining", "[inifile][chain][reference]")
+{
+  ini::inifile ini;
+  ini.set("x", "y", 42).set_comment("chained comment");
+
+  REQUIRE(ini["x"]["y"].as<int>() == 42);
+  REQUIRE(ini["x"]["y"].comment().view()[0] == "; chained comment");
+}
+
+TEST_CASE("inifile: roundtrip preserves multiple sections and types", "[inifile][roundtrip][types]")
+{
+  ini::inifile ini;
+  ini["one"]["a"] = 1;
+  ini["two"]["b"] = true;
+  ini["three"]["c"] = 3.1415;
+  ini["three"]["c"].set_comment("pi");
+
+  std::string saved = ini.to_string();
+
+  ini::inifile reloaded;
+  reloaded.from_string(saved);
+
+  REQUIRE(reloaded["one"]["a"].as<int>() == 1);
+  REQUIRE(reloaded["two"]["b"].as<bool>() == true);
+  REQUIRE(reloaded["three"]["c"].as<double>() == Approx(3.1415));
+  REQUIRE(reloaded["three"]["c"].comment().view()[0] == "; pi");
+}
