@@ -5378,3 +5378,88 @@ TEST_CASE("inifile: save and reload preserves comment", "[inifile][io][comment]"
   in.from_string(str);
   REQUIRE(in["s"]["k"].comment().view()[0] == "; save-comment");
 }
+
+TEST_CASE("inifile: trim section/key names", "[inifile][trim]")
+{
+  ini::inifile ini;
+  ini.set("  net  ", "  port  ", 8080).set_comment("port comment");
+
+  // 测试 trim
+  REQUIRE(ini.contains("net"));
+  REQUIRE(ini["net"].contains("port"));
+  REQUIRE(ini["net"]["port"].as<int>() == 8080);
+  REQUIRE(ini["net"]["port"].comment().view()[0] == "; port comment");
+}
+
+TEST_CASE("inifile: set and retrieve multi-line comment", "[inifile][comment][multi-line]")
+{
+  ini::inifile ini;
+  ini["\tconfig"]["mode\n"].set("fast").set_comment("line 1\nline 2\nline 3", '#');
+
+  const auto &view = ini["config"]["mode"].comment().view();
+  REQUIRE(view.size() == 3);
+  REQUIRE(view[0] == "# line 1");
+  REQUIRE(view[1] == "# line 2");
+  REQUIRE(view[2] == "# line 3");
+}
+
+TEST_CASE("inifile: add vs set comment behavior", "[inifile][comment][append]")
+{
+  ini::inifile ini;
+  ini["a"]["b"].set("x").set_comment("set line");
+  ini["a\t"]["b"].add_comment("added line 1");
+  ini["a "]["\nb"].add_comment("added line 2");
+
+  auto lines = ini["a"]["b"].comment().view();
+  REQUIRE(lines.size() == 3);
+  REQUIRE(lines[0] == "; set line");
+  REQUIRE(lines[1] == "; added line 1");
+  REQUIRE(lines[2] == "; added line 2");
+}
+
+TEST_CASE("inifile: clear comment removes all", "[inifile][comment][clear]")
+{
+  ini::inifile ini;
+  ini["section"]["key"].set("v").set_comment("should be gone");
+  ini["section"]["key"].clear_comment();
+
+  REQUIRE(ini["section"]["key"].comment().view().empty());
+}
+
+TEST_CASE("inifile: serialize with comments and reload", "[inifile][io][comment][persist]")
+{
+  ini::inifile ini;
+  ini["s"]["k"].set("v").set_comment("line1\nline2");
+  ini["s"].set_comment("section comment");
+
+  std::string txt = ini.to_string();
+
+  ini::inifile reloaded;
+  reloaded.from_string(txt);
+
+  const auto &kview = reloaded["s"]["k"].comment().view();
+  const auto &sview = reloaded["s"].comment().view();
+
+  REQUIRE(kview.size() == 2);
+  REQUIRE(kview[0] == "; line1");
+  REQUIRE(kview[1] == "; line2");
+
+  REQUIRE(sview.size() == 1);
+  REQUIRE(sview[0] == "; section comment");
+}
+
+TEST_CASE("inifile: roundtrip preserves content and trim key names", "[inifile][io][trim][roundtrip]")
+{
+  ini::inifile out;
+  out.set("  my section \t ", " \t key name  ", 123).set_comment("testing trim");
+
+  std::string saved = out.to_string();
+
+  ini::inifile in;
+  in.from_string(saved);
+
+  REQUIRE(in.contains("my section"));
+  REQUIRE(in["my section"].contains("key name"));
+  REQUIRE(in["my section"]["key name"].as<int>() == 123);
+  REQUIRE(in["my section"]["key name"].comment().view()[0] == "; testing trim");
+}
