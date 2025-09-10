@@ -422,7 +422,7 @@ struct convert<T, typename std::enable_if<std::is_integral<T>::value && is_to_st
     if (std::is_signed<T>::value)
     {
       long long temp = std::strtoll(value.c_str(), &end_ptr, 10);
-      if (errno == ERANGE || temp < std::numeric_limits<T>::min() || temp > std::numeric_limits<T>::max())
+      if (errno == ERANGE || temp < (std::numeric_limits<T>::min)() || temp > (std::numeric_limits<T>::max)())
       {
         throw std::out_of_range("[inifile] error: Integer conversion out of range: \"" + value + '"');
       }
@@ -437,7 +437,7 @@ struct convert<T, typename std::enable_if<std::is_integral<T>::value && is_to_st
       }
 
       unsigned long long temp = std::strtoull(value.c_str(), &end_ptr, 10);
-      if (errno == ERANGE || temp > std::numeric_limits<T>::max())
+      if (errno == ERANGE || temp > (std::numeric_limits<T>::max)())
       {
         throw std::out_of_range("[inifile] error: Unsigned integer conversion out of range: \"" + value + '"');
       }
@@ -534,7 +534,7 @@ struct convert<T, typename std::enable_if<std::is_floating_point<T>::value>::typ
     errno = 0;
     T temp = parse_string_to_floating_point<T>(value.c_str(), &end_ptr);
 
-    if (errno == ERANGE || temp < std::numeric_limits<T>::lowest() || temp > std::numeric_limits<T>::max())
+    if (errno == ERANGE || temp < (std::numeric_limits<T>::lowest)() || temp > (std::numeric_limits<T>::max)())
     {
       throw std::out_of_range("[inifile] error: Floating-point conversion out of range: \"" + value + '"');
     }
