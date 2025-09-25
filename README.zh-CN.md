@@ -662,7 +662,7 @@ git clone --recurse-submodules https://github.com/abin-z/IniFile.git
 **步骤三: 运行**
 
 ```sh
-./initest
+./initest     # 运行单元测试
 ```
 
 ### 💡 贡献指南

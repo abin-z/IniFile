@@ -658,7 +658,7 @@ cmake --build build    # Build the project
 **Step 3: Run**
 
 ```sh
-./initest
+./initest     # Run unit tests
 ```
 
 ### 💡 Contribution Guidelines
