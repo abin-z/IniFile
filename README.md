@@ -664,6 +664,9 @@ cmake --build build    # Build the project
 ### 💡 Contribution Guidelines
 
 We welcome contributions! Feel free to submit **Issues** and **Pull Requests** to improve this project.
+- Contributions are not limited to code: documentation, tests, performance improvements, and bug reports are also valuable.  
+- Ensure all unit tests pass ([`test_inifile.cpp`](tests/test_inifile.cpp)) before submitting.  
+- Run `clang-format` for code formatting ([`.clang-format`](.clang-format)).  
 
 ### 🙌 Acknowledgements
 

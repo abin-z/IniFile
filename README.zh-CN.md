@@ -668,6 +668,9 @@ git clone --recurse-submodules https://github.com/abin-z/IniFile.git
 ### 💡 贡献指南
 
 欢迎提交 **Issue** 和 **Pull request** 来改进本项目！
+- 不仅是代码：文档、测试、性能优化、反馈 bug 都是贡献。
+- 代码确保可以通过所有单元测试([`test_inifile.cpp`](tests/test_inifile.cpp))
+- 运行 `clang-format` 进行代码格式化([`.clang-format`](.clang-format))
 
 ### 🙌 致谢
 
