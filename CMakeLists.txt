@@ -22,9 +22,6 @@ set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}/build_output/lib) #
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}/build_output/bin) # 动态库 (.so/.dll)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}/build_output/bin) # 可执行文件
 
-# 设置位置无关代码 (PIC)，对于动态库来说是必须的
-set(CMAKE_POSITION_INDEPENDENT_CODE ON)
-
 project(IniFile-Cpp LANGUAGES C CXX VERSION 0.9.9)
 
 # 启用测试功能
