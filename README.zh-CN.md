@@ -63,7 +63,7 @@ key = value
 
    ```cmake
    add_subdirectory(inifile) # inifile为步骤1创建的文件夹名称
-   target_link_libraries(your_target_name PRIVATE inifile) # 链接inifile库
+   target_link_libraries(<target_name> PRIVATE inifile) # 链接inifile库
    ```
 
 4. 在源代码中添加`#include <inifile/inifile.h>`即可使用

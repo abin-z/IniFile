@@ -64,7 +64,7 @@ key = value
 
    ```cmake
    add_subdirectory(inifile) # "inifile" is the folder name created in step 1
-   target_link_libraries(your_target_name PRIVATE inifile) # link inifile
+   target_link_libraries(<target_name> PRIVATE inifile) # link inifile
    ```
 
 4. Include it in your source code using `#include <inifile/inifile.h>`.
