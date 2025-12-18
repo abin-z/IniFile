@@ -4,12 +4,13 @@ IndentWidth: 2        # 缩进宽度2
 UseTab: Never         # 使用空格缩进
 TabWidth: 2           # Tab 宽度2
 ReflowComments: true  # 自动调整 `/** ... */` 的换行格式
-AllowShortFunctionsOnASingleLine: Empty   # 允许短函数一行显示, Empty（允许空函数）
+AllowShortFunctionsOnASingleLine: Empty   # 允许短函数一行显示, Empty(允许空函数)
 BreakConstructorInitializers: AfterColon  # 构造函数初始化列表换行
 ConstructorInitializerIndentWidth: 2      # 构造函数初始化列表缩进
 ConstructorInitializerAllOnOneLineOrOnePerLine: true # 构造函数初始化列表一行或者一行一个
 ContinuationIndentWidth: 2    # 换行缩进宽度2
-IndentCaseLabels: false       # 控制 case: label 本身是否缩进（你没设置，默认为 false）
+IndentCaseLabels: false       # 控制 case: label 本身是否缩进
+PointerAlignment: Right       # 确保 type &var 风格
 # AlignConsecutiveAssignments: true  # 启用连续赋值对齐
 
 BreakBeforeBraces: Custom   # 使用自定义大括号规则
