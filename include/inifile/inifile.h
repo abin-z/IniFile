@@ -64,7 +64,7 @@ static constexpr char whitespaces[] = " \t\n\r\f\v";
 
 /// @brief 除去str两端空白字符
 /// @param str
-inline void trim(std::string& str)
+inline void trim(std::string &str)
 {
   auto lastpos = str.find_last_not_of(whitespaces);
   if (lastpos == std::string::npos)
@@ -79,7 +79,7 @@ inline void trim(std::string& str)
 /// @brief 判断字符串是否全是空白字符
 /// @param str 输入的字符串
 /// @return 如果字符串全是空白字符，则返回true，否则返回false
-inline bool is_all_whitespace(const std::string& str)
+inline bool is_all_whitespace(const std::string &str)
 {
   return str.find_first_not_of(whitespaces) == std::string::npos;
 }
@@ -89,7 +89,7 @@ inline bool is_all_whitespace(const std::string& str)
 /// @param delimiter 分割字符串(支持多字符)
 /// @param skip_empty 是否忽略空字符串
 /// @return 分割后的内容
-inline std::vector<std::string> split(const std::string& str, const std::string& delimiter, bool skip_empty = false)
+inline std::vector<std::string> split(const std::string &str, const std::string &delimiter, bool skip_empty = false)
 {
   std::vector<std::string> tokens;
   std::string::size_type start = 0, pos = 0;
@@ -120,9 +120,9 @@ class has_begin_end
   // 这个测试会先尝试通过 std::begin 和 std::end 获取迭代器
   // 如果这两个函数存在, 并且能正常编译, 最后会返回 std::true_type
   template <typename U>
-  static auto test(int) -> decltype(std::begin(std::declval<U&>()),  // 检查是否支持 std::begin
-                                    std::end(std::declval<U&>()),    // 检查是否支持 std::end
-                                    std::true_type{});               // 如果能编译成功, 返回 std::true_type
+  static auto test(int) -> decltype(std::begin(std::declval<U &>()),  // 检查是否支持 std::begin
+                                    std::end(std::declval<U &>()),    // 检查是否支持 std::end
+                                    std::true_type{});                // 如果能编译成功, 返回 std::true_type
 
   // 如果不支持 std::begin() 或 std::end(), 会匹配到这个重载, 返回 std::false_type
   template <typename>
@@ -155,7 +155,7 @@ class is_ostreamable
 {
  private:
   template <typename U>
-  static auto test(int) -> decltype(std::declval<std::ostream&>() << std::declval<const U&>(), std::true_type{});
+  static auto test(int) -> decltype(std::declval<std::ostream &>() << std::declval<const U &>(), std::true_type{});
 
   template <typename>
   static std::false_type test(...);
@@ -171,7 +171,7 @@ class is_ostreamable
 /// @param separator 用于连接每个元素之间的分隔字符串
 /// @return 拼接后的字符串结果
 template <typename Iterable>
-inline std::string join(const Iterable& iterable, const std::string& separator)
+inline std::string join(const Iterable &iterable, const std::string &separator)
 {
   // 断言 iterable 支持 begin() 和 end(), 不是 map 类型, 元素类型不是指针并且元素类型可通过 << 输出到 std::ostream
   using value_type = typename Iterable::value_type;
@@ -216,7 +216,7 @@ inline std::string format_comment(std::string comment, char symbol)
 
 /// @brief 去除单行字符串末尾的 Windows 换行符 '\r'
 /// @param line 输入字符串
-inline void remove_trailing_cr(std::string& line)
+inline void remove_trailing_cr(std::string &line)
 {
   if (!line.empty() && line.back() == '\r')
   {
@@ -248,7 +248,7 @@ struct convert<bool>
    *  - 空字符串 `""` 解析为 `false`
    *  - 其他情况一律解析为 `true`
    */
-  static void decode(const std::string& value, bool& result)
+  static void decode(const std::string &value, bool &result)
   {
     std::string str(value);  // 复制字符串, 避免修改原始数据
     std::transform(str.begin(), str.end(), str.begin(), [](unsigned char c) { return std::tolower(c); });
@@ -261,7 +261,7 @@ struct convert<bool>
    * @param value 布尔值
    * @param result 输出字符串:"true" 或 "false"
    */
-  static void encode(const bool value, std::string& result)
+  static void encode(const bool value, std::string &result)
   {
     result = value ? "true" : "false";
   }
@@ -270,7 +270,7 @@ struct convert<bool>
 template <>
 struct convert<char>
 {
-  static void decode(const std::string& value, char& result)
+  static void decode(const std::string &value, char &result)
   {
     if (value.empty())
     {
@@ -278,7 +278,7 @@ struct convert<char>
     }
     result = value[0];
   }
-  static void encode(const char value, std::string& result)
+  static void encode(const char value, std::string &result)
   {
     result = std::string(1, value);
   }
@@ -287,7 +287,7 @@ struct convert<char>
 template <>
 struct convert<unsigned char>
 {
-  static void decode(const std::string& value, unsigned char& result)
+  static void decode(const std::string &value, unsigned char &result)
   {
     if (value.empty())
     {
@@ -296,7 +296,7 @@ struct convert<unsigned char>
     result = static_cast<unsigned char>(value[0]);
   }
 
-  static void encode(const unsigned char value, std::string& result)
+  static void encode(const unsigned char value, std::string &result)
   {
     result = std::string(1, value);
   }
@@ -305,7 +305,7 @@ struct convert<unsigned char>
 template <>
 struct convert<signed char>
 {
-  static void decode(const std::string& value, signed char& result)
+  static void decode(const std::string &value, signed char &result)
   {
     if (value.empty())
     {
@@ -314,7 +314,7 @@ struct convert<signed char>
     result = static_cast<signed char>(value[0]);
   }
 
-  static void encode(const signed char value, std::string& result)
+  static void encode(const signed char value, std::string &result)
   {
     result = std::string(1, value);
   }
@@ -324,12 +324,12 @@ struct convert<signed char>
 template <>
 struct convert<std::string>
 {
-  static void decode(const std::string& value, std::string& result)
+  static void decode(const std::string &value, std::string &result)
   {
     result = value;
   }
 
-  static void encode(const std::string& value, std::string& result)
+  static void encode(const std::string &value, std::string &result)
   {
     result = value;
   }
@@ -337,14 +337,14 @@ struct convert<std::string>
 
 // 处理 `const char*`
 template <>
-struct convert<const char*>
+struct convert<const char *>
 {
-  static void decode(const std::string& value, const char*& result)
+  static void decode(const std::string &value, const char *&result)
   {
     result = value.c_str();
   }
 
-  static void encode(const char* value, std::string& result)
+  static void encode(const char *value, std::string &result)
   {
     result = value;
   }
@@ -352,9 +352,9 @@ struct convert<const char*>
 
 // 处理 `char *`
 template <>
-struct convert<char*>
+struct convert<char *>
 {
-  static void encode(char* value, std::string& result)
+  static void encode(char *value, std::string &result)
   {
     result = value;
   }
@@ -364,7 +364,7 @@ struct convert<char*>
 template <std::size_t N>
 struct convert<char[N]>
 {
-  static void encode(const char (&value)[N], std::string& result)
+  static void encode(const char (&value)[N], std::string &result)
   {
     result = value;
   }
@@ -409,14 +409,14 @@ struct convert<T, typename std::enable_if<std::is_integral<T>::value && is_to_st
    * - 确保转换值在 `T` 的范围内
    * - 检查 `end_ptr` 以确保完整转换
    */
-  static void decode(const std::string& value, T& result)
+  static void decode(const std::string &value, T &result)
   {
     if (value.empty())
     {
       throw std::invalid_argument("[inifile] error: Cannot convert empty string to integer: \"" + value + '"');
     }
 
-    char* end_ptr = nullptr;
+    char *end_ptr = nullptr;
     errno = 0;  // 清除错误状态
 
     if (std::is_signed<T>::value)
@@ -457,7 +457,7 @@ struct convert<T, typename std::enable_if<std::is_integral<T>::value && is_to_st
    *
    * - 直接调用 `std::to_string()` 进行转换
    */
-  static void encode(const T value, std::string& result)
+  static void encode(const T value, std::string &result)
   {
     result = std::to_string(value);
   }
@@ -465,25 +465,25 @@ struct convert<T, typename std::enable_if<std::is_integral<T>::value && is_to_st
 
 // 通用浮点字符串解析模板
 template <typename T>
-inline T parse_string_to_floating_point(const char* str, char** end_ptr)
+inline T parse_string_to_floating_point(const char *str, char **end_ptr)
 {
   return static_cast<T>(std::strtold(str, end_ptr));
 }
 // 特化 float
 template <>
-inline float parse_string_to_floating_point<float>(const char* str, char** end_ptr)
+inline float parse_string_to_floating_point<float>(const char *str, char **end_ptr)
 {
   return std::strtof(str, end_ptr);
 }
 // 特化 double
 template <>
-inline double parse_string_to_floating_point<double>(const char* str, char** end_ptr)
+inline double parse_string_to_floating_point<double>(const char *str, char **end_ptr)
 {
   return std::strtod(str, end_ptr);
 }
 // 特化 long double
 template <>
-inline long double parse_string_to_floating_point<long double>(const char* str, char** end_ptr)
+inline long double parse_string_to_floating_point<long double>(const char *str, char **end_ptr)
 {
   return std::strtold(str, end_ptr);
 }
@@ -508,7 +508,7 @@ struct convert<T, typename std::enable_if<std::is_floating_point<T>::value>::typ
    * - 确保转换值在 `T` 的范围内
    * - 检查 `end_ptr` 以确保完整转换
    */
-  static void decode(const std::string& value, T& result)
+  static void decode(const std::string &value, T &result)
   {
     if (value.empty())
     {
@@ -530,7 +530,7 @@ struct convert<T, typename std::enable_if<std::is_floating_point<T>::value>::typ
       }
     }
 
-    char* end_ptr = nullptr;
+    char *end_ptr = nullptr;
     errno = 0;
     T temp = parse_string_to_floating_point<T>(value.c_str(), &end_ptr);
 
@@ -555,7 +555,7 @@ struct convert<T, typename std::enable_if<std::is_floating_point<T>::value>::typ
    * - 不使用 `std::to_string()` 进行转换, `std::to_string()` 会影响浮点数精度;
    * - 对于高精度需求可使用 `std::stringstream`;
    */
-  static void encode(const T value, std::string& result)
+  static void encode(const T value, std::string &result)
   {
     std::ostringstream oss;
     oss << std::setprecision(std::numeric_limits<T>::max_digits10) << value;
@@ -567,12 +567,12 @@ struct convert<T, typename std::enable_if<std::is_floating_point<T>::value>::typ
 template <>
 struct convert<std::string_view>
 {
-  static void decode(const std::string& value, std::string_view& result)
+  static void decode(const std::string &value, std::string_view &result)
   {
     result = value;
   }
 
-  static void encode(const std::string_view value, std::string& result)
+  static void encode(const std::string_view value, std::string &result)
   {
     result = value;
   }
@@ -592,7 +592,7 @@ struct case_insensitive_hash
 /// @brief 大小写不敏感的比较函数
 struct case_insensitive_equal
 {
-  bool operator()(const std::string& lhs, const std::string& rhs) const
+  bool operator()(const std::string &lhs, const std::string &rhs) const
   {
     return lhs.size() == rhs.size() &&
            std::equal(lhs.begin(), lhs.end(), rhs.begin(),
@@ -617,49 +617,49 @@ class comment
   /// @brief Constructs a comment from a single string (can be multi-line).
   /// @param str Input string, lines separated by '\n'.
   /// @param symbol Comment symbol to use (';' or '#').
-  explicit comment(const std::string& str, char symbol = ';')
+  explicit comment(const std::string &str, char symbol = ';')
   {
     add(str, symbol);
   }
   /// @brief Constructs a comment from a vector of lines.
-  explicit comment(const std::vector<std::string>& vec, char symbol = ';')
+  explicit comment(const std::vector<std::string> &vec, char symbol = ';')
   {
-    for (const auto& item : vec) add(item, symbol);
+    for (const auto &item : vec) add(item, symbol);
   }
   /// @brief Constructs a comment from an initializer list of lines.
   comment(std::initializer_list<std::string> list, char symbol = ';')
   {
-    for (const auto& item : list) add(item, symbol);
+    for (const auto &item : list) add(item, symbol);
   }
   /// @brief Swaps the internal comment data with another instance.
-  void swap(comment& other) noexcept
+  void swap(comment &other) noexcept
   {
     using std::swap;
     swap(comments_, other.comments_);
   }
-  friend void swap(comment& lhs, comment& rhs) noexcept
+  friend void swap(comment &lhs, comment &rhs) noexcept
   {
     lhs.swap(rhs);
   }
   /// @brief Copy constructor.
-  comment(const comment& other) :
+  comment(const comment &other) :
     comments_(other.comments_ ? std::unique_ptr<comment_container>(new comment_container{*other.comments_}) : nullptr)
   {
   }
   /// @brief Move constructor.
-  comment(comment&& other) noexcept : comments_(std::move(other.comments_))
+  comment(comment &&other) noexcept : comments_(std::move(other.comments_))
   {
     other.comments_.reset();  // 显式清空, 跨平台行为一致
   }
   /// @brief Copy assignment.
-  comment& operator=(const comment& rhs)
+  comment &operator=(const comment &rhs)
   {
     comment temp(rhs);  // copy ctor
     swap(temp);         // noexcept swap
     return *this;
   }
   /// @brief Move assignment.
-  comment& operator=(comment&& rhs) noexcept
+  comment &operator=(comment &&rhs) noexcept
   {
     comment temp(std::move(rhs));  // move ctor
     swap(temp);                    // noexcept swap
@@ -681,20 +681,20 @@ class comment
     return comments_ ? *comments_ : comment_container{};
   }
   /// @brief Returns a const reference to the internal comment lines.
-  const std::vector<std::string>& view() const
+  const std::vector<std::string> &view() const
   {
     return comments_ ? *comments_ : empty_comments();  // 避免返回空引用
   }
 
   /// @brief Appends comment content from a string (multi-line supported).
-  void add(const std::string& str, char symbol = ';')
+  void add(const std::string &str, char symbol = ';')
   {
     if (detail::is_all_whitespace(str)) return;
     ensure_comments_initialized();
     add_comments_from_string(str, symbol);
   }
   /// @brief Appends comment lines from another comment.
-  void add(const comment& other)
+  void add(const comment &other)
   {
     if (other.empty()) return;
     ensure_comments_initialized();
@@ -702,7 +702,7 @@ class comment
   }
 
   /// @brief Moves comment lines from another comment.
-  void add(comment&& other) noexcept
+  void add(comment &&other) noexcept
   {
     if (other.empty()) return;
     ensure_comments_initialized();
@@ -713,10 +713,10 @@ class comment
   /// @brief Appends comment lines from an initializer list.
   void add(std::initializer_list<std::string> list, char symbol = ';')
   {
-    for (const auto& item : list) add(item, symbol);
+    for (const auto &item : list) add(item, symbol);
   }
   /// @brief Replaces current comment content with a string.
-  void set(const std::string& str, char symbol = ';')
+  void set(const std::string &str, char symbol = ';')
   {
     if (!detail::is_all_whitespace(str))
     {
@@ -730,13 +730,13 @@ class comment
     }
   }
   /// @brief Replaces current comment content with another comment (copy).
-  void set(const comment& other)
+  void set(const comment &other)
   {
     comment temp(other);  // copy
     swap(temp);           // noexcept swap
   }
   /// @brief Replaces current comment content with another comment (move).
-  void set(comment&& other) noexcept
+  void set(comment &&other) noexcept
   {
     comment temp(std::move(other));  // move
     swap(temp);                      // noexcept swap
@@ -781,13 +781,13 @@ class comment
     return rend();
   }
   /// @brief Compares two comments for equality.
-  bool operator==(const comment& rhs) const
+  bool operator==(const comment &rhs) const
   {
     if (comments_ && rhs.comments_) return *comments_ == *rhs.comments_;
     return !comments_ && !rhs.comments_;
   }
   /// @brief Compares two comments for inequality.
-  bool operator!=(const comment& rhs) const
+  bool operator!=(const comment &rhs) const
   {
     return !(*this == rhs);
   }
@@ -815,7 +815,7 @@ class comment
     return comment;
   }
 
-  void add_comments_from_string(const std::string& str, char symbol)
+  void add_comments_from_string(const std::string &str, char symbol)
   {
     std::istringstream stream(str);
     std::string line;
@@ -828,7 +828,7 @@ class comment
 
   /// @brief 提供一个空的注释容器, 用于避免空指针异常, 主要提供给迭代器使用
   /// @return 一个始终为空的注释容器
-  static const comment_container& empty_comments()
+  static const comment_container &empty_comments()
   {
     static const comment_container empty;
     return empty;
@@ -838,9 +838,9 @@ class comment
   std::unique_ptr<comment_container> comments_{nullptr};  // 行级注释容器, 使用unique_ptr主要考虑内存占用更小
 };
 
-inline std::ostream& operator<<(std::ostream& os, const comment& c)
+inline std::ostream &operator<<(std::ostream &os, const comment &c)
 {
-  for (const auto& line : c.view())
+  for (const auto &line : c.view())
   {
     os << line << '\n';
   }
@@ -855,7 +855,7 @@ class basic_inifile;
 /// @brief ini field value
 class field
 {
-  friend std::ostream& operator<<(std::ostream& os, const field& data);
+  friend std::ostream &operator<<(std::ostream &os, const field &data);
 
  public:
   /// 默认构造函数,使用编译器生成的默认实现.
@@ -869,7 +869,7 @@ class field
   ~field() = default;
 
   /// @brief 成员swap函数
-  void swap(field& other) noexcept
+  void swap(field &other) noexcept
   {
     using std::swap;
     swap(value_, other.value_);
@@ -877,20 +877,20 @@ class field
   }
 
   // 友元 swap(非成员函数)(std::swap 支持)
-  friend void swap(field& lhs, field& rhs) noexcept
+  friend void swap(field &lhs, field &rhs) noexcept
   {
     lhs.swap(rhs);
   }
 
   /// 移动构造函数
-  field(field&& other) noexcept : value_(std::move(other.value_)), comments_(std::move(other.comments_))
+  field(field &&other) noexcept : value_(std::move(other.value_)), comments_(std::move(other.comments_))
   {
     other.value_.clear();     // 显式清空, 跨平台行为一致
     other.comments_.clear();  // 显式清空, 跨平台行为一致
   }
 
   /// 移动赋值运算符
-  field& operator=(field&& rhs) noexcept
+  field &operator=(field &&rhs) noexcept
   {
     field temp(std::move(rhs));  // move ctor
     swap(temp);                  // noexcept swap
@@ -898,10 +898,10 @@ class field
   }
 
   /// 重写拷贝构造函数,深拷贝 other 对象.
-  field(const field& other) : value_(other.value_), comments_(other.comments_) {}
+  field(const field &other) : value_(other.value_), comments_(other.comments_) {}
 
   /// 重写拷贝赋值(copy-and-swap 方式)
-  field& operator=(const field& rhs) noexcept  // `rhs` pass by reference
+  field &operator=(const field &rhs) noexcept  // `rhs` pass by reference
   {
     field temp(rhs);  // 使用拷贝构造函数创建一个临时对象
     swap(temp);       // 利用拷贝构造+swap, 确保异常安全,也能处理自赋值问题
@@ -912,7 +912,7 @@ class field
   /// @tparam T Other type T
   /// @param other Other type value
   template <typename T>
-  field(const T& other)
+  field(const T &other)
   {
     detail::convert<T>::encode(other, value_);  // 将传入的值编码成字符串并存储到 value_ 中
   }
@@ -922,7 +922,7 @@ class field
   /// @param rhs Other type value
   /// @return `field` reference
   template <typename T>
-  field& operator=(const T& rhs)
+  field &operator=(const T &rhs)
   {
     detail::convert<T>::encode(rhs, value_);  // 将右侧值编码成字符串并存储到 value_ 中
     return *this;                             // 返回当前对象的引用,支持链式赋值
@@ -948,7 +948,7 @@ class field
   /// @throws `std::invalid_argument` If the field cannot be converted to type T.
   /// @throws `std::out_of_range` If the field is out of the valid range for type T.
   template <typename T>
-  T& as_to(T& out) const
+  T &as_to(T &out) const
   {
     detail::convert<T>::decode(value_, out);  // 将 value_ 字符串解码为目标类型 T, 并存储到 out 中
     return out;                               // 返回转换后的引用
@@ -971,7 +971,7 @@ class field
   /// @param value The value to be stored.
   /// @return Reference to the current field (for chaining).
   template <typename T>
-  field& set(const T& value)
+  field &set(const T &value)
   {
     detail::convert<T>::encode(value, value_);  // 将值编码为字符串存储到 value_ 中
     return *this;
@@ -980,17 +980,17 @@ class field
   /// @brief Set `key=value` comment, overwriting the original comment.
   /// @param str Comment content. Multi-line input is allowed, lines separated by `\n`.
   /// @param symbol Comment symbol, default is `;`. Only `;` and `#` are supported.
-  void set_comment(const std::string& str, char symbol = ';')
+  void set_comment(const std::string &str, char symbol = ';')
   {
     comments_.set(str, symbol);
   }
   /// @brief Overwrite the current comment with another comment (copy).
-  void set_comment(const comment& other)
+  void set_comment(const comment &other)
   {
     comments_.set(other);
   }
   /// @brief Overwrite the current comment with another comment (move).
-  void set_comment(comment&& other) noexcept
+  void set_comment(comment &&other) noexcept
   {
     comments_.set(std::move(other));
   }
@@ -1005,17 +1005,17 @@ class field
   /// @brief Add `key=value` comments by appending to the existing ones.
   /// @param str Comment content. Multi-line input is allowed, lines separated by `\n`.
   /// @param symbol Comment symbol, default is `;`. Only `;` and `#` are supported.
-  void add_comment(const std::string& str, char symbol = ';')
+  void add_comment(const std::string &str, char symbol = ';')
   {
     comments_.add(str, symbol);
   }
   /// @brief Append comments from another comment object (copy).
-  void add_comment(const comment& other)
+  void add_comment(const comment &other)
   {
     comments_.add(other);
   }
   /// @brief Append comments from another comment object (move).
-  void add_comment(comment&& other) noexcept
+  void add_comment(comment &&other) noexcept
   {
     comments_.add(std::move(other));
   }
@@ -1029,13 +1029,13 @@ class field
 
   /// @brief Get a const reference to the comment associated with this field.
   /// @return Const reference to the internal `comment` object.
-  const ini::comment& comment() const
+  const ini::comment &comment() const
   {
     return comments_;
   }
   /// @brief Get a mutable reference to the comment associated with this field.
   /// @return Reference to the internal `comment` object.
-  ini::comment& comment()
+  ini::comment &comment()
   {
     return comments_;
   }
@@ -1056,7 +1056,7 @@ class field
   ini::comment comments_;  // key-value 键值对的注释
 };
 
-inline std::ostream& operator<<(std::ostream& os, const field& data)
+inline std::ostream &operator<<(std::ostream &os, const field &data)
 {
   return os << data.value_;
 }
@@ -1078,7 +1078,7 @@ class basic_section
   using const_iterator = typename data_container::const_iterator;
 
   /// @brief 成员swap函数
-  void swap(basic_section& other) noexcept
+  void swap(basic_section &other) noexcept
   {
     using std::swap;
     swap(data_, other.data_);
@@ -1086,7 +1086,7 @@ class basic_section
   }
 
   // 友元 swap函数(非成员函数)
-  friend void swap(basic_section& lhs, basic_section& rhs) noexcept
+  friend void swap(basic_section &lhs, basic_section &rhs) noexcept
   {
     lhs.swap(rhs);
   }
@@ -1096,22 +1096,22 @@ class basic_section
   // 默认析构函数
   ~basic_section() = default;
   /// 重写拷贝构造函数, 深拷贝
-  basic_section(const basic_section& other) : data_(other.data_), comments_(other.comments_) {}
+  basic_section(const basic_section &other) : data_(other.data_), comments_(other.comments_) {}
   /// 重写拷贝赋值函数(copy and swap方式)
-  basic_section& operator=(const basic_section& rhs) noexcept
+  basic_section &operator=(const basic_section &rhs) noexcept
   {
     basic_section temp(rhs);  // copy ctor
     swap(temp);               // noexcept swap
     return *this;
   }
   // 移动构造函数
-  basic_section(basic_section&& other) noexcept : data_(std::move(other.data_)), comments_(std::move(other.comments_))
+  basic_section(basic_section &&other) noexcept : data_(std::move(other.data_)), comments_(std::move(other.comments_))
   {
     other.data_.clear();      // 显式清空, 跨平台行为一致
     other.comments_.clear();  // 显式清空, 跨平台行为一致
   }
   // 移动赋值函数, 默认的不能处理移动自赋值情况
-  basic_section& operator=(basic_section&& rhs) noexcept
+  basic_section &operator=(basic_section &&rhs) noexcept
   {
     basic_section temp(std::move(rhs));  // move ctor
     swap(temp);                          // noexcept swap
@@ -1121,7 +1121,7 @@ class basic_section
   /// @brief Get or insert a field reference. If the key does not exist, insert a default constructed field object
   /// @param key key name
   /// @return Return the field reference corresponding to the key
-  field& operator[](std::string key)
+  field &operator[](std::string key)
   {
     detail::trim(key);
     return data_[std::move(key)];
@@ -1133,7 +1133,7 @@ class basic_section
   /// @param value field value
   /// @return Reference to the inserted or updated field
   template <typename T>
-  field& set(std::string key, T&& value)
+  field &set(std::string key, T &&value)
   {
     detail::trim(key);
     return data_[std::move(key)] = std::forward<T>(value);
@@ -1142,7 +1142,7 @@ class basic_section
   /// @param args initializer_list of multiple key-value pairs
   void set(std::initializer_list<std::pair<std::string, field>> args)
   {
-    for (auto&& pair : args)
+    for (auto &&pair : args)
     {
       std::string key = pair.first;  // 拷贝 key，准备去除空白
       detail::trim(key);             // trim 去除前后空白，避免 key 带空格导致查找异常
@@ -1164,13 +1164,13 @@ class basic_section
   /// @param key key - an exception will be thrown if the key does not exist
   /// @return field value reference
   /// @throws `std::out_of_range` if key does not exist
-  field& at(std::string key)
+  field &at(std::string key)
   {
     detail::trim(key);
     return data_.at(key);
   }
   // const overloading function
-  const field& at(std::string key) const
+  const field &at(std::string key) const
   {
     detail::trim(key);
     return data_.at(key);
@@ -1196,7 +1196,7 @@ class basic_section
   {
     std::vector<key_type> result;
     result.reserve(data_.size());
-    for (const auto& pair : data_)
+    for (const auto &pair : data_)
     {
       result.emplace_back(pair.first);
     }
@@ -1209,7 +1209,7 @@ class basic_section
   {
     std::vector<mapped_type> result;
     result.reserve(data_.size());
-    for (const auto& pair : data_)
+    for (const auto &pair : data_)
     {
       result.emplace_back(pair.second);
     }
@@ -1313,17 +1313,17 @@ class basic_section
   /// @brief Set `[section]` comment, overwriting the original comment.
   /// @param str Comment content, Multi-line comments are allowed, lines separated by `\n`.
   /// @param symbol Comment symbol, default is `;`, Only `;` and `#` are supported.
-  void set_comment(const std::string& str, char symbol = ';')
+  void set_comment(const std::string &str, char symbol = ';')
   {
     comments_.set(str, symbol);
   }
   /// @brief Overwrite the current comment with another comment (copy).
-  void set_comment(const comment& other)
+  void set_comment(const comment &other)
   {
     comments_.set(other);
   }
   /// @brief Overwrite the current comment with another comment (move).
-  void set_comment(comment&& other) noexcept
+  void set_comment(comment &&other) noexcept
   {
     comments_.set(std::move(other));
   }
@@ -1338,17 +1338,17 @@ class basic_section
   /// @brief Add `[section]` comments and then append them.
   /// @param str Comment content, Multi-line comments are allowed, lines separated by `\n`.
   /// @param symbol Comment symbol, default is `;`, Only `;` and `#` are supported.
-  void add_comment(const std::string& str, char symbol = ';')
+  void add_comment(const std::string &str, char symbol = ';')
   {
     comments_.add(str, symbol);
   }
   /// @brief Append comments from another comment object (copy).
-  void add_comment(const comment& other)
+  void add_comment(const comment &other)
   {
     comments_.add(other);
   }
   /// @brief Append comments from another comment object (move).
-  void add_comment(comment&& other) noexcept
+  void add_comment(comment &&other) noexcept
   {
     comments_.add(std::move(other));
   }
@@ -1362,13 +1362,13 @@ class basic_section
 
   /// @brief Get a const reference to the comment associated with this field.
   /// @return Const reference to the internal `comment` object.
-  const ini::comment& comment() const
+  const ini::comment &comment() const
   {
     return comments_;
   }
   /// @brief Get a mutable reference to the comment associated with this field.
   /// @return Reference to the internal `comment` object.
-  ini::comment& comment()
+  ini::comment &comment()
   {
     return comments_;
   }
@@ -1401,13 +1401,13 @@ class basic_inifile
   using iterator = typename data_container::iterator;
   using const_iterator = typename data_container::const_iterator;
 
-  void swap(basic_inifile& other) noexcept
+  void swap(basic_inifile &other) noexcept
   {
     using std::swap;
     swap(data_, other.data_);
   }
 
-  friend void swap(basic_inifile& lhs, basic_inifile& rhs) noexcept
+  friend void swap(basic_inifile &lhs, basic_inifile &rhs) noexcept
   {
     lhs.swap(rhs);
   }
@@ -1418,17 +1418,17 @@ class basic_inifile
   ~basic_inifile() = default;
 
   // 拷贝构造
-  basic_inifile(const basic_inifile& other) = default;
+  basic_inifile(const basic_inifile &other) = default;
   // 拷贝赋值
-  basic_inifile& operator=(const basic_inifile& rhs) = default;
+  basic_inifile &operator=(const basic_inifile &rhs) = default;
 
   // 移动构造
-  basic_inifile(basic_inifile&& other) noexcept : data_(std::move(other.data_))
+  basic_inifile(basic_inifile &&other) noexcept : data_(std::move(other.data_))
   {
     other.data_.clear();  // 显式清空, 跨平台行为一致
   };
   // 移动赋值 (move and swap)
-  basic_inifile& operator=(basic_inifile&& rhs) noexcept
+  basic_inifile &operator=(basic_inifile &&rhs) noexcept
   {
     basic_inifile temp(std::move(rhs));  // move ctor
     swap(temp);                          // noexcept swap
@@ -1438,7 +1438,7 @@ class basic_inifile
   /// @brief Get or insert a field. If section_name does not exist, insert a default constructed section object
   /// @param sec section name
   /// @return Returns the section reference corresponding to the key
-  section& operator[](std::string sec)
+  section &operator[](std::string sec)
   {
     detail::trim(sec);
     return data_[std::move(sec)];
@@ -1451,7 +1451,7 @@ class basic_inifile
   /// @param value Field value
   /// @return Reference to the inserted or updated field
   template <typename T>
-  field& set(std::string sec, std::string key, T&& value)
+  field &set(std::string sec, std::string key, T &&value)
   {
     detail::trim(sec);
     detail::trim(key);
@@ -1487,13 +1487,13 @@ class basic_inifile
   /// @param sec section-name - an exception will be thrown if the section does not exist
   /// @return section reference
   /// @throws `std::out_of_range` if section does not exist
-  section& at(std::string sec)
+  section &at(std::string sec)
   {
     detail::trim(sec);
     return data_.at(sec);
   }
   // const overloading function
-  const section& at(std::string sec) const
+  const section &at(std::string sec) const
   {
     detail::trim(sec);
     return data_.at(sec);
@@ -1524,7 +1524,7 @@ class basic_inifile
   {
     std::vector<key_type> result;
     result.reserve(data_.size());
-    for (const auto& pair : data_)
+    for (const auto &pair : data_)
     {
       result.push_back(pair.first);
     }
@@ -1619,7 +1619,7 @@ class basic_inifile
 
   /// @brief Read ini information from istream
   /// @param is istream
-  void read(std::istream& is)
+  void read(std::istream &is)
   {
     data_.clear();
     std::string line, current_section;
@@ -1672,7 +1672,7 @@ class basic_inifile
 
   /// @brief Write ini information to ostream
   /// @param os ostream
-  void write(std::ostream& os) const
+  void write(std::ostream &os) const
   {
     bool first_section = true;
 
@@ -1680,7 +1680,7 @@ class basic_inifile
     auto it = data_.find("");
     if (it != data_.end())
     {
-      for (const auto& kv : it->second)
+      for (const auto &kv : it->second)
       {
         write_comment(os, kv.second.comment());  // 添加kv注释
         os << kv.first << "=" << kv.second << "\n";
@@ -1689,7 +1689,7 @@ class basic_inifile
     }
 
     // 处理非空 section
-    for (const auto& sec : data_)
+    for (const auto &sec : data_)
     {
       // 空 section 已经写过了
       if (sec.first.empty()) continue;
@@ -1698,7 +1698,7 @@ class basic_inifile
       first_section = false;
       write_comment(os, sec.second.comment());  // 添加section注释
       os << "[" << sec.first << "]\n";
-      for (const auto& kv : sec.second)
+      for (const auto &kv : sec.second)
       {
         write_comment(os, kv.second.comment());  // 添加kv注释
         os << kv.first << "=" << kv.second << "\n";
@@ -1708,7 +1708,7 @@ class basic_inifile
 
   /// @brief Read ini information from string
   /// @param str ini string
-  void from_string(const std::string& str)
+  void from_string(const std::string &str)
   {
     std::istringstream is(str);
     read(is);
@@ -1726,7 +1726,7 @@ class basic_inifile
   /// @brief Load ini information from ini file
   /// @param filename Read file path
   /// @return Whether the loading is successful, return `true` if successful
-  bool load(const std::string& filename)
+  bool load(const std::string &filename)
   {
     std::ifstream is(filename);
     if (!is) return false;
@@ -1739,7 +1739,7 @@ class basic_inifile
   /// @brief Save ini information to ini file
   /// @param filename Save file path
   /// @return Whether the save is successful, return `true` if successful
-  bool save(const std::string& filename) const
+  bool save(const std::string &filename) const
   {
     std::ofstream os(filename);
     if (!os) return false;
@@ -1753,11 +1753,11 @@ class basic_inifile
   /// @brief 写注释内容
   /// @param os 输出流
   /// @param comments 注释内容
-  static void write_comment(std::ostream& os, const comment& comments)
+  static void write_comment(std::ostream &os, const comment &comments)
   {
     if (!comments.empty())
     {
-      for (const auto& item : comments)
+      for (const auto &item : comments)
       {
         os << item << '\n';
       }
@@ -1782,7 +1782,7 @@ inline std::string trim(std::string str)
 /// @param delimiter The character used to split the string.
 /// @param skip_empty If true, empty substrings are ignored; otherwise, they are included.
 /// @return A vector of substrings obtained by splitting the input string.
-inline std::vector<std::string> split(const std::string& str, char delimiter, bool skip_empty = false)
+inline std::vector<std::string> split(const std::string &str, char delimiter, bool skip_empty = false)
 {
   return detail::split(str, std::string(1, delimiter), skip_empty);
 }
@@ -1792,7 +1792,7 @@ inline std::vector<std::string> split(const std::string& str, char delimiter, bo
 /// @param delimiter The substring used to split the string (can be multiple characters).
 /// @param skip_empty If true, empty substrings are ignored; otherwise, they are included.
 /// @return A vector of substrings obtained by splitting the input string.
-inline std::vector<std::string> split(const std::string& str, const std::string& delimiter, bool skip_empty = false)
+inline std::vector<std::string> split(const std::string &str, const std::string &delimiter, bool skip_empty = false)
 {
   return detail::split(str, delimiter, skip_empty);
 }
@@ -1804,7 +1804,7 @@ inline std::vector<std::string> split(const std::string& str, const std::string&
 /// @param separator The character separating each element in the result.
 /// @return A string with all elements separated by the given character.
 template <typename Iterable>
-inline std::string join(const Iterable& iterable, char separator)
+inline std::string join(const Iterable &iterable, char separator)
 {
   return detail::join(iterable, std::string(1, separator));
 }
@@ -1816,7 +1816,7 @@ inline std::string join(const Iterable& iterable, char separator)
 /// @param separator The string separating each element in the result.
 /// @return A string with all elements separated by the given string.
 template <typename Iterable>
-inline std::string join(const Iterable& iterable, const std::string& separator)
+inline std::string join(const Iterable &iterable, const std::string &separator)
 {
   return detail::join(iterable, separator);
 }
