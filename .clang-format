@@ -9,7 +9,7 @@ ContinuationIndentWidth: 2                            # 换行缩进宽度 2
 DerivePointerAlignment: false                         # 禁用自动指针对齐
 IndentCaseLabels: false                               # 控制 case: label 本身是否缩进
 IndentWidth: 2                                        # 缩进宽度 2
-PointerAlignment: Left                                # 确保 type& var 风格
+PointerAlignment: Right                               # 确保 type &var 风格
 ReflowComments: true                                  # 自动调整 /** ... */ 的换行格式
 TabWidth: 2                                           # Tab 宽度 2
 UseTab: Never                                         # 使用空格缩进
