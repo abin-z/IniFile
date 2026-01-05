@@ -299,7 +299,7 @@ struct convert<unsigned char>
 
   static void encode(const unsigned char value, std::string &result)
   {
-    result = std::string(1, value);
+    result = std::string(1, static_cast<char>(value));
   }
 };
 
