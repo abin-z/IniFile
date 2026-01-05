@@ -864,7 +864,7 @@ class field
 
   /// 参数构造函数：通过传入字符串初始化 value_
   /// 使用 pass-by-value 统一接收左值/右值，结合 std::move 实现高效构造
-  field(std::string value) : value_(std::move(value)) {}
+  explicit field(std::string value) : value_(std::move(value)) {}
 
   /// 默认析构函数,使用编译器生成的默认实现.
   ~field() = default;
