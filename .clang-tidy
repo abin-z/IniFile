@@ -22,6 +22,7 @@ performance-unnecessary-value-param,
 -cppcoreguidelines-pro-bounds-array-to-pointer-decay,
 -readability-named-parameter,
 -cert-env33-c,
+-google-runtime-int,
 -readability-identifier-length
 '
 
