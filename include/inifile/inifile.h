@@ -92,7 +92,8 @@ inline bool is_all_whitespace(const std::string &str)
 inline std::vector<std::string> split(const std::string &str, const std::string &delimiter, bool skip_empty = false)
 {
   std::vector<std::string> tokens;
-  std::string::size_type start = 0, pos = 0;
+  std::string::size_type start = 0;
+  std::string::size_type pos = 0;
   while ((pos = str.find(delimiter, start)) != std::string::npos)
   {
     std::string token = str.substr(start, pos - start);
@@ -1144,8 +1145,8 @@ class basic_section
   {
     for (auto &&pair : args)
     {
-      std::string key = pair.first;  // 拷贝 key，准备去除空白
-      detail::trim(key);             // trim 去除前后空白，避免 key 带空格导致查找异常
+      std::string key = pair.first;                    // 拷贝 key，准备去除空白
+      detail::trim(key);                               // trim 去除前后空白，避免 key 带空格导致查找异常
       data_[std::move(key)] = std::move(pair.second);  // 插入键值对
     }
   }
@@ -1622,7 +1623,8 @@ class basic_inifile
   void read(std::istream &is)
   {
     data_.clear();
-    std::string line, current_section;
+    std::string line;
+    std::string current_section;
     comment comments;  // 注释类
     while (std::getline(is, line))
     {
