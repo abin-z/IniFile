@@ -1735,7 +1735,7 @@ class basic_inifile
 
     read(is);
     // 仅当 fail() 不是由于 EOF 造成的,并且没有发生 bad(),才认为读取成功
-    return !(is.fail() && !is.eof()) && !is.bad();
+    return (!is.fail() || is.eof()) && !is.bad();
   }
 
   /// @brief Save ini information to ini file
