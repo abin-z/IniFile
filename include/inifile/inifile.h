@@ -703,7 +703,7 @@ class comment
   }
 
   /// @brief Moves comment lines from another comment.
-  void add(comment &&other) noexcept  // NOLINT(cppcoreguidelines-rvalue-reference-param-not-moved)
+  void add(comment &&other)  // NOLINT(cppcoreguidelines-rvalue-reference-param-not-moved)
   {
     if (other.empty()) return;
     ensure_comments_initialized();
