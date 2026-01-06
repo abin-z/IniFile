@@ -206,7 +206,7 @@ inline std::string format_comment(std::string comment, char symbol)
   char comment_prefix = symbol == '#' ? '#' : ';';  // 只支持 ';' 和 '#' 注释, 默认使用 ';'
   if (comment.empty())
   {
-    return std::string(1, comment_prefix);
+    return {comment_prefix};
   }
   if (comment[0] != comment_prefix)
   {
