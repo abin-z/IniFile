@@ -1,3 +1,8 @@
+# 如果是 MSVC 编译器，设置源文件为 UTF-8 编码
+if (MSVC)
+  add_compile_options("/utf-8")
+endif()
+
 # 指定CMake最低版本要求
 cmake_minimum_required(VERSION 3.20)
 
