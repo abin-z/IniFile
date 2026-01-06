@@ -703,7 +703,7 @@ class comment
   }
 
   /// @brief Moves comment lines from another comment.
-  void add(comment &&other) noexcept
+  void add(comment &&other) noexcept  // NOLINT(cppcoreguidelines-rvalue-reference-param-not-moved)
   {
     if (other.empty()) return;
     ensure_comments_initialized();
@@ -913,7 +913,7 @@ class field
   /// @tparam T Other type T
   /// @param other Other type value
   template <typename T>
-  field(const T &other)
+  field(const T &other)  // NOLINT(google-explicit-constructor)
   {
     detail::convert<T>::encode(other, value_);  // 将传入的值编码成字符串并存储到 value_ 中
   }
@@ -962,7 +962,7 @@ class field
   /// @throws `std::invalid_argument` If the field cannot be converted to type T.
   /// @throws `std::out_of_range` If the field is out of the valid range for type T.
   template <typename T>
-  operator T() const
+  operator T() const  // NOLINT(google-explicit-constructor)
   {
     return this->as<T>();  // 使用 as<T> 方法将值转换为目标类型 T, 转换失败抛异常: std::invalid_argument
   }
