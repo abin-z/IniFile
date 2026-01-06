@@ -84,6 +84,15 @@ inline bool is_all_whitespace(const std::string &str)
   return str.find_first_not_of(whitespaces) == std::string::npos;
 }
 
+/// @brief 实现 C++11 中缺失的 std::make_unique
+template <typename T, typename... Args>
+std::unique_ptr<T> make_unique(Args &&...args)
+{
+  static_assert(!std::is_array<T>::value, "detail::make_unique: array types (T[]) are not supported");
+  static_assert(!std::is_reference<T>::value, "detail::make_unique: T must not be a reference");
+  return std::unique_ptr<T>(new T(std::forward<Args>(args)...));
+}
+
 /// @brief 字符串切割功能
 /// @param str 待处理字符串
 /// @param delimiter 分割字符串(支持多字符)
@@ -644,7 +653,7 @@ class comment
   }
   /// @brief Copy constructor.
   comment(const comment &other) :
-    comments_(other.comments_ ? std::unique_ptr<comment_container>(new comment_container{*other.comments_}) : nullptr)
+    comments_(other.comments_ ? detail::make_unique<comment_container>(*other.comments_) : nullptr)
   {
   }
   /// @brief Move constructor.
@@ -797,7 +806,7 @@ class comment
   /// @brief 初始化 comments_, 确保不为nullptr
   void ensure_comments_initialized()
   {
-    if (!comments_) comments_.reset(new comment_container{});
+    if (!comments_) comments_ = detail::make_unique<comment_container>();
   }
 
   static std::string format_comment_line(std::string comment, char symbol)
