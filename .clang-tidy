@@ -23,12 +23,13 @@ performance-unnecessary-value-param,
 -readability-named-parameter,
 -cert-env33-c,
 -google-runtime-int,
--readability-identifier-length
+-readability-identifier-length,
+-readability-redundant-access-specifiers
 '
 
 
 WarningsAsErrors: ''
-HeaderFilterRegex: '.*'
+HeaderFilterRegex: '.*[\\/]inifile\.h$'
 FormatStyle:     file
 
 CheckOptions:    
