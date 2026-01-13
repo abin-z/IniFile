@@ -911,9 +911,9 @@ class field
   field(const field &other) : value_(other.value_), comments_(other.comments_) {}
 
   /// 重写拷贝赋值(copy-and-swap 方式)
-  field &operator=(const field &rhs) noexcept  // `rhs` pass by reference
+  field &operator=(const field &rhs)  // `rhs` pass by reference
   {
-    field temp(rhs);  // 使用拷贝构造函数创建一个临时对象
+    field temp(rhs);  // 使用拷贝构造函数创建一个临时对象, 这里会分配内存
     swap(temp);       // 利用拷贝构造+swap, 确保异常安全,也能处理自赋值问题
     return *this;
   }
@@ -1108,7 +1108,7 @@ class basic_section
   /// 重写拷贝构造函数, 深拷贝
   basic_section(const basic_section &other) : data_(other.data_), comments_(other.comments_) {}
   /// 重写拷贝赋值函数(copy and swap方式)
-  basic_section &operator=(const basic_section &rhs) noexcept
+  basic_section &operator=(const basic_section &rhs)
   {
     basic_section temp(rhs);  // copy ctor
     swap(temp);               // noexcept swap
