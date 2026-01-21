@@ -18,7 +18,7 @@ int main()
 
   inif["section1"]["string"] = "value";
   inif["section1"]["int"]    = 123;
-  inif["section1"]["float"]  = 3.14f;
+  inif["section1"]["float"]  = 3.14F;
   inif["section1"]["double"] = 3.141592;
   inif["section1"]["char"]   = 'c';
   inif["section1"]["bool"]   = true;

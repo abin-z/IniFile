@@ -32,7 +32,7 @@ int main()
   std::cout << "[split ,] skip_empty: " << ini::join(parts_no_empty, '|') << "\n";
 
   // --- split by string ---
-  std::string path = "C:\\Users\\Admin\\file.ini";
+  std::string path = R"(C:\Users\Admin\file.ini)";
   std::vector<std::string> path_parts = ini::split(path, "\\");
   std::cout << "[split \\] " << ini::join(path_parts, " > ") << "\n";
 

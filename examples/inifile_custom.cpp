@@ -14,11 +14,13 @@
 
 #include <inifile/inifile.h>
 
+#include <utility>
+
 /// @brief User-defined classes
 struct Person
 {
   Person() = default;  // Must have a default constructor
-  Person(int id, int age, const std::string &name) : id(id), age(age), name(name) {}
+  Person(int id, int age, std::string name) : id(id), age(age), name(std::move(name)) {}
 
   int id = 0;
   int age = 0;

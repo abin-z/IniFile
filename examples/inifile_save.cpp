@@ -20,7 +20,7 @@ int main()
 
   inif["section"]["string"] = "value";
   inif["section"]["int"]    = 123;
-  inif["section"]["float"]  = 3.14f;
+  inif["section"]["float"]  = 3.14F;
   inif["section"]["double"] = 3.141592;
   inif["section"]["char"]   = 'c';
   inif["section"]["bool"]   = true;
