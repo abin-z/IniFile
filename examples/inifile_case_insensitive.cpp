@@ -30,15 +30,15 @@ int main()
   auto copy_inif = inif;               // Copy the ini file object
 
   // Test case-insensitive section and key access
-  std::cout << "inif.contains(\"Section\") = " << inif.contains("Section") << std::endl;
-  std::cout << "inif.contains(\"SECTION\") = " << inif.contains("SECTION") << std::endl;
-  std::cout << "inif.contains(\"SeCtIoN\") = " << inif.contains("SeCtIoN") << std::endl;
+  std::cout << R"(inif.contains("Section") = )" << inif.contains("Section") << std::endl;
+  std::cout << R"(inif.contains("SECTION") = )" << inif.contains("SECTION") << std::endl;
+  std::cout << R"(inif.contains("SeCtIoN") = )" << inif.contains("SeCtIoN") << std::endl;
 
-  std::cout << "inif.at(\"section\").contains(\"key\") = " << inif.at("section").contains("key") << std::endl;
-  std::cout << "inif.at(\"section\").contains(\"Key\") = " << inif.at("section").contains("Key") << std::endl;
-  std::cout << "inif.at(\"SECTION\").contains(\"KEY\") = " << inif.at("SECTION").contains("KEY") << std::endl;
-  std::cout << "inif.at(\"SECTION\").contains(\"flag\") = " << inif.at("SECTION").contains("flag") << std::endl;
-  std::cout << "inif.at(\"SECTION\").contains(\"FLAG\") = " << inif.at("SECTION").contains("FLAG") << std::endl;
+  std::cout << R"(inif.at("section").contains("key") = )" << inif.at("section").contains("key") << std::endl;
+  std::cout << R"(inif.at("section").contains("Key") = )" << inif.at("section").contains("Key") << std::endl;
+  std::cout << R"(inif.at("SECTION").contains("KEY") = )" << inif.at("SECTION").contains("KEY") << std::endl;
+  std::cout << R"(inif.at("SECTION").contains("flag") = )" << inif.at("SECTION").contains("flag") << std::endl;
+  std::cout << R"(inif.at("SECTION").contains("FLAG") = )" << inif.at("SECTION").contains("FLAG") << std::endl;
 
   std::cout << "section-key: " << inif["section"]["key"].as<std::string>() << std::endl;
   std::cout << "SECTION-KEY: " << inif["SECTION"]["KEY"].as<std::string>() << std::endl;
