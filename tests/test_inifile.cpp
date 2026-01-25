@@ -653,6 +653,53 @@ TEST_CASE("split function", "[split]")
   }
 }
 
+TEST_CASE("split empty delimiter", "[tool][split]")
+{
+  SECTION("non-empty string")
+  {
+    auto v = ini::split("abc", "", false);
+    REQUIRE(v.size() == 1);
+    REQUIRE(v[0] == "abc");
+  }
+
+  SECTION("empty string")
+  {
+    auto v = ini::split("", "", true);
+    REQUIRE(v.empty());
+  }
+
+  SECTION("skip_empty = true")
+  {
+    auto v = ini::split("", ",", true);
+    REQUIRE(v.empty());
+  }
+}
+
+TEST_CASE("split preserve spaces and symbols", "[tool][split]")
+{
+  auto v = ini::split("  a | b |  c  ", "|", true);
+  REQUIRE(v.size() == 3);
+  REQUIRE(v[0] == "  a ");
+  REQUIRE(v[1] == " b ");
+  REQUIRE(v[2] == "  c  ");
+}
+
+TEST_CASE("split multi-character delimiter", "[tool][split]")
+{
+  auto v = ini::split("one::two::three", "::");
+  REQUIRE(v.size() == 3);
+  REQUIRE(v[0] == "one");
+  REQUIRE(v[1] == "two");
+  REQUIRE(v[2] == "three");
+}
+
+TEST_CASE("split delimiter not found", "[tool][split]")
+{
+  auto v = ini::split("abc", ",");
+  REQUIRE(v.size() == 1);
+  REQUIRE(v[0] == "abc");
+}
+
 TEST_CASE("split function with string delimiter", "[split][string-delim]")
 {
   using namespace ini;
