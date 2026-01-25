@@ -101,23 +101,19 @@ std::unique_ptr<T> make_unique(Args &&...args)
 inline std::vector<std::string> split(const std::string &str, const std::string &delimiter, bool skip_empty = false)
 {
   std::vector<std::string> tokens;
+  if (delimiter.empty())
+  {
+    if (!skip_empty || !str.empty()) tokens.emplace_back(str);
+    return tokens;
+  }
   std::string::size_type start = 0;
   std::string::size_type pos = 0;
   while ((pos = str.find(delimiter, start)) != std::string::npos)
   {
-    std::string token = str.substr(start, pos - start);
-    if (!skip_empty || !token.empty())
-    {
-      tokens.emplace_back(std::move(token));
-    }
+    if (!skip_empty || pos != start) tokens.emplace_back(str.substr(start, pos - start));
     start = pos + delimiter.length();
   }
-  // 处理最后一部分
-  std::string last_token = str.substr(start);
-  if (!skip_empty || !last_token.empty())
-  {
-    tokens.emplace_back(std::move(last_token));
-  }
+  if (!skip_empty || start < str.size()) tokens.emplace_back(str.substr(start));
   return tokens;
 }
 
