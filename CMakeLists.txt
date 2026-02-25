@@ -36,6 +36,6 @@ enable_testing()  # 允许 add_test() 添加测试, 须放在 add_test() 之前
 # 添加子目录
 add_subdirectory(include)
 add_subdirectory(examples)
-add_subdirectory(external)
+add_subdirectory(external/Catch2)
 add_subdirectory(tests)
 

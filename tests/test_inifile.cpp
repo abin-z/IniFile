@@ -2,13 +2,14 @@
 #include <inifile/inifile.h>
 
 #include <array>
-#include <catch.hpp>
 #include <deque>
 #include <forward_list>
 #include <list>
 #include <set>
 #include <string>
 #include <vector>
+
+#include "catch2/catch.hpp"
 
 TEST_CASE("basic test")
 {
