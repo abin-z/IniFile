@@ -15,10 +15,14 @@ endif()
 # ---------------------------------------------------------------------------------------
 project(inifile LANGUAGES C CXX VERSION 0.9.9)
 
+include(GNUInstallDirs)
+
 # ----------------------------------------
 # Header-only library
 # ----------------------------------------
 add_library(inifile INTERFACE)
+# Alias target
+add_library(inifile::inifile ALIAS inifile)
 target_include_directories(inifile
   INTERFACE
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
@@ -54,10 +58,11 @@ if(INIFILE_MASTER_PROJECT)
 endif()
 
 # ----------------------------------------
-# Options for examples/tests
+# Options for examples/tests/install
 # ----------------------------------------
 option(INIFILE_BUILD_EXAMPLES  "Build examples" ${INIFILE_MASTER_PROJECT})
 option(INIFILE_BUILD_TESTS "Build tests" ${INIFILE_MASTER_PROJECT})
+option(INIFILE_INSTALL "Generate install target" ${INIFILE_MASTER_PROJECT})
 
 if(INIFILE_BUILD_EXAMPLES)
   message(STATUS "[inifile] Building examples...")
@@ -69,4 +74,29 @@ if(INIFILE_BUILD_TESTS)
   include(CTest)  # enable add_test
   add_subdirectory(external/Catch2)
   add_subdirectory(tests)
+endif()
+
+if(INIFILE_INSTALL)
+  message(STATUS "[inifile] Generating install target...")
+  install(TARGETS inifile
+    EXPORT inifileTargets
+    INCLUDES DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+  )
+  install(DIRECTORY include/ DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
+  # install(EXPORT inifileTargets
+  #   FILE inifileTargets.cmake
+  #   NAMESPACE inifile::
+  #   DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/inifile
+  # )
+  # include(CMakePackageConfigHelpers)
+  # write_basic_package_version_file(
+  #   "${CMAKE_CURRENT_BINARY_DIR}/inifileConfigVersion.cmake"
+  #   VERSION ${PROJECT_VERSION}
+  #   COMPATIBILITY AnyNewerVersion
+  # )
+  # install(FILES
+  #   "${CMAKE_CURRENT_SOURCE_DIR}/cmake/inifileConfig.cmake"
+  #   "${CMAKE_CURRENT_BINARY_DIR}/inifileConfigVersion.cmake"
+  #   DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/inifile
+  # )
 endif()
