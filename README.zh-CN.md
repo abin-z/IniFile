@@ -45,28 +45,77 @@ key = value
 
 ---
 
-### 📦 使用方式
+### 📦 安装与使用
 
-**方式1: Header-only**
+`inifile` 是一个 **Header-only C++ 库**，支持三种使用方式：
+
+**方式1: 直接拷贝头文件 (快速)**
 
 1. 直接将[`inifile.h`](./include/inifile/inifile.h)头文件复制到您的项目文件夹中
 
-2. 然后在源代码文件中直接`#include "inifile.h"`即可使用
+2. 在源代码中直接：
 
-**方式2: 使用CMake**
+   ````cpp
+   #include "inifile.h"
+   ````
 
-1. 在项目中创建一个`inifile`文件夹(名称随意)
 
-2. 将本项目的[`include`](./include/)文件夹中的所有内容复制到刚才步骤1创建的`inifile`文件夹内
+**方式2: 作为子模块 / 源码集成（`add_subdirectory`）**
 
-3. 然后在您的主`CMakeLists.txt`中添加以下内容
+1. 在您的项目中添加 `inifile` 作为子模块（或者直接复制源码）
 
-   ```cmake
-   add_subdirectory(inifile) # inifile为步骤1创建的文件夹名称
-   target_link_libraries(<target_name> PRIVATE inifile) # 链接inifile库
+   ```bash
+   git submodule add https://github.com/abin-z/IniFile.git 3rd/inifile
    ```
 
-4. 在源代码中添加`#include <inifile/inifile.h>`即可使用
+2. 在主项目 `CMakeLists.txt` 中：
+
+   ```cmake
+   add_subdirectory(3rd/inifile)                # 3rd/inifile 为步骤 1 中路径
+   target_link_libraries(<your_target> PRIVATE inifile::inifile)
+   ```
+
+3. 源代码中：
+
+   ```cpp
+   #include <inifile/inifile.h>
+   ```
+
+**方式 3：安装后使用 `find_package`（推荐用于发布 / 多项目复用）**
+
+1. 构建并安装库
+
+   ```bash
+   git clone https://github.com/abin-z/IniFile.git
+   cd IniFile
+   cmake -S . -B build -DCMAKE_INSTALL_PREFIX=/your/install/path
+   cmake --build build --config Release
+   cmake --install build --config Release
+   ```
+
+   Windows 案例:
+
+   ```powershell
+   cmake -S . -B build -A x64 -DCMAKE_INSTALL_PREFIX="C:/libs/inifile"
+   cmake --build build --config Release
+   cmake --install build --config Release
+   ```
+
+2. 在你的项目中使用
+
+   ```cmake
+   list(APPEND CMAKE_PREFIX_PATH "/your/install/path/lib/cmake/inifile")
+   find_package(inifile REQUIRED)
+   
+   add_executable(app src/main.cpp)
+   target_link_libraries(app PRIVATE inifile::inifile)
+   ```
+
+3. 源代码中：
+
+   ```cpp
+   #include <inifile/inifile.h>
+   ```
 
 ### 🛠️ 基础使用案例
 

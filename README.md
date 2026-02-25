@@ -47,29 +47,77 @@ key = value
 
 ---
 
-### 📦 Usage
+### 📦 Installation & Usage
 
-**Method 1: Header-only**
+`inifile` is a **Header-only C++ library** and can be used in three ways:
+
+**Method 1: Copy the header directly (quick)**
 
 1. Copy the [`inifile.h`](./include/inifile/inifile.h) header file to your project folder.
-2. Include it in your source code using `#include "inifile.h"`.
+2. In your source code:
 
-**Method 2: Using CMake**
-
-1. Create an `inifile` folder in your project (name can be customized).
-
-2. Copy all contents from the [`include`](./include/) folder of this project into the `inifile` folder.
-
-3. Add the following line to your main `CMakeLists.txt` file:
-
-   ```cmake
-   add_subdirectory(inifile) # "inifile" is the folder name created in step 1
-   target_link_libraries(<target_name> PRIVATE inifile) # link inifile
+   ```cpp
+   #include "inifile.h"
    ```
 
-4. Include it in your source code using `#include <inifile/inifile.h>`.
+**Method 2: As a submodule / source integration (`add_subdirectory`)**
 
-### 🛠️ Usage Examples
+1. Add `inifile` as a submodule:
+
+   ```bash
+   git submodule add https://github.com/abin-z/IniFile.git 3rd/inifile
+   ```
+
+2. In your main `CMakeLists.txt`:
+
+   ```cmake
+   add_subdirectory(3rd/inifile)                 # Path to the submodule
+   target_link_libraries(<your_target> PRIVATE inifile::inifile)
+   ```
+
+3. In your source code:
+
+   ```cpp
+   #include <inifile/inifile.h>
+   ```
+
+**Method 3: Install and use `find_package` (recommended for release / multi-project usage)**
+
+1. Build and install the library:
+
+   ```bash
+   git clone --recurse-submodules https://github.com/abin-z/IniFile.git
+   cd IniFile
+   cmake -S . -B build -DCMAKE_INSTALL_PREFIX=/your/install/path
+   cmake --build build --config Release
+   cmake --install build --config Release
+   ```
+
+   Windows example:
+
+   ```powershell
+   cmake -S . -B build -A x64 -DCMAKE_INSTALL_PREFIX="C:/libs/inifile"
+   cmake --build build --config Release
+   cmake --install build --config Release
+   ```
+
+2. In your project:
+
+   ```cmake
+   list(APPEND CMAKE_PREFIX_PATH "/your/install/path/lib/cmake/inifile")
+   find_package(inifile REQUIRED)
+   
+   add_executable(app src/main.cpp)
+   target_link_libraries(app PRIVATE inifile::inifile)
+   ```
+
+3. In your source code:
+
+   ```cpp
+   #include <inifile/inifile.h>
+   ```
+
+### 🛠️ Examples
 
 Below are some simple usage examples. For more details, refer to the[`./examples/`](./examples/) folder.
 
