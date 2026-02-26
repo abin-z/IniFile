@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.20)
 
-project(inifile LANGUAGES C CXX VERSION 0.9.9)
+project(inifile LANGUAGES C CXX VERSION 1.0.0)
 
 # 引入 GNUInstallDirs 模块, 提供标准安装目录变量
 # 例如：CMAKE_INSTALL_PREFIX, CMAKE_INSTALL_LIBDIR, CMAKE_INSTALL_INCLUDEDIR 等
