@@ -1,5 +1,12 @@
 cmake_minimum_required(VERSION 3.20)
 
+project(inifile LANGUAGES C CXX VERSION 0.9.9)
+
+# 引入 GNUInstallDirs 模块, 提供标准安装目录变量
+# 例如：CMAKE_INSTALL_PREFIX, CMAKE_INSTALL_LIBDIR, CMAKE_INSTALL_INCLUDEDIR 等
+# 方便跨平台写 install(), 避免硬编码路径
+include(GNUInstallDirs)
+
 # ---------------------------------------------------------------------------------------
 # Set default build to Release for single-config generators (Makefile/Ninja)
 # ---------------------------------------------------------------------------------------
@@ -10,16 +17,6 @@ if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
   endif()
 endif()
 
-# ---------------------------------------------------------------------------------------
-# Project definition
-# ---------------------------------------------------------------------------------------
-project(inifile LANGUAGES C CXX VERSION 0.9.9)
-
-# 引入 GNUInstallDirs 模块, 提供标准安装目录变量
-# 例如：CMAKE_INSTALL_PREFIX, CMAKE_INSTALL_LIBDIR, CMAKE_INSTALL_INCLUDEDIR 等
-# 方便跨平台写 install(), 避免硬编码路径
-include(GNUInstallDirs)
-
 # ----------------------------------------
 # Header-only library
 # ----------------------------------------
@@ -29,7 +26,7 @@ add_library(inifile::inifile ALIAS inifile)
 target_include_directories(inifile
   INTERFACE
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-    $<INSTALL_INTERFACE:include>
+    $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
 )
 target_compile_features(inifile INTERFACE cxx_std_11)
 
@@ -104,7 +101,7 @@ if(INIFILE_INSTALL)
   )
 
   # -------------------------------
-  # 导出 target 定义文件（inifileTargets.cmake）
+  # 导出 target 定义文件(inifileTargets.cmake)
   # 供其他项目通过 find_package() 引用
   # -------------------------------
   install(EXPORT inifileTargets
@@ -126,7 +123,7 @@ if(INIFILE_INSTALL)
   )
 
   # -------------------------------
-  # 生成版本文件（find_package 时用于版本检查）
+  # 生成版本文件(find_package 时用于版本检查)
   # -------------------------------
   write_basic_package_version_file(
     "${CMAKE_CURRENT_BINARY_DIR}/inifileConfigVersion.cmake"
