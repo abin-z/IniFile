@@ -20,6 +20,8 @@ There are countless INI parsing libraries, and each library even has its own rea
 
 If you are looking for a **simple, functional, elegant, stable** modern C++ solution, then this library is for you. If you know how to use `std::map`, you are ready.
 
+> `⭐ Don't forget to put a star if you like the project!`
+
 ---
 
 ### 🚀 Features
