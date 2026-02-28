@@ -1,6 +1,6 @@
 ##  🌟 轻量级ini文件解析库
 
-[![iniparser](https://img.shields.io/badge/INI_Parser-8A2BE2)](https://github.com/abin-z/IniFile) [![headeronly](https://img.shields.io/badge/Header_Only-green)](https://github.com/abin-z/IniFile/blob/main/include/inifile/inifile.h) [![moderncpp](https://img.shields.io/badge/Modern_C%2B%2B-218c73)](https://learn.microsoft.com/en-us/cpp/cpp/welcome-back-to-cpp-modern-cpp?view=msvc-170) [![licenseMIT](https://img.shields.io/badge/License-MIT-green)](https://opensource.org/license/MIT) [![version](https://img.shields.io/badge/version-1.0.0-green)](https://github.com/abin-z/IniFile/releases)
+[![iniparser](https://img.shields.io/badge/INI_Parser-8A2BE2)](https://github.com/abin-z/inifile) [![headeronly](https://img.shields.io/badge/Header_Only-green)](https://github.com/abin-z/inifile/blob/main/include/inifile/inifile.h) [![moderncpp](https://img.shields.io/badge/Modern_C%2B%2B-218c73)](https://learn.microsoft.com/en-us/cpp/cpp/welcome-back-to-cpp-modern-cpp?view=msvc-170) [![licenseMIT](https://img.shields.io/badge/License-MIT-green)](https://opensource.org/license/MIT) [![version](https://img.shields.io/badge/version-1.0.0-green)](https://github.com/abin-z/inifile/releases)
 
 🌍 Languages/语言:  [English](README.md)  |  [简体中文](README.zh-CN.md)
 
@@ -67,7 +67,7 @@ key = value
 1. 在您的项目中添加 `inifile` 作为子模块（或者直接复制源码）
 
    ```bash
-   git submodule add https://github.com/abin-z/IniFile.git 3rd/inifile
+   git submodule add https://github.com/abin-z/inifile.git 3rd/inifile
    ```
 
 2. 在主项目 `CMakeLists.txt` 中：
@@ -88,8 +88,8 @@ key = value
 1. 构建并安装库
 
    ```bash
-   git clone https://github.com/abin-z/IniFile.git
-   cd IniFile
+   git clone https://github.com/abin-z/inifile.git
+   cd inifile
    cmake -S . -B build -DCMAKE_INSTALL_PREFIX=/your/install/path
    cmake --build build --config Release
    cmake --install build --config Release
@@ -695,7 +695,7 @@ int main()
 **步骤1: 克隆仓库**
 
 ```sh
-git clone --recurse-submodules https://github.com/abin-z/IniFile.git
+git clone --recurse-submodules https://github.com/abin-z/inifile.git
 ```
 
 > 如果你已经克隆过项目但忘记加 `--recurse-submodules`，可以运行以下命令手动初始化：
