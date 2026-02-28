@@ -16,4 +16,4 @@ enable_testing()
 
 # 注册 initest 作为 CTest 可识别的测试用例
 # 当执行 `ctest` 时，会运行 initest 并检查其返回值
-add_test(NAME IniFileTest COMMAND initest)
+add_test(NAME inifileTest COMMAND initest)
