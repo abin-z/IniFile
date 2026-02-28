@@ -2241,7 +2241,7 @@ TEST_CASE("ini::field move and assignment robustness", "[field][move][self-assig
   }
 }
 
-TEST_CASE("IniFile Save/Load Consistency - All Integer Types")
+TEST_CASE("inifile Save/Load Consistency - All Integer Types")
 {
   ini::inifile ini;
   ini["int"]["int_min"] = std::numeric_limits<int>::min();
@@ -2328,7 +2328,7 @@ TEST_CASE("IniFile Save/Load Consistency - All Integer Types")
   CHECK(loaded["u64"]["max"].as<uint64_t>() == std::numeric_limits<uint64_t>::max());
 }
 
-TEST_CASE("IniFile Save/Load Consistency - All Floating Types")
+TEST_CASE("inifile Save/Load Consistency - All Floating Types")
 {
   ini::inifile ini;
   ini["float"]["lowest"] = std::numeric_limits<float>::lowest();  // -FLT_MAX
@@ -2371,7 +2371,7 @@ TEST_CASE("IniFile Save/Load Consistency - All Floating Types")
   CHECK(std::isnan(loaded["special"]["nan"].as<double>()));
 }
 
-TEST_CASE("IniFile Save/Load Consistency - Special Floating-Point Values")
+TEST_CASE("inifile Save/Load Consistency - Special Floating-Point Values")
 {
   ini::inifile ini;
 
@@ -2411,7 +2411,7 @@ TEST_CASE("IniFile Save/Load Consistency - Special Floating-Point Values")
          loaded["long double"]["-inf"].as<long double>() < 0));
 }
 
-TEST_CASE("IniFile Save/Load Consistency - bool, std::string, const char*, char types")
+TEST_CASE("inifile Save/Load Consistency - bool, std::string, const char*, char types")
 {
   ini::inifile ini;
 
