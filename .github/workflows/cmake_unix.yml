@@ -25,11 +25,6 @@ jobs:
         with:
           submodules: true
 
-      - name: Show compiler version
-        run: |
-          echo "C++ compiler:"
-          $CXX --version
-
       - name: Configure CMake
         run: cmake -S . -B build -G Ninja \
           -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} \
