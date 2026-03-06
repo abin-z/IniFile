@@ -1,16 +1,38 @@
 name: Build & Test
 
-on: [push, pull_request]
+on:
+  push:
+    branches: ["main"]
+    paths-ignore:
+      - "README.md"
+      - "README.zh-CN.md"
+  pull_request:
+
 jobs:
   build:
-    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+        build_type: [Debug, Release]
+
+    runs-on: ${{ matrix.os }}
+
+    name: ${{ matrix.os }} ${{ matrix.build_type }}
+
     steps:
-    - uses: actions/checkout@v4
-      with:
-        submodules: true
-    - name: Configure CMake
-      run: cmake -S . -B build
-    - name: Build
-      run: cmake --build build --parallel
-    - name: Run tests
-      run: ctest --test-dir build
+      - uses: actions/checkout@v4
+        with:
+          submodules: true
+
+      - name: Configure CMake
+        run: cmake -S . -B build \
+          -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} \
+          -DINIFILE_BUILD_TESTS=ON \
+          -DINIFILE_BUILD_EXAMPLES=ON
+
+      - name: Build
+        run: cmake --build build --config ${{ matrix.build_type }} --parallel
+
+      - name: Run tests
+        run: ctest --test-dir build -C ${{ matrix.build_type }} --output-on-failure
