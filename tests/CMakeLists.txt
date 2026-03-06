@@ -2,6 +2,7 @@
 add_executable(initest test_inifile.cpp)
 
 target_compile_options(initest PRIVATE
+  $<$<CXX_COMPILER_ID:GNU>:-Wa,-mbig-obj>
   $<$<CXX_COMPILER_ID:MSVC>:/bigobj>
 )
 
