@@ -21,6 +21,8 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+        with:
+          submodules: true
 
       - name: Setup Compiler
         shell: pwsh
@@ -39,7 +41,7 @@ jobs:
           if ($env:MATRIX_COMPILER -eq 'msvc') {
             cmake -S . -B build -G "Visual Studio 17 2022" -A x64 -DCMAKE_BUILD_TYPE=$env:MATRIX_BUILD_TYPE
           } elseif ($env:MATRIX_COMPILER -eq 'clang') {
-            cmake -S . -B build -G Ninja -T LLVM -A x64 -DCMAKE_BUILD_TYPE=$env:MATRIX_BUILD_TYPE
+            cmake -S . -B build -G Ninja -DCMAKE_C_COMPILER=clang-cl -DCMAKE_CXX_COMPILER=clang-cl -DCMAKE_BUILD_TYPE=$env:MATRIX_BUILD_TYPE
           } else {
             cmake -S . -B build -G Ninja -DCMAKE_C_COMPILER=gcc -DCMAKE_CXX_COMPILER=g++ -DCMAKE_BUILD_TYPE=$env:MATRIX_BUILD_TYPE
           }
