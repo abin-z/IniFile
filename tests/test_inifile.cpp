@@ -14,10 +14,13 @@
 TEST_CASE("basic test")
 {
   REQUIRE(1 + 1 == 2);
-#ifdef _WIN32
+#if defined(_MSC_VER)
   // msvc下能通过: msvc下double和long double一样, 都是 (64-bit IEEE 754), 但是gcc和clang不一样
   CHECK(sizeof(double) == sizeof(long double));
   CHECK(std::numeric_limits<long double>::max() == std::numeric_limits<double>::max());
+#else
+  // 非 MSVC 平台 (MinGW/GCC/Clang) 不做检查, 避免 CI 失败
+  SUCCEED("Skipping long double checks on non-MSVC compilers");
 #endif
 }
 
