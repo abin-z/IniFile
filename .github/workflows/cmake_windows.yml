@@ -1,0 +1,51 @@
+name: Build & Test (Windows)
+
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        compiler: [msvc, clang, mingw]
+        build_type: [Debug, Release]
+
+    runs-on: windows-latest
+
+    env:
+      MATRIX_COMPILER: ${{ matrix.compiler }}
+      MATRIX_BUILD_TYPE: ${{ matrix.build_type }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Compiler
+        shell: pwsh
+        run: |
+          if ($env:MATRIX_COMPILER -eq 'clang') {
+            Write-Host "Using clang-cl from VS"
+          } elseif ($env:MATRIX_COMPILER -eq 'msvc') {
+            Write-Host "Using MSVC (default)"
+          } else {
+            Write-Host "Using MinGW (assume preinstalled in PATH)"
+          }
+
+      - name: Configure CMake
+        shell: pwsh
+        run: |
+          if ($env:MATRIX_COMPILER -eq 'msvc') {
+            cmake -S . -B build -G "Visual Studio 17 2022" -A x64 -DCMAKE_BUILD_TYPE=$env:MATRIX_BUILD_TYPE
+          } elseif ($env:MATRIX_COMPILER -eq 'clang') {
+            cmake -S . -B build -G Ninja -T LLVM -A x64 -DCMAKE_BUILD_TYPE=$env:MATRIX_BUILD_TYPE
+          } else {
+            cmake -S . -B build -G Ninja -DCMAKE_C_COMPILER=gcc -DCMAKE_CXX_COMPILER=g++ -DCMAKE_BUILD_TYPE=$env:MATRIX_BUILD_TYPE
+          }
+
+      - name: Build
+        run: cmake --build build --config ${{ matrix.build_type }} --parallel
+
+      - name: Run tests
+        run: ctest --test-dir build -C ${{ matrix.build_type }} --output-on-failure
