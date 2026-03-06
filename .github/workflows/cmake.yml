@@ -26,7 +26,7 @@ jobs:
           submodules: true
 
       - name: Configure CMake
-        run: cmake -S . -B build -G Ninja \
+        run: cmake -S . -B build \
           -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} \
           -DINIFILE_BUILD_TESTS=ON \
           -DINIFILE_BUILD_EXAMPLES=ON
