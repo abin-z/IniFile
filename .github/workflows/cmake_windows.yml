@@ -28,11 +28,11 @@ jobs:
         shell: pwsh
         run: |
           if ($env:MATRIX_COMPILER -eq 'clang') {
-            Write-Host "Using clang-cl from VS"
+            Write-Host "Using Clang from LLVM"
           } elseif ($env:MATRIX_COMPILER -eq 'msvc') {
             Write-Host "Using MSVC (default)"
           } else {
-            Write-Host "Using MinGW (assume preinstalled in PATH)"
+            Write-Host "Using MinGW (GCC)"
           }
 
       - name: Configure CMake
