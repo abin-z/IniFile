@@ -38,10 +38,10 @@ jobs:
         run: ctest --test-dir build -C ${{ matrix.build_type }} --output-on-failure
 
       - name: Install library
-        run: cmake --install build --prefix ./install
+        run: cmake --install build --prefix $PWD/install
 
       - name: Test installed library
         run: |
-          cmake -S tests/installed_test -B build_installed -G Ninja -DCMAKE_PREFIX_PATH=./install
+          cmake -S tests/installed_test -B build_installed -G Ninja -DCMAKE_PREFIX_PATH=$PWD/install
           cmake --build build_installed
           ctest --test-dir build_installed --output-on-failure
