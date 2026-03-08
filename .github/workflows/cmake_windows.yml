@@ -52,7 +52,7 @@ jobs:
         run: ctest --test-dir build -C ${{ matrix.build_type }} --output-on-failure
 
       - name: Install library
-        run: cmake --install build --prefix ./install
+        run: cmake --install build --prefix "${PWD}/install"
 
       - name: Test installed library
         shell: pwsh
