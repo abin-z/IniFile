@@ -57,10 +57,13 @@ jobs:
       - name: Test installed library
         shell: pwsh
         run: |
+          $install_path = "${PWD}/install"
           if ('${{ matrix.compiler }}' -eq 'msvc') {
-            cmake -S tests/installed_test -B build_installed -G "Visual Studio 17 2022" -A x64 -DCMAKE_PREFIX_PATH="$PWD\install"
+            cmake -S tests/installed_test -B build_installed -G "Visual Studio 17 2022" -A x64 -DCMAKE_PREFIX_PATH=$install_path
             cmake --build build_installed --config ${{ matrix.build_type }}
           } else {
-            cmake -S tests/installed_test -B build_installed -G Ninja -DCMAKE_C_COMPILER=${{ matrix.compiler }} -DCMAKE_CXX_COMPILER=${{ matrix.compiler }}++ -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} -DCMAKE_PREFIX_PATH="$PWD/install"
+            $cc_name = if ('${{ matrix.compiler }}' -eq 'clang') { 'clang' } else { 'gcc' }
+            $cxx_name = if ('${{ matrix.compiler }}' -eq 'clang') { 'clang++' } else { 'g++' }
+            cmake -S tests/installed_test -B build_installed -G Ninja -DCMAKE_C_COMPILER=$cc_name -DCMAKE_CXX_COMPILER=$cxx_name -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} -DCMAKE_PREFIX_PATH=$install_path
             cmake --build build_installed
           }
