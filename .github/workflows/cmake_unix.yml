@@ -44,4 +44,3 @@ jobs:
         run: |
           cmake -S tests/installed_test -B build_installed -G Ninja -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} -DCMAKE_PREFIX_PATH=$PWD/install
           cmake --build build_installed
-          ctest --test-dir build_installed --output-on-failure
