@@ -57,6 +57,6 @@ jobs:
       - name: Test installed library
         shell: pwsh
         run: |
-          cmake -S tests/installed_test -B build_installed -DCMAKE_PREFIX_PATH=./install
+          cmake -S tests/installed_test -B build_installed -G Ninja -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} -DCMAKE_PREFIX_PATH=$PWD/install
           cmake --build build_installed --config ${{ matrix.build_type }}
           ctest --test-dir build_installed --config ${{ matrix.build_type }} --output-on-failure
