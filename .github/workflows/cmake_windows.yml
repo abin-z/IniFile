@@ -47,3 +47,6 @@ jobs:
 
       - name: Run tests
         run: ctest --test-dir build -C ${{ matrix.build_type }} --output-on-failure
+
+      - name: Install library
+        run: cmake --install build --prefix ./install
