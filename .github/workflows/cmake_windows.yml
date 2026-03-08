@@ -1,4 +1,4 @@
-name: Build & Test (Windows)
+name: Build & Test & Install (Windows)
 
 on:
   push:
@@ -9,7 +9,7 @@ on:
   pull_request:
 
 jobs:
-  build:
+  windows_ci:
     strategy:
       fail-fast: false
       matrix:
@@ -53,3 +53,10 @@ jobs:
 
       - name: Install library
         run: cmake --install build --prefix ./install
+
+      - name: Test installed library
+        shell: pwsh
+        run: |
+          cmake -S tests/installed_test -B build_installed -DCMAKE_PREFIX_PATH=./install
+          cmake --build build_installed --config ${{ matrix.build_type }}
+          ctest --test-dir build_installed --config ${{ matrix.build_type }} --output-on-failure

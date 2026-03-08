@@ -1,4 +1,4 @@
-name: Build & Test (Unix)
+name: Build & Test & Install (Unix)
 
 on:
   push:
@@ -9,7 +9,7 @@ on:
   pull_request:
 
 jobs:
-  build:
+  unix_ci:
     strategy:
       fail-fast: false
       matrix:
@@ -39,3 +39,9 @@ jobs:
 
       - name: Install library
         run: cmake --install build --prefix ./install
+
+      - name: Test installed library
+        run: |
+          cmake -S tests/installed_test -B build_installed -G Ninja -DCMAKE_PREFIX_PATH=./install
+          cmake --build build_installed
+          ctest --test-dir build_installed --output-on-failure
