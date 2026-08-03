@@ -119,8 +119,7 @@ inline std::vector<std::string> split(const std::string &str, const std::string 
 
 // 1. 检查类型 T 是否支持 std::begin() 和 std::end()
 template <typename T>
-class has_begin_end
-{
+class has_begin_end {
  private:
   // 内部辅助模板, 尝试调用 std::begin() 和 std::end() 来检查类型 T 是否支持它们
   // 这个测试会先尝试通过 std::begin 和 std::end 获取迭代器
@@ -141,8 +140,7 @@ class has_begin_end
 
 // 2. 检查容器是否是 map 类型(如 std::map 或 std::unordered_map)
 template <typename T>
-class is_map
-{
+class is_map {
  private:
   template <typename U>
   static auto test(int) ->
@@ -157,8 +155,7 @@ class is_map
 
 // 3. 检查元素类型是否支持 ostream 输出操作 <<
 template <typename T>
-class is_ostreamable
-{
+class is_ostreamable {
  private:
   template <typename U>
   static auto test(int) -> decltype(std::declval<std::ostream &>() << std::declval<const U &>(), std::true_type{});
@@ -242,8 +239,7 @@ struct convert;
  * 提供 `decode` 和 `encode` 方法,支持 `bool` 与 `std::string` 之间的转换
  */
 template <>
-struct convert<bool>
-{
+struct convert<bool> {
   /**
    * @brief 将 std::string 转换为 bool 类型
    * @param value 输入的字符串
@@ -274,8 +270,7 @@ struct convert<bool>
 };
 
 template <>
-struct convert<char>
-{
+struct convert<char> {
   static void decode(const std::string &value, char &result)
   {
     if (value.empty())
@@ -291,8 +286,7 @@ struct convert<char>
 };
 
 template <>
-struct convert<unsigned char>
-{
+struct convert<unsigned char> {
   static void decode(const std::string &value, unsigned char &result)
   {
     if (value.empty())
@@ -309,8 +303,7 @@ struct convert<unsigned char>
 };
 
 template <>
-struct convert<signed char>
-{
+struct convert<signed char> {
   static void decode(const std::string &value, signed char &result)
   {
     if (value.empty())
@@ -328,8 +321,7 @@ struct convert<signed char>
 
 // 处理 `std::string`
 template <>
-struct convert<std::string>
-{
+struct convert<std::string> {
   static void decode(const std::string &value, std::string &result)
   {
     result = value;
@@ -343,8 +335,7 @@ struct convert<std::string>
 
 // 处理 `const char*`
 template <>
-struct convert<const char *>
-{
+struct convert<const char *> {
   static void decode(const std::string &value, const char *&result)
   {
     result = value.c_str();
@@ -358,8 +349,7 @@ struct convert<const char *>
 
 // 处理 `char *`
 template <>
-struct convert<char *>
-{
+struct convert<char *> {
   static void encode(char *value, std::string &result)
   {
     result = value;
@@ -368,8 +358,7 @@ struct convert<char *>
 
 // 处理 `char[N]` 类型(即固定大小的字符数组)
 template <std::size_t N>
-struct convert<char[N]>
-{
+struct convert<char[N]> {
   static void encode(const char (&value)[N], std::string &result)
   {
     result = value;
@@ -384,14 +373,10 @@ using void_t = void;
 
 /// @brief is_to_stringable: 检查类型 T 是否支持 std::to_string()
 template <typename T, typename = void>
-struct is_to_stringable : std::false_type
-{
-};
+struct is_to_stringable : std::false_type {};
 // 如果 T 能传入 std::to_string, 则 is_to_stringable<T> 为 true
 template <typename T>
-struct is_to_stringable<T, void_t<decltype(std::to_string(std::declval<T>()))>> : std::true_type
-{
-};
+struct is_to_stringable<T, void_t<decltype(std::to_string(std::declval<T>()))>> : std::true_type {};
 //////////////////////////////////////////////////////////////////////////////////////////////////////
 
 /**
@@ -402,8 +387,7 @@ struct is_to_stringable<T, void_t<decltype(std::to_string(std::declval<T>()))>> 
  * 该特化确保只有整型类型(例如 `int`、`long` 等)能够匹配,而字符类型将被排除.
  */
 template <typename T>
-struct convert<T, typename std::enable_if<std::is_integral<T>::value && is_to_stringable<T>::value>::type>
-{
+struct convert<T, typename std::enable_if<std::is_integral<T>::value && is_to_stringable<T>::value>::type> {
   /**
    * @brief 将字符串转换为整数
    * @param value 输入的字符串
@@ -501,8 +485,7 @@ inline long double parse_string_to_floating_point<long double>(const char *str, 
  * 即 `float`、`double` 和 `long double`.
  */
 template <typename T>
-struct convert<T, typename std::enable_if<std::is_floating_point<T>::value>::type>
-{
+struct convert<T, typename std::enable_if<std::is_floating_point<T>::value>::type> {
   /**
    * @brief 将字符串转换为浮点数
    * @param value 输入的字符串
@@ -571,8 +554,7 @@ struct convert<T, typename std::enable_if<std::is_floating_point<T>::value>::typ
 
 #ifdef __cpp_lib_string_view
 template <>
-struct convert<std::string_view>
-{
+struct convert<std::string_view> {
   static void decode(const std::string &value, std::string_view &result)
   {
     result = value;
@@ -586,8 +568,7 @@ struct convert<std::string_view>
 #endif
 
 /// @brief 大小写不敏感的哈希函数
-struct case_insensitive_hash
-{
+struct case_insensitive_hash {
   std::size_t operator()(std::string s) const  // pass by value
   {
     std::transform(s.begin(), s.end(), s.begin(), [](unsigned char c) { return std::tolower(c); });
@@ -596,8 +577,7 @@ struct case_insensitive_hash
 };
 
 /// @brief 大小写不敏感的比较函数
-struct case_insensitive_equal
-{
+struct case_insensitive_equal {
   bool operator()(const std::string &lhs, const std::string &rhs) const
   {
     return lhs.size() == rhs.size() &&
@@ -609,8 +589,7 @@ struct case_insensitive_equal
 }  // namespace detail
 
 /// @brief Represents a comment block for INI-style configuration, supporting multiple lines.
-class comment
-{
+class comment {
   using comment_container = std::vector<std::string>;  // 注释容器
 
  public:
@@ -650,8 +629,7 @@ class comment
   /// @brief Copy constructor.
   comment(const comment &other) :
     comments_(other.comments_ ? detail::make_unique<comment_container>(*other.comments_) : nullptr)
-  {
-  }
+  {}
   /// @brief Move constructor.
   comment(comment &&other) noexcept : comments_(std::move(other.comments_))
   {
@@ -859,8 +837,7 @@ template <typename, typename>
 class basic_inifile;
 
 /// @brief ini field value
-class field
-{
+class field {
   friend std::ostream &operator<<(std::ostream &os, const field &data);
 
  public:
@@ -1069,8 +1046,7 @@ inline std::ostream &operator<<(std::ostream &os, const field &data)
 
 /// @brief ini basic_section class
 template <typename Hash = std::hash<std::string>, typename Equal = std::equal_to<std::string>>
-class basic_section
-{
+class basic_section {
   using data_container = std::unordered_map<std::string, field, Hash, Equal>;  // 数据容器类型
 
  public:
@@ -1150,8 +1126,8 @@ class basic_section
   {
     for (auto &&pair : args)
     {
-      std::string key = pair.first;                    // 拷贝 key，准备去除空白
-      detail::trim(key);                               // trim 去除前后空白，避免 key 带空格导致查找异常
+      std::string key = pair.first;  // 拷贝 key，准备去除空白
+      detail::trim(key);             // trim 去除前后空白，避免 key 带空格导致查找异常
       data_[std::move(key)] = std::move(pair.second);  // 插入键值对
     }
   }
@@ -1392,8 +1368,7 @@ class basic_section
 
 /// @brief ini file class
 template <typename Hash = std::hash<std::string>, typename Equal = std::equal_to<std::string>>
-class basic_inifile
-{
+class basic_inifile {
   using section = basic_section<Hash, Equal>;  // 在 basic_inifile 内部定义 section 别名
   using data_container = std::unordered_map<std::string, section, Hash, Equal>;  // 数据容器类型
 

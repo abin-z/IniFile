@@ -1,38 +1,66 @@
-BasedOnStyle: Google  # 继承 Google 风格
+BasedOnStyle: Google  # 基础风格：继承 Google 规范
 
-AllowShortFunctionsOnASingleLine: Empty               # 允许短函数一行显示（Empty 允许空函数）
-BreakConstructorInitializers: AfterColon              # 构造函数初始化列表换行
-ColumnLimit: 120                                      # 单行最大字符数 120
-ConstructorInitializerAllOnOneLineOrOnePerLine: true  # 构造函数初始化列表一行或一行一个
-ConstructorInitializerIndentWidth: 2                  # 构造函数初始化列表缩进
-ContinuationIndentWidth: 2                            # 换行缩进宽度 2
-DerivePointerAlignment: false                         # 禁用自动指针对齐
-IndentCaseLabels: false                               # 控制 case: label 本身是否缩进
-IndentWidth: 2                                        # 缩进宽度 2
-PointerAlignment: Right                               # 确保 type &var 风格
-ReflowComments: true                                  # 自动调整 /** ... */ 的换行格式
-TabWidth: 2                                           # Tab 宽度 2
-UseTab: Never                                         # 使用空格缩进
-# AlignConsecutiveAssignments: true                   # 启用连续赋值对齐
+# ==========================================
+# 布局与缩进设置 (Layout & Indentation)
+# ==========================================
+ColumnLimit: 120        # 单行最大字符数（适配宽屏，超过则自动折行）
+IndentWidth: 2          # 基础缩进空格数：2
+TabWidth: 2             # Tab 字符等效空格数：2
+UseTab: Never           # 全局禁止使用 Tab，一律转为空格
 
-BreakBeforeBraces: Custom       # 使用自定义大括号规则
+ContinuationIndentWidth: 2            # 续行（未完成语句换行）缩进宽度：2
+ConstructorInitializerIndentWidth: 2  # 构造函数初始化列表的缩进宽度：2
+IndentCaseLabels: false               # switch 语句中的 case 标签不额外缩进
+
+# ==========================================
+# 函数与构造函数 (Functions & Constructors)
+# ==========================================
+AllowShortFunctionsOnASingleLine: Empty  # 仅允许“空函数”合并为单行显示（如 void foo() {}）
+
+# 构造函数初始化列表排版
+BreakConstructorInitializers: AfterColon              # 冒号后开始换行
+ConstructorInitializerAllOnOneLineOrOnePerLine: true  # 初始化列表要么全在单行，要么一行一个元素
+
+# ==========================================
+# 类型、指针与注释 (Types, Pointers & Comments)
+# ==========================================
+PointerAlignment: Right        # 指针/引用符号靠右对齐（例如：Type *var 或 Type &var）
+DerivePointerAlignment: false  # 禁用自动根据上下文推导指针对齐，强行应用 PointerAlignment
+
+ReflowComments: true  # 自动重排注释格式（超出 ColumnLimit 时自动换行并对齐）
+
+# AlignConsecutiveAssignments: true  # [可选] 是否启用连续赋值号（=）按列对齐
+
+# ==========================================
+# 大括号换行风格 (Brace Wrapping Rules)
+# ==========================================
+BreakBeforeBraces: Custom  # 使用自定义的大括号风格（基于 BSD/Allman 风格微调）
+
 BraceWrapping:
-  AfterClass: true              # ✅ 类的大括号换行
-  AfterControlStatement: true   # ✅ if/for/while 换行
-  AfterEnum: true               # ✅ 枚举的大括号换行
-  AfterFunction: true           # ✅ 函数的大括号换行
-  AfterNamespace: true          # ✅ 命名空间的大括号换行
-  AfterStruct: true             # ✅ struct 的大括号换行
-  BeforeCatch: true             # ✅ catch 大括号也换行
-  BeforeElse: true              # ✅ else 换行
-  IndentBraces: false           # ❌ 大括号不额外缩进
+  # 紧凑类型（大括号与类型名称保持在同一行）
+  AfterClass: false   # class 名后不换行：class Foo {
+  AfterStruct: false  # struct 名后不换行：struct Foo {
+  AfterEnum: false    # enum 名后不换行：enum Foo {
+
+  # 换行类型（大括号独占新行）
+  AfterControlStatement: true  # if / for / while / switch 等控制语句后换行
+  AfterFunction: true          # 函数定义/声明的末尾大括号换行
+  AfterNamespace: true         # namespace 命名空间大括号换行
+  BeforeElse: true             # else 独立换行（不紧贴 if 的闭合括号）
+  BeforeCatch: true            # catch 独立换行（不紧贴 try 的闭合括号）
+
+  # 细节控制
+  IndentBraces: false         # 大括号本身不产生额外缩进（与外层代码平齐）
+  SplitEmptyRecord: false     # 空结构体/类保持单行，不拆分多行（如 struct Idle {};）
+  SplitEmptyFunction: false   # 空函数体保持单行，不拆分多行（如 void foo() {}）
+  SplitEmptyNamespace: false  # 空命名空间保持单行，不拆分多行（如 namespace N {}）
 
 ##############################################################
-# 如果你对某段代码的格式非常满意，不希望 clang-format 修改它
-# 请使用 clang-format off/on 忽略代码块
+# 局部豁免说明：
+# 若某些特定代码（如极特殊排版的数组/状态机矩阵）不希望被修改，
+# 可使用以下标记包围该片段：
 #
 # // clang-format off
-# 满意的代码片段，不需要 clang-format 修改它
+# 保持原样、无需格式化的代码片段
 # // clang-format on
-#
 ##############################################################
