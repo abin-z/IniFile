@@ -17,8 +17,7 @@
 /// @brief Specialization of INIFILE_TYPE_CONVERTER for std::vector<T>.
 /// @tparam T The type of elements in the vector.
 template <typename T>
-struct INIFILE_TYPE_CONVERTER<std::vector<T>>
-{
+struct INIFILE_TYPE_CONVERTER<std::vector<T>> {
   /// @brief Encodes a vector into a delimited string.
   static void encode(const std::vector<T> &vec, std::string &value)
   {

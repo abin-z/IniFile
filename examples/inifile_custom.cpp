@@ -14,11 +14,11 @@
 
 #include <inifile/inifile.h>
 
+#include <iostream>
 #include <utility>
 
 /// @brief User-defined classes
-struct Person
-{
+struct Person {
   Person() = default;  // Must have a default constructor
   Person(int id, int age, std::string name) : id(id), age(age), name(std::move(name)) {}
 
@@ -34,8 +34,7 @@ void print_person(const Person &p)
 
 /// @brief Custom type conversion (Use INIFILE_TYPE_CONVERTER to specialize Person)
 template <>
-struct INIFILE_TYPE_CONVERTER<Person>
-{
+struct INIFILE_TYPE_CONVERTER<Person> {
   // "Encode" the Person object into a value string
   static void encode(const Person &obj, std::string &value)
   {
@@ -71,4 +70,5 @@ int main()
   Person pp = inif["section"]["key"];  // get person object
 
   print_person(pp);
+  std::cout << '\n';
 }
