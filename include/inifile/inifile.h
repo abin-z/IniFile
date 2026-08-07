@@ -27,18 +27,51 @@
 #ifndef INI_FILE_H_
 #define INI_FILE_H_
 
+// clang-format off
+
+// ========================================
+// Feature detection
+// ========================================
+// ------ [[nodiscard]] ------
 #if defined(__has_cpp_attribute)
-
-#if __has_cpp_attribute(nodiscard)
-#define INIFILE_NODISCARD [[nodiscard]]
-#endif
-
+#  if __has_cpp_attribute(nodiscard)
+#    define INIFILE_NODISCARD [[nodiscard]]
+#  endif
 #endif
 
 #ifndef INIFILE_NODISCARD
-#define INIFILE_NODISCARD
+#  define INIFILE_NODISCARD
 #endif
 
+// ------ std::string_view ------
+#if defined(__has_include)
+#  if __has_include(<string_view>)
+#    include <string_view>
+
+#    if defined(__cpp_lib_string_view)
+#      define INIFILE_HAS_STRING_VIEW 1
+#    endif
+
+#  endif
+#endif
+
+#ifndef INIFILE_HAS_STRING_VIEW
+#  define INIFILE_HAS_STRING_VIEW 0
+#endif
+
+
+// ========================================
+// User configuration
+// ========================================
+#ifndef INIFILE_TYPE_CONVERTER
+#  define INIFILE_TYPE_CONVERTER ini::detail::convert
+#endif
+
+// clang-format on
+
+// ========================================
+// Standard headers
+// ========================================
 #include <algorithm>
 #include <cctype>
 #include <cerrno>
@@ -56,24 +89,6 @@
 #include <unordered_map>
 #include <utility>
 #include <vector>
-
-#if defined(__has_include)
-#if __has_include(<string_view>)
-#include <string_view>
-#if defined(__cpp_lib_string_view)
-#define INIFILE_HAS_STRING_VIEW 1
-#endif
-#endif
-#endif
-
-#ifndef INIFILE_HAS_STRING_VIEW
-#define INIFILE_HAS_STRING_VIEW 0
-#endif
-
-// Provides custom type converters, users can customize type conversion
-#ifndef INIFILE_TYPE_CONVERTER
-#define INIFILE_TYPE_CONVERTER ini::detail::convert
-#endif
 
 namespace ini
 {
