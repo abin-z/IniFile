@@ -57,8 +57,17 @@
 #include <utility>
 #include <vector>
 
-#ifdef __cpp_lib_string_view  // If we have std::string_view
+#if defined(__has_include)
+#if __has_include(<string_view>)
 #include <string_view>
+#if defined(__cpp_lib_string_view)
+#define INIFILE_HAS_STRING_VIEW 1
+#endif
+#endif
+#endif
+
+#ifndef INIFILE_HAS_STRING_VIEW
+#define INIFILE_HAS_STRING_VIEW 0
 #endif
 
 // Provides custom type converters, users can customize type conversion
@@ -564,7 +573,7 @@ struct convert<T, typename std::enable_if<std::is_floating_point<T>::value>::typ
   }
 };
 
-#ifdef __cpp_lib_string_view
+#if INIFILE_HAS_STRING_VIEW
 template <>
 struct convert<std::string_view> {
   static void decode(const std::string &value, std::string_view &result)
