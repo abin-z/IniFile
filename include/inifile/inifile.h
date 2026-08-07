@@ -27,6 +27,18 @@
 #ifndef INI_FILE_H_
 #define INI_FILE_H_
 
+#if defined(__has_cpp_attribute)
+
+#if __has_cpp_attribute(nodiscard)
+#define INIFILE_NODISCARD [[nodiscard]]
+#endif
+
+#endif
+
+#ifndef INIFILE_NODISCARD
+#define INIFILE_NODISCARD
+#endif
+
 #include <algorithm>
 #include <cctype>
 #include <cerrno>
@@ -650,6 +662,7 @@ class comment {
     return *this;
   }
   /// @brief Checks if the comment is empty.
+  INIFILE_NODISCARD
   bool empty() const noexcept
   {
     return !comments_ || comments_->empty();
@@ -660,11 +673,13 @@ class comment {
     comments_.reset();
   }
   /// @brief Returns a copy of the internal comment lines.
+  INIFILE_NODISCARD
   std::vector<std::string> to_vector() const
   {
     return comments_ ? *comments_ : comment_container{};
   }
   /// @brief Returns a const reference to the internal comment lines.
+  INIFILE_NODISCARD
   const std::vector<std::string> &view() const
   {
     return comments_ ? *comments_ : empty_comments();  // 避免返回空引用
@@ -731,6 +746,8 @@ class comment {
     set(comment(list, symbol));
   }
 
+  // NOLINTBEGIN(modernize-use-nodiscard)
+
   // Iterators for read-only access
   const_iterator begin() const
   {
@@ -764,6 +781,8 @@ class comment {
   {
     return rend();
   }
+  // NOLINTEND(modernize-use-nodiscard)
+
   /// @brief Compares two comments for equality.
   bool operator==(const comment &rhs) const
   {
@@ -1012,6 +1031,7 @@ class field {
 
   /// @brief Get a const reference to the comment associated with this field.
   /// @return Const reference to the internal `comment` object.
+  INIFILE_NODISCARD
   const ini::comment &comment() const
   {
     return comments_;
@@ -1029,6 +1049,7 @@ class field {
     comments_.clear();
   }
 
+  INIFILE_NODISCARD
   bool empty() const noexcept
   {
     return value_.empty();
@@ -1126,8 +1147,8 @@ class basic_section {
   {
     for (auto &&pair : args)
     {
-      std::string key = pair.first;  // 拷贝 key，准备去除空白
-      detail::trim(key);             // trim 去除前后空白，避免 key 带空格导致查找异常
+      std::string key = pair.first;                    // 拷贝 key，准备去除空白
+      detail::trim(key);                               // trim 去除前后空白，避免 key 带空格导致查找异常
       data_[std::move(key)] = std::move(pair.second);  // 插入键值对
     }
   }
@@ -1135,6 +1156,7 @@ class basic_section {
   /// @brief key exists
   /// @param key
   /// @return returns true if exists
+  INIFILE_NODISCARD
   bool contains(std::string key) const
   {
     detail::trim(key);
@@ -1151,7 +1173,8 @@ class basic_section {
     detail::trim(key);
     return data_.at(key);
   }
-  // const overloading function
+  /// @brief const overloading function
+  INIFILE_NODISCARD
   const field &at(std::string key) const
   {
     detail::trim(key);
@@ -1162,6 +1185,7 @@ class basic_section {
   /// @param key key
   /// @param default_value default value - return default value when key does not exist
   /// @return field value (a copy)
+  INIFILE_NODISCARD
   field get(std::string key, field default_value = field{}) const
   {
     detail::trim(key);
@@ -1220,11 +1244,13 @@ class basic_section {
     data_.clear();
   }
 
+  INIFILE_NODISCARD
   size_type size() const noexcept
   {
     return data_.size();
   }
 
+  INIFILE_NODISCARD
   bool empty() const noexcept
   {
     return data_.empty();
@@ -1344,6 +1370,7 @@ class basic_section {
 
   /// @brief Get a const reference to the comment associated with this field.
   /// @return Const reference to the internal `comment` object.
+  INIFILE_NODISCARD
   const ini::comment &comment() const
   {
     return comments_;
@@ -1442,6 +1469,7 @@ class basic_inifile {
   /// @brief Check if the specified section exists
   /// @param sec section name
   /// @return Return true if it exists, otherwise return false
+  INIFILE_NODISCARD
   bool contains(std::string sec) const
   {
     detail::trim(sec);
@@ -1452,6 +1480,7 @@ class basic_inifile {
   /// @param sec section name
   /// @param key key
   /// @return Return true if it exists, otherwise return false
+  INIFILE_NODISCARD
   bool contains(std::string sec, std::string key) const
   {
     detail::trim(sec);
@@ -1485,6 +1514,7 @@ class basic_inifile {
   /// @param key key
   /// @param default_value default value - the default value will be returned if the key does not exist
   /// @return field value(a copy)
+  INIFILE_NODISCARD
   field get(std::string sec, std::string key, field default_value = field{}) const
   {
     detail::trim(sec);
@@ -1501,6 +1531,7 @@ class basic_inifile {
 
   /// @brief Get all section names in the INI file.
   /// @return A vector containing all section names.
+  INIFILE_NODISCARD
   std::vector<key_type> sections() const
   {
     std::vector<key_type> result;
@@ -1531,6 +1562,7 @@ class basic_inifile {
     return data_.size();
   }
 
+  INIFILE_NODISCARD
   bool empty() const noexcept
   {
     return data_.empty();
@@ -1698,6 +1730,7 @@ class basic_inifile {
 
   /// @brief Convert the inifile object to a corresponding string
   /// @return ini string
+  INIFILE_NODISCARD
   std::string to_string() const
   {
     std::ostringstream ss;
@@ -1708,6 +1741,7 @@ class basic_inifile {
   /// @brief Load ini information from ini file
   /// @param filename Read file path
   /// @return Whether the loading is successful, return `true` if successful
+  INIFILE_NODISCARD
   bool load(const std::string &filename)
   {
     std::ifstream is(filename);
@@ -1721,6 +1755,7 @@ class basic_inifile {
   /// @brief Save ini information to ini file
   /// @param filename Save file path
   /// @return Whether the save is successful, return `true` if successful
+  INIFILE_NODISCARD
   bool save(const std::string &filename) const
   {
     std::ofstream os(filename);
