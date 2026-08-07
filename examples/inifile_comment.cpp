@@ -75,10 +75,25 @@ int main()
   }
 
   // Save to file
-  inif.save(path);
+  auto is_saved = inif.save(path);
+  if (is_saved)
+  {
+    std::cout << "INI file saved successfully to: " << path << '\n';
+  }
+  else
+  {
+    std::cout << "Failed to save INI file to: " << path << '\n';
+  }
 
   // Load from file and print
   ini::inifile loadinif;
-  loadinif.load(path);
-  std::cout << loadinif.to_string() << '\n';
+  auto is_loaded = loadinif.load(path);
+  if (is_loaded)
+  {
+    std::cout << loadinif.to_string() << '\n';
+  }
+  else
+  {
+    std::cout << "Failed to load INI file from: " << path << '\n';
+  }
 }
