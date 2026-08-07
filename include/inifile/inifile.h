@@ -1198,6 +1198,7 @@ class basic_section {
 
   /// @brief Get all keys in the section.
   /// @return A vector containing all keys.
+  INIFILE_NODISCARD
   std::vector<key_type> keys() const
   {
     std::vector<key_type> result;
@@ -1211,6 +1212,7 @@ class basic_section {
 
   /// @brief Get all values in the section.
   /// @return A vector containing all values, each value is a `ini::field` object.
+  INIFILE_NODISCARD
   std::vector<mapped_type> values() const
   {
     std::vector<mapped_type> result;
@@ -1224,6 +1226,7 @@ class basic_section {
 
   /// @brief Get all key-value pairs in the section.
   /// @return A vector containing all key-value pairs, each pair is a `std::pair<std::string, ini::field>`.
+  INIFILE_NODISCARD
   std::vector<value_type> items() const
   {
     return {data_.begin(), data_.end()};
@@ -1557,6 +1560,7 @@ class basic_inifile {
     data_.clear();
   }
 
+  INIFILE_NODISCARD
   size_type size() const noexcept
   {
     return data_.size();
