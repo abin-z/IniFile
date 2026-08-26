@@ -624,7 +624,11 @@ struct case_insensitive_equal {
 
 }  // namespace detail
 
-/// @brief Represents a comment block for INI-style configuration, supporting multiple lines.
+/**
+ * @brief Multi-line comment block for INI sections or key-value pairs.
+ *
+ * Each line is stored with a leading `;` or `#` prefix. Whitespace-only lines are ignored.
+ */
 class comment {
   using comment_container = std::vector<std::string>;  // 注释容器
 
@@ -632,91 +636,157 @@ class comment {
   using const_iterator = typename comment_container::const_iterator;
   using const_reverse_iterator = typename comment_container::const_reverse_iterator;
 
+  /// @brief Constructs an empty comment.
   comment() = default;
+
+  /// @brief Destroys the comment.
   ~comment() = default;
 
-  /// @brief Constructs a comment from a single string (can be multi-line).
-  /// @param str Input string, lines separated by '\n'.
-  /// @param symbol Comment symbol to use (';' or '#').
+  /**
+   * @brief Constructs a comment from a string (may contain multiple lines).
+   * @param str Input text; lines are separated by `\n`.
+   * @param symbol Comment prefix; only `#` selects `#`, any other value uses `;`. Defaults to `;`.
+   */
   explicit comment(const std::string &str, char symbol = ';')
   {
     add(str, symbol);
   }
-  /// @brief Constructs a comment from a vector of lines.
+
+  /**
+   * @brief Constructs a comment from a vector of lines.
+   * @param vec Comment lines (each may already include a prefix).
+   * @param symbol Comment prefix for lines that do not already have one;
+   *               only `#` selects `#`, any other value uses `;`. Defaults to `;`.
+   */
   explicit comment(const std::vector<std::string> &vec, char symbol = ';')
   {
     for (const auto &item : vec) add(item, symbol);
   }
-  /// @brief Constructs a comment from an initializer list of lines.
+
+  /**
+   * @brief Constructs a comment from an initializer list of lines.
+   * @param list Comment lines.
+   * @param symbol Comment prefix for lines that do not already have one;
+   *               only `#` selects `#`, any other value uses `;`. Defaults to `;`.
+   */
   comment(std::initializer_list<std::string> list, char symbol = ';')
   {
     for (const auto &item : list) add(item, symbol);
   }
-  /// @brief Swaps the internal comment data with another instance.
+
+  /**
+   * @brief Swaps contents with another comment.
+   * @param other The other comment to swap with.
+   */
   void swap(comment &other) noexcept
   {
     using std::swap;
     swap(comments_, other.comments_);
   }
+
+  /**
+   * @brief Swaps two comments (ADL-friendly non-member overload).
+   * @param lhs Left-hand comment.
+   * @param rhs Right-hand comment.
+   */
   friend void swap(comment &lhs, comment &rhs) noexcept
   {
     lhs.swap(rhs);
   }
-  /// @brief Copy constructor.
+
+  /**
+   * @brief Copy-constructs a comment (deep copy).
+   * @param other Source comment.
+   */
   comment(const comment &other) :
     comments_(other.comments_ ? detail::make_unique<comment_container>(*other.comments_) : nullptr)
   {}
-  /// @brief Move constructor.
+
+  /**
+   * @brief Move-constructs a comment.
+   * @param other Source comment; left empty after the move.
+   */
   comment(comment &&other) noexcept : comments_(std::move(other.comments_))
   {
     other.comments_.reset();  // 显式清空, 跨平台行为一致
   }
-  /// @brief Copy assignment.
+
+  /**
+   * @brief Copy-assigns from another comment (copy-and-swap).
+   * @param rhs Source comment.
+   * @return Reference to `*this`.
+   */
   comment &operator=(const comment &rhs)
   {
     comment temp(rhs);  // copy ctor
     swap(temp);         // noexcept swap
     return *this;
   }
-  /// @brief Move assignment.
+
+  /**
+   * @brief Move-assigns from another comment.
+   * @param rhs Source comment; left empty after the move.
+   * @return Reference to `*this`.
+   */
   comment &operator=(comment &&rhs) noexcept
   {
     comment temp(std::move(rhs));  // move ctor
     swap(temp);                    // noexcept swap
     return *this;
   }
-  /// @brief Checks if the comment is empty.
+
+  /**
+   * @brief Checks whether the comment has no lines.
+   * @return `true` if empty, otherwise `false`.
+   */
   INIFILE_NODISCARD
   bool empty() const noexcept
   {
     return !comments_ || comments_->empty();
   }
-  /// @brief Clears the comment.
+
+  /// @brief Removes all comment lines.
   void clear() noexcept
   {
     comments_.reset();
   }
-  /// @brief Returns a copy of the internal comment lines.
+
+  /**
+   * @brief Returns a copy of all comment lines.
+   * @return Vector of formatted comment lines (each starts with `;` or `#`).
+   */
   INIFILE_NODISCARD
   std::vector<std::string> to_vector() const
   {
     return comments_ ? *comments_ : comment_container{};
   }
-  /// @brief Returns a const reference to the internal comment lines.
+
+  /**
+   * @brief Returns a const view of the internal comment lines.
+   * @return Const reference to the line vector (empty static storage if unset).
+   */
   INIFILE_NODISCARD
   const std::vector<std::string> &view() const
   {
     return comments_ ? *comments_ : empty_comments();  // 避免返回空引用
   }
 
-  /// @brief Appends comment content from a string (multi-line supported).
+  /**
+   * @brief Appends comment text from a string (multi-line supported).
+   * @param str Text to append; lines separated by `\n`. Whitespace-only input is ignored.
+   * @param symbol Comment prefix; only `#` selects `#`, any other value uses `;`. Defaults to `;`.
+   */
   void add(const std::string &str, char symbol = ';')
   {
     if (detail::is_all_whitespace(str)) return;
     ensure_comments_initialized();
     add_comments_from_string(str, symbol);
   }
-  /// @brief Appends comment lines from another comment.
+
+  /**
+   * @brief Appends all lines from another comment (copy).
+   * @param other Comment whose lines are appended.
+   */
   void add(const comment &other)
   {
     if (other.empty()) return;
@@ -724,7 +794,10 @@ class comment {
     comments_->insert(comments_->end(), other.comments_->begin(), other.comments_->end());
   }
 
-  /// @brief Moves comment lines from another comment.
+  /**
+   * @brief Appends all lines from another comment (move).
+   * @param other Comment whose lines are moved; cleared afterwards.
+   */
   void add(comment &&other)  // NOLINT(cppcoreguidelines-rvalue-reference-param-not-moved)
   {
     if (other.empty()) return;
@@ -733,12 +806,22 @@ class comment {
                       std::make_move_iterator(other.comments_->end()));
     other.clear();  // 清空 other 的 comments_，防止重复使用
   }
-  /// @brief Appends comment lines from an initializer list.
+
+  /**
+   * @brief Appends comment lines from an initializer list.
+   * @param list Comment lines to append.
+   * @param symbol Comment prefix; only `#` selects `#`, any other value uses `;`. Defaults to `;`.
+   */
   void add(std::initializer_list<std::string> list, char symbol = ';')
   {
     for (const auto &item : list) add(item, symbol);
   }
-  /// @brief Replaces current comment content with a string.
+
+  /**
+   * @brief Replaces the comment with text from a string.
+   * @param str New comment text; lines separated by `\n`. Whitespace-only clears the comment.
+   * @param symbol Comment prefix; only `#` selects `#`, any other value uses `;`. Defaults to `;`.
+   */
   void set(const std::string &str, char symbol = ';')
   {
     if (!detail::is_all_whitespace(str))
@@ -752,19 +835,32 @@ class comment {
       comments_.reset();  // 不需要保留空注释
     }
   }
-  /// @brief Replaces current comment content with another comment (copy).
+
+  /**
+   * @brief Replaces the comment with a copy of another comment.
+   * @param other Source comment.
+   */
   void set(const comment &other)
   {
     comment temp(other);  // copy
     swap(temp);           // noexcept swap
   }
-  /// @brief Replaces current comment content with another comment (move).
+
+  /**
+   * @brief Replaces the comment by moving from another comment.
+   * @param other Source comment; left empty after the move.
+   */
   void set(comment &&other) noexcept
   {
     comment temp(std::move(other));  // move
     swap(temp);                      // noexcept swap
   }
-  /// @brief Replaces current comment content with an initializer list.
+
+  /**
+   * @brief Replaces the comment with an initializer list of lines.
+   * @param list New comment lines.
+   * @param symbol Comment prefix; only `#` selects `#`, any other value uses `;`. Defaults to `;`.
+   */
   void set(std::initializer_list<std::string> list, char symbol = ';')
   {
     set(comment(list, symbol));
@@ -772,48 +868,95 @@ class comment {
 
   // NOLINTBEGIN(modernize-use-nodiscard)
 
-  // Iterators for read-only access
+  /**
+   * @brief Returns a const iterator to the first comment line.
+   * @return Const iterator to the beginning.
+   */
   const_iterator begin() const
   {
     return comments_ ? comments_->cbegin() : empty_comments().cbegin();
   }
+
+  /**
+   * @brief Returns a const iterator past the last comment line.
+   * @return Const iterator to the end.
+   */
   const_iterator end() const
   {
     return comments_ ? comments_->cend() : empty_comments().cend();
   }
+
+  /**
+   * @brief Returns a const iterator to the first comment line.
+   * @return Const iterator to the beginning.
+   */
   const_iterator cbegin() const
   {
     return begin();
   }
+
+  /**
+   * @brief Returns a const iterator past the last comment line.
+   * @return Const iterator to the end.
+   */
   const_iterator cend() const
   {
     return end();
   }
+
+  /**
+   * @brief Returns a const reverse iterator to the last comment line.
+   * @return Const reverse iterator to the reverse beginning.
+   */
   const_reverse_iterator rbegin() const
   {
     return comments_ ? comments_->crbegin() : empty_comments().crbegin();
   }
+
+  /**
+   * @brief Returns a const reverse iterator past the first comment line.
+   * @return Const reverse iterator to the reverse end.
+   */
   const_reverse_iterator rend() const
   {
     return comments_ ? comments_->crend() : empty_comments().crend();
   }
+
+  /**
+   * @brief Returns a const reverse iterator to the last comment line.
+   * @return Const reverse iterator to the reverse beginning.
+   */
   const_reverse_iterator crbegin() const
   {
     return rbegin();
   }
+
+  /**
+   * @brief Returns a const reverse iterator past the first comment line.
+   * @return Const reverse iterator to the reverse end.
+   */
   const_reverse_iterator crend() const
   {
     return rend();
   }
   // NOLINTEND(modernize-use-nodiscard)
 
-  /// @brief Compares two comments for equality.
+  /**
+   * @brief Equality comparison.
+   * @param rhs Comment to compare with.
+   * @return `true` if both comments have the same lines (or are both empty).
+   */
   bool operator==(const comment &rhs) const
   {
     if (comments_ && rhs.comments_) return *comments_ == *rhs.comments_;
     return !comments_ && !rhs.comments_;
   }
-  /// @brief Compares two comments for inequality.
+
+  /**
+   * @brief Inequality comparison.
+   * @param rhs Comment to compare with.
+   * @return `true` if the comments differ.
+   */
   bool operator!=(const comment &rhs) const
   {
     return !(*this == rhs);
@@ -865,6 +1008,12 @@ class comment {
   std::unique_ptr<comment_container> comments_{nullptr};  // 行级注释容器, 使用unique_ptr主要考虑内存占用更小
 };
 
+/**
+ * @brief Writes each comment line to an output stream, followed by a newline.
+ * @param os Output stream.
+ * @param c Comment to write.
+ * @return Reference to @p os.
+ */
 inline std::ostream &operator<<(std::ostream &os, const comment &c)
 {
   for (const auto &line : c.view())
@@ -879,22 +1028,32 @@ inline std::ostream &operator<<(std::ostream &os, const comment &c)
 template <typename, typename>
 class basic_inifile;
 
-/// @brief ini field value
+/**
+ * @brief A single INI field value (`key = value`), with optional associated comments.
+ *
+ * Values are stored as strings and can be converted to/from common C++ types via
+ * `as()`, `set()`, assignment, and conversion operators.
+ */
 class field {
   friend std::ostream &operator<<(std::ostream &os, const field &data);
 
  public:
-  /// 默认构造函数,使用编译器生成的默认实现.
+  /// @brief Constructs an empty field.
   field() = default;
 
-  /// 参数构造函数：通过传入字符串初始化 value_
-  /// 使用 pass-by-value 统一接收左值/右值，结合 std::move 实现高效构造
+  /**
+   * @brief Constructs a field from a string value.
+   * @param value Field value (passed by value for efficient copy/move).
+   */
   explicit field(std::string value) : value_(std::move(value)) {}
 
-  /// 默认析构函数,使用编译器生成的默认实现.
+  /// @brief Destroys the field.
   ~field() = default;
 
-  /// @brief 成员swap函数
+  /**
+   * @brief Swaps contents with another field.
+   * @param other The other field to swap with.
+   */
   void swap(field &other) noexcept
   {
     using std::swap;
@@ -902,20 +1061,31 @@ class field {
     swap(comments_, other.comments_);
   }
 
-  // 友元 swap(非成员函数)(std::swap 支持)
+  /**
+   * @brief Swaps two fields (ADL-friendly non-member overload).
+   * @param lhs Left-hand field.
+   * @param rhs Right-hand field.
+   */
   friend void swap(field &lhs, field &rhs) noexcept
   {
     lhs.swap(rhs);
   }
 
-  /// 移动构造函数
+  /**
+   * @brief Move-constructs a field.
+   * @param other Source field; left empty after the move.
+   */
   field(field &&other) noexcept : value_(std::move(other.value_)), comments_(std::move(other.comments_))
   {
     other.value_.clear();     // 显式清空, 跨平台行为一致
     other.comments_.clear();  // 显式清空, 跨平台行为一致
   }
 
-  /// 移动赋值运算符
+  /**
+   * @brief Move-assigns from another field.
+   * @param rhs Source field; left empty after the move.
+   * @return Reference to `*this`.
+   */
   field &operator=(field &&rhs) noexcept
   {
     field temp(std::move(rhs));  // move ctor
@@ -923,10 +1093,17 @@ class field {
     return *this;
   }
 
-  /// 重写拷贝构造函数,深拷贝 other 对象.
+  /**
+   * @brief Copy-constructs a field.
+   * @param other Source field.
+   */
   field(const field &other) : value_(other.value_), comments_(other.comments_) {}
 
-  /// 重写拷贝赋值(copy-and-swap 方式)
+  /**
+   * @brief Copy-assigns from another field (copy-and-swap).
+   * @param rhs Source field.
+   * @return Reference to `*this`.
+   */
   field &operator=(const field &rhs)  // `rhs` pass by reference
   {
     field temp(rhs);  // 使用拷贝构造函数创建一个临时对象, 这里会分配内存
@@ -934,19 +1111,23 @@ class field {
     return *this;
   }
 
-  /// @brief Template constructor: allows construction of `field` objects from values ​​of other types.
-  /// @tparam T Other type T
-  /// @param other Other type value
+  /**
+   * @brief Constructs a field by converting a value of type @p T to string.
+   * @tparam T Source type (must be supported by the type converter).
+   * @param other Value to encode into the field.
+   */
   template <typename T>
   field(const T &other)  // NOLINT(google-explicit-constructor)
   {
     detail::convert<T>::encode(other, value_);  // 将传入的值编码成字符串并存储到 value_ 中
   }
 
-  /// @brief Template copy assignment operator. Allows values ​​of other types to be assigned to `field` objects.
-  /// @tparam T Other type T
-  /// @param rhs Other type value
-  /// @return `field` reference
+  /**
+   * @brief Assigns a value of type @p T by converting it to string.
+   * @tparam T Source type (must be supported by the type converter).
+   * @param rhs Value to encode into the field.
+   * @return Reference to `*this`.
+   */
   template <typename T>
   field &operator=(const T &rhs)
   {
@@ -954,11 +1135,15 @@ class field {
     return *this;                             // 返回当前对象的引用,支持链式赋值
   }
 
-  /// @brief Converts an ini field to target type T. If the conversion fails, exception will be thrown.
-  /// @tparam T Target type T
-  /// @return Target type value
-  /// @throws `std::invalid_argument` If the field cannot be converted to type T.
-  /// @throws `std::out_of_range` If the field is out of the valid range for type T.
+  /**
+   * @brief Converts the field value to type @p T.
+   * @tparam T Target type.
+   * @return Converted value.
+   * @throws std::invalid_argument If the value cannot be converted to @p T
+   *         (depends on @p T; e.g. bool/string conversions do not throw).
+   * @throws std::out_of_range If the value is outside the valid range for @p T
+   *         (integral/floating conversions).
+   */
   template <typename T>
   T as() const
   {
@@ -967,12 +1152,16 @@ class field {
     return result;                               // 返回转换结果
   }
 
-  /// @brief Converts an ini field to target type T and stores the result in the given output variable.
-  /// @tparam T Target type T
-  /// @param out Output variable to receive the converted value
-  /// @return Reference to the output variable after conversion
-  /// @throws `std::invalid_argument` If the field cannot be converted to type T.
-  /// @throws `std::out_of_range` If the field is out of the valid range for type T.
+  /**
+   * @brief Converts the field value to type @p T and writes it to @p out.
+   * @tparam T Target type.
+   * @param out Output variable that receives the converted value.
+   * @return Reference to @p out.
+   * @throws std::invalid_argument If the value cannot be converted to @p T
+   *         (depends on @p T; e.g. bool/string conversions do not throw).
+   * @throws std::out_of_range If the value is outside the valid range for @p T
+   *         (integral/floating conversions).
+   */
   template <typename T>
   T &as_to(T &out) const
   {
@@ -980,22 +1169,27 @@ class field {
     return out;                               // 返回转换后的引用
   }
 
-  /// @brief Type conversion operator: allows field objects to be converted to the target type T.
-  //         If the conversion fails, exception will be thrown.
-  /// @tparam T Target type to be converted
-  /// @return The value of the target type after conversion
-  /// @throws `std::invalid_argument` If the field cannot be converted to type T.
-  /// @throws `std::out_of_range` If the field is out of the valid range for type T.
+  /**
+   * @brief Implicit conversion to type @p T.
+   * @tparam T Target type.
+   * @return Converted value.
+   * @throws std::invalid_argument If the value cannot be converted to @p T
+   *         (depends on @p T; e.g. bool/string conversions do not throw).
+   * @throws std::out_of_range If the value is outside the valid range for @p T
+   *         (integral/floating conversions).
+   */
   template <typename T>
   operator T() const  // NOLINT(google-explicit-constructor)
   {
     return this->as<T>();  // 使用 as<T> 方法将值转换为目标类型 T, 转换失败抛异常: std::invalid_argument
   }
 
-  /// @brief Sets the field value from a given typed value.
-  /// @tparam T Type of the input value.
-  /// @param value The value to be stored.
-  /// @return Reference to the current field (for chaining).
+  /**
+   * @brief Sets the field value from a typed value.
+   * @tparam T Type of @p value.
+   * @param value Value to store (encoded as string).
+   * @return Reference to `*this` (for chaining).
+   */
   template <typename T>
   field &set(const T &value)
   {
@@ -1003,76 +1197,111 @@ class field {
     return *this;
   }
 
-  /// @brief Set `key=value` comment, overwriting the original comment.
-  /// @param str Comment content. Multi-line input is allowed, lines separated by `\n`.
-  /// @param symbol Comment symbol, default is `;`. Only `;` and `#` are supported.
+  /**
+   * @brief Replaces the key-value comment with text from a string.
+   * @param str Comment text; multi-line allowed, lines separated by `\n`.
+   * @param symbol Comment prefix; only `#` selects `#`, any other value uses `;`. Defaults to `;`.
+   */
   void set_comment(const std::string &str, char symbol = ';')
   {
     comments_.set(str, symbol);
   }
-  /// @brief Overwrite the current comment with another comment (copy).
+
+  /**
+   * @brief Replaces the key-value comment with a copy of another comment.
+   * @param other Source comment.
+   */
   void set_comment(const comment &other)
   {
     comments_.set(other);
   }
-  /// @brief Overwrite the current comment with another comment (move).
+
+  /**
+   * @brief Replaces the key-value comment by moving from another comment.
+   * @param other Source comment; left empty after the move.
+   */
   void set_comment(comment &&other) noexcept
   {
     comments_.set(std::move(other));
   }
-  /// @brief Set the comment from an initializer list of strings.
-  /// @param list List of comment lines.
-  /// @param symbol Comment symbol, default is `;`. Only `;` and `#` are supported.
+
+  /**
+   * @brief Replaces the key-value comment with an initializer list of lines.
+   * @param list Comment lines.
+   * @param symbol Comment prefix; only `#` selects `#`, any other value uses `;`. Defaults to `;`.
+   */
   void set_comment(std::initializer_list<std::string> list, char symbol = ';')
   {
     comments_.set(list, symbol);
   }
 
-  /// @brief Add `key=value` comments by appending to the existing ones.
-  /// @param str Comment content. Multi-line input is allowed, lines separated by `\n`.
-  /// @param symbol Comment symbol, default is `;`. Only `;` and `#` are supported.
+  /**
+   * @brief Appends text to the key-value comment.
+   * @param str Comment text; multi-line allowed, lines separated by `\n`.
+   * @param symbol Comment prefix; only `#` selects `#`, any other value uses `;`. Defaults to `;`.
+   */
   void add_comment(const std::string &str, char symbol = ';')
   {
     comments_.add(str, symbol);
   }
-  /// @brief Append comments from another comment object (copy).
+
+  /**
+   * @brief Appends lines from another comment (copy).
+   * @param other Comment whose lines are appended.
+   */
   void add_comment(const comment &other)
   {
     comments_.add(other);
   }
-  /// @brief Append comments from another comment object (move).
+
+  /**
+   * @brief Appends lines from another comment (move).
+   * @param other Comment whose lines are moved; left empty afterwards.
+   */
   void add_comment(comment &&other) noexcept
   {
     comments_.add(std::move(other));
   }
-  /// @brief Append comments from an initializer list of strings.
-  /// @param list List of comment lines.
-  /// @param symbol Comment symbol, default is `;`. Only `;` and `#` are supported.
+
+  /**
+   * @brief Appends comment lines from an initializer list.
+   * @param list Comment lines to append.
+   * @param symbol Comment prefix; only `#` selects `#`, any other value uses `;`. Defaults to `;`.
+   */
   void add_comment(std::initializer_list<std::string> list, char symbol = ';')
   {
     comments_.add(list, symbol);
   }
 
-  /// @brief Get a const reference to the comment associated with this field.
-  /// @return Const reference to the internal `comment` object.
+  /**
+   * @brief Returns a const reference to the associated comment.
+   * @return Const reference to the internal `comment` object.
+   */
   INIFILE_NODISCARD
   const ini::comment &comment() const
   {
     return comments_;
   }
-  /// @brief Get a mutable reference to the comment associated with this field.
-  /// @return Reference to the internal `comment` object.
+
+  /**
+   * @brief Returns a mutable reference to the associated comment.
+   * @return Reference to the internal `comment` object.
+   */
   ini::comment &comment()
   {
     return comments_;
   }
 
-  /// @brief Clear `key=value` comment
+  /// @brief Clears the key-value comment.
   void clear_comment()
   {
     comments_.clear();
   }
 
+  /**
+   * @brief Checks whether the field value string is empty.
+   * @return `true` if the stored value is empty, otherwise `false`.
+   */
   INIFILE_NODISCARD
   bool empty() const noexcept
   {
@@ -1084,12 +1313,26 @@ class field {
   ini::comment comments_;  // key-value 键值对的注释
 };
 
+/**
+ * @brief Writes the field's raw string value to an output stream.
+ * @param os Output stream.
+ * @param data Field to write.
+ * @return Reference to @p os.
+ */
 inline std::ostream &operator<<(std::ostream &os, const field &data)
 {
   return os << data.value_;
 }
 
-/// @brief ini basic_section class
+/**
+ * @brief One INI section: a map of keys to @ref field values, plus an optional section comment.
+ *
+ * @tparam Hash Hash functor for key strings (default: `std::hash<std::string>`).
+ * @tparam Equal Equality functor for key strings (default: `std::equal_to<std::string>`).
+ *
+ * Key-accepting APIs trim leading/trailing whitespace from the key argument
+ * (`operator[]`, `set`, `contains`, `at`, `get`, `remove`, `find`, `erase(key)`, `count`).
+ */
 template <typename Hash = std::hash<std::string>, typename Equal = std::equal_to<std::string>>
 class basic_section {
   using data_container = std::unordered_map<std::string, field, Hash, Equal>;  // 数据容器类型
@@ -1104,7 +1347,10 @@ class basic_section {
   using iterator = typename data_container::iterator;
   using const_iterator = typename data_container::const_iterator;
 
-  /// @brief 成员swap函数
+  /**
+   * @brief Swaps contents with another section.
+   * @param other The other section to swap with.
+   */
   void swap(basic_section &other) noexcept
   {
     using std::swap;
@@ -1112,32 +1358,55 @@ class basic_section {
     swap(comments_, other.comments_);
   }
 
-  // 友元 swap函数(非成员函数)
+  /**
+   * @brief Swaps two sections (ADL-friendly non-member overload).
+   * @param lhs Left-hand section.
+   * @param rhs Right-hand section.
+   */
   friend void swap(basic_section &lhs, basic_section &rhs) noexcept
   {
     lhs.swap(rhs);
   }
 
-  // 默认构造
+  /// @brief Constructs an empty section.
   basic_section() = default;
-  // 默认析构函数
+
+  /// @brief Destroys the section.
   ~basic_section() = default;
-  /// 重写拷贝构造函数, 深拷贝
+
+  /**
+   * @brief Copy-constructs a section.
+   * @param other Source section.
+   */
   basic_section(const basic_section &other) : data_(other.data_), comments_(other.comments_) {}
-  /// 重写拷贝赋值函数(copy and swap方式)
+
+  /**
+   * @brief Copy-assigns from another section (copy-and-swap).
+   * @param rhs Source section.
+   * @return Reference to `*this`.
+   */
   basic_section &operator=(const basic_section &rhs)
   {
     basic_section temp(rhs);  // copy ctor
     swap(temp);               // noexcept swap
     return *this;
   }
-  // 移动构造函数
+
+  /**
+   * @brief Move-constructs a section.
+   * @param other Source section; left empty after the move.
+   */
   basic_section(basic_section &&other) noexcept : data_(std::move(other.data_)), comments_(std::move(other.comments_))
   {
     other.data_.clear();      // 显式清空, 跨平台行为一致
     other.comments_.clear();  // 显式清空, 跨平台行为一致
   }
-  // 移动赋值函数, 默认的不能处理移动自赋值情况
+
+  /**
+   * @brief Move-assigns from another section.
+   * @param rhs Source section; left empty after the move.
+   * @return Reference to `*this`.
+   */
   basic_section &operator=(basic_section &&rhs) noexcept
   {
     basic_section temp(std::move(rhs));  // move ctor
@@ -1145,28 +1414,35 @@ class basic_section {
     return *this;
   }
 
-  /// @brief Get or insert a field reference. If the key does not exist, insert a default constructed field object
-  /// @param key key name
-  /// @return Return the field reference corresponding to the key
+  /**
+   * @brief Returns a reference to the field for @p key, inserting a default field if missing.
+   * @param key Key name (whitespace trimmed).
+   * @return Reference to the field associated with @p key.
+   */
   field &operator[](std::string key)
   {
     detail::trim(key);
     return data_[std::move(key)];
   }
 
-  /// @brief Set key-value pairs
-  /// @tparam T field value type
-  /// @param key key
-  /// @param value field value
-  /// @return Reference to the inserted or updated field
+  /**
+   * @brief Sets a single key-value pair.
+   * @tparam T Type of @p value.
+   * @param key Key name (whitespace trimmed).
+   * @param value Value to store (converted to @ref field).
+   * @return Reference to the inserted or updated field.
+   */
   template <typename T>
   field &set(std::string key, T &&value)
   {
     detail::trim(key);
     return data_[std::move(key)] = std::forward<T>(value);
   }
-  /// @brief Set multiple key-value pairs
-  /// @param args initializer_list of multiple key-value pairs
+
+  /**
+   * @brief Sets multiple key-value pairs from an initializer list.
+   * @param args Key-value pairs to insert or overwrite.
+   */
   void set(std::initializer_list<std::pair<std::string, field>> args)
   {
     for (auto &&pair : args)
@@ -1177,9 +1453,11 @@ class basic_section {
     }
   }
 
-  /// @brief key exists
-  /// @param key
-  /// @return returns true if exists
+  /**
+   * @brief Checks whether a key exists in this section.
+   * @param key Key name (whitespace trimmed).
+   * @return `true` if the key exists, otherwise `false`.
+   */
   INIFILE_NODISCARD
   bool contains(std::string key) const
   {
@@ -1187,17 +1465,24 @@ class basic_section {
     return data_.find(key) != data_.end();
   }
 
-  /// @brief Returns a reference to the field value of the specified key.
-  ///        If the key does not exist, an `std::out_of_range` exception will be thrown.
-  /// @param key key - an exception will be thrown if the key does not exist
-  /// @return field value reference
-  /// @throws `std::out_of_range` if key does not exist
+  /**
+   * @brief Returns a reference to the field for @p key.
+   * @param key Key name (whitespace trimmed).
+   * @return Reference to the field.
+   * @throws std::out_of_range If @p key does not exist.
+   */
   field &at(std::string key)
   {
     detail::trim(key);
     return data_.at(key);
   }
-  /// @brief const overloading function
+
+  /**
+   * @brief Returns a const reference to the field for @p key.
+   * @param key Key name (whitespace trimmed).
+   * @return Const reference to the field.
+   * @throws std::out_of_range If @p key does not exist.
+   */
   INIFILE_NODISCARD
   const field &at(std::string key) const
   {
@@ -1205,10 +1490,12 @@ class basic_section {
     return data_.at(key);
   }
 
-  /// @brief Get the value corresponding to key. If key does not exist, return default_value.
-  /// @param key key
-  /// @param default_value default value - return default value when key does not exist
-  /// @return field value (a copy)
+  /**
+   * @brief Returns a copy of the field for @p key, or @p default_value if missing.
+   * @param key Key name (whitespace trimmed).
+   * @param default_value Value returned when @p key is not found.
+   * @return Copy of the field, or @p default_value.
+   */
   INIFILE_NODISCARD
   field get(std::string key, field default_value = field{}) const
   {
@@ -1220,8 +1507,10 @@ class basic_section {
     return default_value;
   }
 
-  /// @brief Get all keys in the section.
-  /// @return A vector containing all keys.
+  /**
+   * @brief Returns all keys in this section.
+   * @return Vector of key names (order is unspecified).
+   */
   INIFILE_NODISCARD
   std::vector<key_type> keys() const
   {
@@ -1234,8 +1523,10 @@ class basic_section {
     return result;
   }
 
-  /// @brief Get all values in the section.
-  /// @return A vector containing all values, each value is a `ini::field` object.
+  /**
+   * @brief Returns all field values in this section.
+   * @return Vector of @ref field values (order is unspecified).
+   */
   INIFILE_NODISCARD
   std::vector<mapped_type> values() const
   {
@@ -1248,168 +1539,278 @@ class basic_section {
     return result;
   }
 
-  /// @brief Get all key-value pairs in the section.
-  /// @return A vector containing all key-value pairs, each pair is a `std::pair<std::string, ini::field>`.
+  /**
+   * @brief Returns all key-value pairs in this section.
+   * @return Vector of `(key, field)` pairs (order is unspecified).
+   */
   INIFILE_NODISCARD
   std::vector<value_type> items() const
   {
     return {data_.begin(), data_.end()};
   }
 
-  /// @brief Remove the specified key-value pairs
-  /// @param key key
-  /// @return Return true if the deletion is successful, return false if it is not found
+  /**
+   * @brief Removes the key-value pair for @p key.
+   * @param key Key name (whitespace trimmed).
+   * @return `true` if a pair was removed, `false` if @p key was not found.
+   */
   bool remove(std::string key)
   {
     detail::trim(key);
     return data_.erase(key) != 0;
   }
 
-  /// @brief Clear all key-value pairs
+  /// @brief Removes all key-value pairs from this section (section comment is kept).
   void clear() noexcept
   {
     data_.clear();
   }
 
+  /**
+   * @brief Returns the number of key-value pairs.
+   * @return Pair count.
+   */
   INIFILE_NODISCARD
   size_type size() const noexcept
   {
     return data_.size();
   }
 
+  /**
+   * @brief Checks whether the section has no key-value pairs.
+   * @return `true` if empty, otherwise `false`.
+   */
   INIFILE_NODISCARD
   bool empty() const noexcept
   {
     return data_.empty();
   }
 
+  /**
+   * @brief Finds a key and returns an iterator to the element.
+   * @param key Key name (whitespace trimmed).
+   * @return Iterator to the element, or @ref end() if not found.
+   */
   iterator find(key_type key)
   {
     detail::trim(key);
     return data_.find(key);
   }
+
+  /**
+   * @brief Finds a key and returns a const iterator to the element.
+   * @param key Key name (whitespace trimmed).
+   * @return Const iterator to the element, or @ref end() if not found.
+   */
   const_iterator find(key_type key) const
   {
     detail::trim(key);
     return data_.find(key);
   }
 
+  /**
+   * @brief Returns the number of elements with the given key (0 or 1).
+   * @param key Key name (whitespace trimmed).
+   * @return `1` if present, otherwise `0`.
+   */
   size_type count(key_type key) const
   {
     detail::trim(key);
     return data_.count(key);
   }
 
+  /**
+   * @brief Erases the element at @p pos.
+   * @param pos Iterator to the element to erase.
+   * @return Iterator following the erased element.
+   */
   iterator erase(iterator pos)
   {
     return data_.erase(pos);
   }
+
+  /**
+   * @brief Erases the element at @p pos.
+   * @param pos Const iterator to the element to erase.
+   * @return Iterator following the erased element.
+   */
   iterator erase(const_iterator pos)
   {
     return data_.erase(pos);
   }
+
+  /**
+   * @brief Erases the elements in the half-open range `[first, last)`.
+   * @param first Start of the range.
+   * @param last End of the range.
+   * @return Iterator following the last erased element.
+   */
   iterator erase(const_iterator first, const_iterator last)
   {
     return data_.erase(first, last);
   }
+
+  /**
+   * @brief Erases the element with the given key.
+   * @param key Key name (whitespace trimmed).
+   * @return Number of elements erased (`0` or `1`).
+   */
   size_type erase(key_type key)
   {
     detail::trim(key);
     return data_.erase(key);
   }
 
+  /**
+   * @brief Returns an iterator to the first key-value pair.
+   * @return Iterator to the beginning.
+   */
   iterator begin() noexcept
   {
     return data_.begin();
   }
+
+  /**
+   * @brief Returns a const iterator to the first key-value pair.
+   * @return Const iterator to the beginning.
+   */
   const_iterator begin() const noexcept
   {
     return data_.begin();
   }
 
+  /**
+   * @brief Returns an iterator past the last key-value pair.
+   * @return Iterator to the end.
+   */
   iterator end() noexcept
   {
     return data_.end();
   }
+
+  /**
+   * @brief Returns a const iterator past the last key-value pair.
+   * @return Const iterator to the end.
+   */
   const_iterator end() const noexcept
   {
     return data_.end();
   }
 
+  /**
+   * @brief Returns a const iterator to the first key-value pair.
+   * @return Const iterator to the beginning.
+   */
   const_iterator cbegin() const noexcept
   {
     return data_.cbegin();
   }
+
+  /**
+   * @brief Returns a const iterator past the last key-value pair.
+   * @return Const iterator to the end.
+   */
   const_iterator cend() const noexcept
   {
     return data_.cend();
   }
 
-  /// @brief Set `[section]` comment, overwriting the original comment.
-  /// @param str Comment content, Multi-line comments are allowed, lines separated by `\n`.
-  /// @param symbol Comment symbol, default is `;`, Only `;` and `#` are supported.
+  /**
+   * @brief Replaces the `[section]` comment with text from a string.
+   * @param str Comment text; multi-line allowed, lines separated by `\n`.
+   * @param symbol Comment prefix; only `#` selects `#`, any other value uses `;`. Defaults to `;`.
+   */
   void set_comment(const std::string &str, char symbol = ';')
   {
     comments_.set(str, symbol);
   }
-  /// @brief Overwrite the current comment with another comment (copy).
+
+  /**
+   * @brief Replaces the `[section]` comment with a copy of another comment.
+   * @param other Source comment.
+   */
   void set_comment(const comment &other)
   {
     comments_.set(other);
   }
-  /// @brief Overwrite the current comment with another comment (move).
+
+  /**
+   * @brief Replaces the `[section]` comment by moving from another comment.
+   * @param other Source comment; left empty after the move.
+   */
   void set_comment(comment &&other) noexcept
   {
     comments_.set(std::move(other));
   }
-  /// @brief Set the comment from an initializer list of strings.
-  /// @param list List of comment lines.
-  /// @param symbol Comment symbol, default is `;`. Only `;` and `#` are supported.
+
+  /**
+   * @brief Replaces the `[section]` comment with an initializer list of lines.
+   * @param list Comment lines.
+   * @param symbol Comment prefix; only `#` selects `#`, any other value uses `;`. Defaults to `;`.
+   */
   void set_comment(std::initializer_list<std::string> list, char symbol = ';')
   {
     comments_.set(list, symbol);
   }
 
-  /// @brief Add `[section]` comments and then append them.
-  /// @param str Comment content, Multi-line comments are allowed, lines separated by `\n`.
-  /// @param symbol Comment symbol, default is `;`, Only `;` and `#` are supported.
+  /**
+   * @brief Appends text to the `[section]` comment.
+   * @param str Comment text; multi-line allowed, lines separated by `\n`.
+   * @param symbol Comment prefix; only `#` selects `#`, any other value uses `;`. Defaults to `;`.
+   */
   void add_comment(const std::string &str, char symbol = ';')
   {
     comments_.add(str, symbol);
   }
-  /// @brief Append comments from another comment object (copy).
+
+  /**
+   * @brief Appends lines from another comment (copy).
+   * @param other Comment whose lines are appended.
+   */
   void add_comment(const comment &other)
   {
     comments_.add(other);
   }
-  /// @brief Append comments from another comment object (move).
+
+  /**
+   * @brief Appends lines from another comment (move).
+   * @param other Comment whose lines are moved; left empty afterwards.
+   */
   void add_comment(comment &&other) noexcept
   {
     comments_.add(std::move(other));
   }
-  /// @brief Append comments from an initializer list of strings.
-  /// @param list List of comment lines.
-  /// @param symbol Comment symbol, default is `;`. Only `;` and `#` are supported.
+
+  /**
+   * @brief Appends comment lines from an initializer list.
+   * @param list Comment lines to append.
+   * @param symbol Comment prefix; only `#` selects `#`, any other value uses `;`. Defaults to `;`.
+   */
   void add_comment(std::initializer_list<std::string> list, char symbol = ';')
   {
     comments_.add(list, symbol);
   }
 
-  /// @brief Get a const reference to the comment associated with this field.
-  /// @return Const reference to the internal `comment` object.
+  /**
+   * @brief Returns a const reference to the section-level comment.
+   * @return Const reference to the internal `comment` object.
+   */
   INIFILE_NODISCARD
   const ini::comment &comment() const
   {
     return comments_;
   }
-  /// @brief Get a mutable reference to the comment associated with this field.
-  /// @return Reference to the internal `comment` object.
+
+  /**
+   * @brief Returns a mutable reference to the section-level comment.
+   * @return Reference to the internal `comment` object.
+   */
   ini::comment &comment()
   {
     return comments_;
   }
 
-  /// @brief Clear `[section]` comment
+  /// @brief Clears the `[section]` comment.
   void clear_comment()
   {
     comments_.clear();
@@ -1420,7 +1821,16 @@ class basic_section {
   ini::comment comments_;  // section-level comments
 };
 
-/// @brief ini file class
+/**
+ * @brief INI document: a map of section names to @ref basic_section, with load/save helpers.
+ *
+ * @tparam Hash Hash functor for section names (default: `std::hash<std::string>`).
+ * @tparam Equal Equality functor for section names (default: `std::equal_to<std::string>`).
+ *
+ * Section-name and key-name arguments are trimmed of leading/trailing whitespace by
+ * the corresponding lookup/insert APIs.
+ * An empty section name represents keys that appear before any `[section]` header.
+ */
 template <typename Hash = std::hash<std::string>, typename Equal = std::equal_to<std::string>>
 class basic_inifile {
   using section = basic_section<Hash, Equal>;  // 在 basic_inifile 内部定义 section 别名
@@ -1436,33 +1846,59 @@ class basic_inifile {
   using iterator = typename data_container::iterator;
   using const_iterator = typename data_container::const_iterator;
 
+  /**
+   * @brief Swaps contents with another inifile.
+   * @param other The other inifile to swap with.
+   */
   void swap(basic_inifile &other) noexcept
   {
     using std::swap;
     swap(data_, other.data_);
   }
 
+  /**
+   * @brief Swaps two inifiles (ADL-friendly non-member overload).
+   * @param lhs Left-hand inifile.
+   * @param rhs Right-hand inifile.
+   */
   friend void swap(basic_inifile &lhs, basic_inifile &rhs) noexcept
   {
     lhs.swap(rhs);
   }
 
-  // 构造函数
+  /// @brief Constructs an empty inifile.
   basic_inifile() = default;
-  // 析构函数
+
+  /// @brief Destroys the inifile.
   ~basic_inifile() = default;
 
-  // 拷贝构造
+  /**
+   * @brief Copy-constructs an inifile.
+   * @param other Source inifile.
+   */
   basic_inifile(const basic_inifile &other) = default;
-  // 拷贝赋值
+
+  /**
+   * @brief Copy-assigns from another inifile.
+   * @param rhs Source inifile.
+   * @return Reference to `*this`.
+   */
   basic_inifile &operator=(const basic_inifile &rhs) = default;
 
-  // 移动构造
+  /**
+   * @brief Move-constructs an inifile.
+   * @param other Source inifile; left empty after the move.
+   */
   basic_inifile(basic_inifile &&other) noexcept : data_(std::move(other.data_))
   {
     other.data_.clear();  // 显式清空, 跨平台行为一致
   };
-  // 移动赋值 (move and swap)
+
+  /**
+   * @brief Move-assigns from another inifile.
+   * @param rhs Source inifile; left empty after the move.
+   * @return Reference to `*this`.
+   */
   basic_inifile &operator=(basic_inifile &&rhs) noexcept
   {
     basic_inifile temp(std::move(rhs));  // move ctor
@@ -1470,21 +1906,25 @@ class basic_inifile {
     return *this;
   };
 
-  /// @brief Get or insert a field. If section_name does not exist, insert a default constructed section object
-  /// @param sec section name
-  /// @return Returns the section reference corresponding to the key
+  /**
+   * @brief Returns a reference to the section named @p sec, inserting an empty section if missing.
+   * @param sec Section name (whitespace trimmed).
+   * @return Reference to the section.
+   */
   section &operator[](std::string sec)
   {
     detail::trim(sec);
     return data_[std::move(sec)];
   }
 
-  /// @brief Set section key-value
-  /// @tparam T Field value type
-  /// @param sec Section name
-  /// @param key Key
-  /// @param value Field value
-  /// @return Reference to the inserted or updated field
+  /**
+   * @brief Sets a value under the given section and key.
+   * @tparam T Type of @p value.
+   * @param sec Section name (whitespace trimmed).
+   * @param key Key name (whitespace trimmed).
+   * @param value Value to store.
+   * @return Reference to the inserted or updated field.
+   */
   template <typename T>
   field &set(std::string sec, std::string key, T &&value)
   {
@@ -1493,9 +1933,11 @@ class basic_inifile {
     return data_[std::move(sec)][std::move(key)] = std::forward<T>(value);
   }
 
-  /// @brief Check if the specified section exists
-  /// @param sec section name
-  /// @return Return true if it exists, otherwise return false
+  /**
+   * @brief Checks whether a section exists.
+   * @param sec Section name (whitespace trimmed).
+   * @return `true` if the section exists, otherwise `false`.
+   */
   INIFILE_NODISCARD
   bool contains(std::string sec) const
   {
@@ -1503,10 +1945,12 @@ class basic_inifile {
     return data_.find(sec) != data_.end();
   }
 
-  /// @brief Check if the specified key exists in the specified section
-  /// @param sec section name
-  /// @param key key
-  /// @return Return true if it exists, otherwise return false
+  /**
+   * @brief Checks whether a key exists in the given section.
+   * @param sec Section name (whitespace trimmed).
+   * @param key Key name (whitespace trimmed).
+   * @return `true` if both the section and key exist, otherwise `false`.
+   */
   INIFILE_NODISCARD
   bool contains(std::string sec, std::string key) const
   {
@@ -1519,28 +1963,38 @@ class basic_inifile {
     return false;
   }
 
-  /// @brief Returns a reference to the specified section.
-  ///        If section does not exist, an exception of type `std::out_of_range` will be thrown.
-  /// @param sec section-name - an exception will be thrown if the section does not exist
-  /// @return section reference
-  /// @throws `std::out_of_range` if section does not exist
+  /**
+   * @brief Returns a reference to the section named @p sec.
+   * @param sec Section name (whitespace trimmed).
+   * @return Reference to the section.
+   * @throws std::out_of_range If the section does not exist.
+   */
   section &at(std::string sec)
   {
     detail::trim(sec);
     return data_.at(sec);
   }
-  // const overloading function
+
+  /**
+   * @brief Returns a const reference to the section named @p sec.
+   * @param sec Section name (whitespace trimmed).
+   * @return Const reference to the section.
+   * @throws std::out_of_range If the section does not exist.
+   */
   const section &at(std::string sec) const
   {
     detail::trim(sec);
     return data_.at(sec);
   }
 
-  /// @brief Returns the field value of the specified section and the specified key
-  /// @param sec section name
-  /// @param key key
-  /// @param default_value default value - the default value will be returned if the key does not exist
-  /// @return field value(a copy)
+  /**
+   * @brief Returns a copy of the field under section @p sec and key @p key,
+   *        or @p default_value if missing.
+   * @param sec Section name (whitespace trimmed).
+   * @param key Key name (whitespace trimmed).
+   * @param default_value Value returned when the section or key is not found.
+   * @return Copy of the field, or @p default_value.
+   */
   INIFILE_NODISCARD
   field get(std::string sec, std::string key, field default_value = field{}) const
   {
@@ -1556,8 +2010,10 @@ class basic_inifile {
     return default_value;
   }
 
-  /// @brief Get all section names in the INI file.
-  /// @return A vector containing all section names.
+  /**
+   * @brief Returns all section names.
+   * @return Vector of section names (order is unspecified).
+   */
   INIFILE_NODISCARD
   std::vector<key_type> sections() const
   {
@@ -1570,96 +2026,181 @@ class basic_inifile {
     return result;
   }
 
-  /// @brief Remove the specified seciton
-  /// @param sec section-name
-  /// @return Return true if the deletion is successful, return false if it is not found
+  /**
+   * @brief Removes the section named @p sec (and all of its keys).
+   * @param sec Section name (whitespace trimmed).
+   * @return `true` if a section was removed, `false` if it was not found.
+   */
   bool remove(std::string sec)
   {
     detail::trim(sec);
     return data_.erase(sec) != 0;
   }
 
+  /// @brief Removes all sections and keys.
   void clear() noexcept
   {
     data_.clear();
   }
 
+  /**
+   * @brief Returns the number of sections.
+   * @return Section count.
+   */
   INIFILE_NODISCARD
   size_type size() const noexcept
   {
     return data_.size();
   }
 
+  /**
+   * @brief Checks whether the inifile has no sections.
+   * @return `true` if empty, otherwise `false`.
+   */
   INIFILE_NODISCARD
   bool empty() const noexcept
   {
     return data_.empty();
   }
 
+  /**
+   * @brief Finds a section and returns an iterator to it.
+   * @param key Section name (whitespace trimmed).
+   * @return Iterator to the section, or @ref end() if not found.
+   */
   iterator find(key_type key)
   {
     detail::trim(key);
     return data_.find(key);
   }
+
+  /**
+   * @brief Finds a section and returns a const iterator to it.
+   * @param key Section name (whitespace trimmed).
+   * @return Const iterator to the section, or @ref end() if not found.
+   */
   const_iterator find(key_type key) const
   {
     detail::trim(key);
     return data_.find(key);
   }
 
+  /**
+   * @brief Returns the number of sections with the given name (0 or 1).
+   * @param key Section name (whitespace trimmed).
+   * @return `1` if present, otherwise `0`.
+   */
   size_type count(key_type key) const
   {
     detail::trim(key);
     return data_.count(key);
   }
 
+  /**
+   * @brief Erases the section at @p pos.
+   * @param pos Iterator to the section to erase.
+   * @return Iterator following the erased element.
+   */
   iterator erase(iterator pos)
   {
     return data_.erase(pos);
   }
+
+  /**
+   * @brief Erases the section at @p pos.
+   * @param pos Const iterator to the section to erase.
+   * @return Iterator following the erased element.
+   */
   iterator erase(const_iterator pos)
   {
     return data_.erase(pos);
   }
+
+  /**
+   * @brief Erases the sections in the half-open range `[first, last)`.
+   * @param first Start of the range.
+   * @param last End of the range.
+   * @return Iterator following the last erased element.
+   */
   iterator erase(const_iterator first, const_iterator last)
   {
     return data_.erase(first, last);
   }
+
+  /**
+   * @brief Erases the section with the given name.
+   * @param key Section name (whitespace trimmed).
+   * @return Number of elements erased (`0` or `1`).
+   */
   size_type erase(key_type key)
   {
     detail::trim(key);
     return data_.erase(key);
   }
 
+  /**
+   * @brief Returns an iterator to the first section.
+   * @return Iterator to the beginning.
+   */
   iterator begin() noexcept
   {
     return data_.begin();
   }
+
+  /**
+   * @brief Returns a const iterator to the first section.
+   * @return Const iterator to the beginning.
+   */
   const_iterator begin() const noexcept
   {
     return data_.begin();
   }
 
+  /**
+   * @brief Returns an iterator past the last section.
+   * @return Iterator to the end.
+   */
   iterator end() noexcept
   {
     return data_.end();
   }
+
+  /**
+   * @brief Returns a const iterator past the last section.
+   * @return Const iterator to the end.
+   */
   const_iterator end() const noexcept
   {
     return data_.end();
   }
 
+  /**
+   * @brief Returns a const iterator to the first section.
+   * @return Const iterator to the beginning.
+   */
   const_iterator cbegin() const noexcept
   {
     return data_.cbegin();
   }
+
+  /**
+   * @brief Returns a const iterator past the last section.
+   * @return Const iterator to the end.
+   */
   const_iterator cend() const noexcept
   {
     return data_.cend();
   }
 
-  /// @brief Read ini information from istream
-  /// @param is istream
+  /**
+   * @brief Replaces the in-memory contents by parsing INI text from an input stream.
+   *
+   * Clears existing data first. Pending line comments (`;` / `#`) are attached to the
+   * next `[section]` or `key=value` line; blank lines are skipped and do not clear the
+   * pending comment. End-of-line comments are not supported.
+   *
+   * @param is Input stream providing INI text.
+   */
   void read(std::istream &is)
   {
     data_.clear();
@@ -1712,8 +2253,14 @@ class basic_inifile {
     }
   }
 
-  /// @brief Write ini information to ostream
-  /// @param os ostream
+  /**
+   * @brief Serializes the inifile to an output stream.
+   *
+   * Writes keys under the empty section name first (no `[section]` header), then
+   * each named section. A blank line is inserted between sections.
+   *
+   * @param os Output stream to write to.
+   */
   void write(std::ostream &os) const
   {
     bool first_section = true;
@@ -1748,16 +2295,20 @@ class basic_inifile {
     }
   }
 
-  /// @brief Read ini information from string
-  /// @param str ini string
+  /**
+   * @brief Replaces the in-memory contents by parsing an INI string.
+   * @param str INI text.
+   */
   void from_string(const std::string &str)
   {
     std::istringstream is(str);
     read(is);
   }
 
-  /// @brief Convert the inifile object to a corresponding string
-  /// @return ini string
+  /**
+   * @brief Serializes the inifile to an INI-formatted string.
+   * @return INI text.
+   */
   INIFILE_NODISCARD
   std::string to_string() const
   {
@@ -1766,9 +2317,15 @@ class basic_inifile {
     return ss.str();
   }
 
-  /// @brief Load ini information from ini file
-  /// @param filename Read file path
-  /// @return Whether the loading is successful, return `true` if successful
+  /**
+   * @brief Loads and parses an INI file from disk.
+   *
+   * On success (or after the file is opened), existing in-memory data is replaced via @ref read.
+   * If the file cannot be opened, this object is left unchanged and `false` is returned.
+   *
+   * @param filename Path to the file to read.
+   * @return `true` on success, `false` if the file could not be opened or a hard I/O error occurred.
+   */
   INIFILE_NODISCARD
   bool load(const std::string &filename)
   {
@@ -1780,9 +2337,11 @@ class basic_inifile {
     return (!is.fail() || is.eof()) && !is.bad();
   }
 
-  /// @brief Save ini information to ini file
-  /// @param filename Save file path
-  /// @return Whether the save is successful, return `true` if successful
+  /**
+   * @brief Writes the inifile to a file on disk.
+   * @param filename Path to the file to write.
+   * @return `true` on success, `false` if the file could not be opened or a write error occurred.
+   */
   INIFILE_NODISCARD
   bool save(const std::string &filename) const
   {
@@ -1795,9 +2354,9 @@ class basic_inifile {
   }
 
  private:
-  /// @brief 写注释内容
-  /// @param os 输出流
-  /// @param comments 注释内容
+  /// @brief Writes comment lines to @p os (one line each).
+  /// @param os Output stream.
+  /// @param comments Comment block to write.
   static void write_comment(std::ostream &os, const comment &comments)
   {
     if (!comments.empty())
@@ -1813,66 +2372,85 @@ class basic_inifile {
   data_container data_;  // section_name - key_value
 };
 
-/// @brief Trims whitespace from both ends of the given string.
-/// @param str The input string to be trimmed.
-/// @return A new string with leading and trailing whitespace removed.
+/**
+ * @brief Returns a copy of @p str with leading and trailing whitespace removed.
+ * @param str Input string (passed by value).
+ * @return Trimmed string.
+ */
 inline std::string trim(std::string str)
 {
   detail::trim(str);
   return str;
 }
 
-/// @brief Splits a string into a vector of substrings based on a delimiter.
-/// @param str The input string to be split.
-/// @param delimiter The character used to split the string.
-/// @param skip_empty If true, empty substrings are ignored; otherwise, they are included.
-/// @return A vector of substrings obtained by splitting the input string.
+/**
+ * @brief Splits a string by a single-character delimiter.
+ * @param str Input string.
+ * @param delimiter Character used as the separator.
+ * @param skip_empty If `true`, empty tokens are omitted; otherwise they are kept.
+ * @return Vector of substrings.
+ */
 inline std::vector<std::string> split(const std::string &str, char delimiter, bool skip_empty = false)
 {
   return detail::split(str, std::string(1, delimiter), skip_empty);
 }
 
-/// @brief Splits a string into a vector of substrings based on a string delimiter.
-/// @param str The input string to be split.
-/// @param delimiter The substring used to split the string (can be multiple characters).
-/// @param skip_empty If true, empty substrings are ignored; otherwise, they are included.
-/// @return A vector of substrings obtained by splitting the input string.
+/**
+ * @brief Splits a string by a string delimiter (may be multi-character).
+ * @param str Input string.
+ * @param delimiter Substring used as the separator.
+ * @param skip_empty If `true`, empty tokens are omitted; otherwise they are kept.
+ * @return Vector of substrings.
+ */
 inline std::vector<std::string> split(const std::string &str, const std::string &delimiter, bool skip_empty = false)
 {
   return detail::split(str, delimiter, skip_empty);
 }
 
-/// @brief Joins elements of a sequence container into a string, separated by a character.
-///        Note: The elements of the container must not be of pointer type.
-/// @tparam Iterable Sequence container type (e.g., vector, list, set, array, deque) that supports begin() and end().
-/// @param iterable The container whose elements are joined.
-/// @param separator The character separating each element in the result.
-/// @return A string with all elements separated by the given character.
+/**
+ * @brief Joins elements of a sequence container into a string, separated by a character.
+ *
+ * Requirements: @p Iterable must support `begin()`/`end()`, must not be a map-like type,
+ * and elements must be streamable with `operator<<` (raw pointers are not allowed).
+ *
+ * @tparam Iterable Sequence container type (e.g. vector, list, set).
+ * @param iterable Container whose elements are joined.
+ * @param separator Character inserted between elements.
+ * @return Joined string (empty if @p iterable is empty).
+ */
 template <typename Iterable>
 inline std::string join(const Iterable &iterable, char separator)
 {
   return detail::join(iterable, std::string(1, separator));
 }
 
-/// @brief Joins elements of a sequence container into a string, separated by a string.
-///        Note: The elements of the container must not be of pointer type.
-/// @tparam Iterable Sequence container type (e.g., vector, list, set, array, deque) that supports begin() and end().
-/// @param iterable The container whose elements are joined.
-/// @param separator The string separating each element in the result.
-/// @return A string with all elements separated by the given string.
+/**
+ * @brief Joins elements of a sequence container into a string, separated by a string.
+ *
+ * Requirements: @p Iterable must support `begin()`/`end()`, must not be a map-like type,
+ * and elements must be streamable with `operator<<` (raw pointers are not allowed).
+ *
+ * @tparam Iterable Sequence container type (e.g. vector, list, set).
+ * @param iterable Container whose elements are joined.
+ * @param separator String inserted between elements.
+ * @return Joined string (empty if @p iterable is empty).
+ */
 template <typename Iterable>
 inline std::string join(const Iterable &iterable, const std::string &separator)
 {
   return detail::join(iterable, separator);
 }
 
-/// @brief section class
+/// @brief Default case-sensitive section type (`basic_section<>`).
 using section = basic_section<>;
-/// @brief inifile class
+
+/// @brief Default case-sensitive inifile type (`basic_inifile<>`).
 using inifile = basic_inifile<>;
-/// @brief case_insensitive_section class
+
+/// @brief Section type with case-insensitive key comparison.
 using case_insensitive_section = basic_section<detail::case_insensitive_hash, detail::case_insensitive_equal>;
-/// @brief case_insensitive_inifile class
+
+/// @brief Inifile type with case-insensitive section and key comparison.
 using case_insensitive_inifile = basic_inifile<detail::case_insensitive_hash, detail::case_insensitive_equal>;
 
 }  // namespace ini
